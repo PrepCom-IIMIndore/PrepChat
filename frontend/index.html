@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrepChat</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="logo-area">
+                <span class="logo-icon">🎓</span>
+                <div class="logo-text">
+                    <h1>PrepChat</h1>
+                    <span class="badge-proxy">Backend Secured Proxy</span>
+                </div>
+            </div>
+            <div class="header-tagline">
+                Deterministic Search & Knowledge Retrieval
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+
+        <!-- Search Controls -->
+        <section class="search-card">
+            <div class="search-grid">
+                <div class="search-field-group">
+                    <label for="fuzzy-search-input">🔍 Fuzzy Search Company Name</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="fuzzy-search-input" placeholder="e.g. EY, Ernst & Young, BCG, McKinsey, Amex..." autocomplete="off">
+                        <span class="search-clear-btn" id="clear-search-btn" title="Clear">&times;</span>
+                    </div>
+                </div>
+
+                <div class="search-field-group">
+                    <label for="company-select">📋 Or Select From Company Catalog</label>
+                    <select id="company-select">
+                        <option value="">-- Choose a company --</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Match Info Banner -->
+        <div id="match-banner" class="match-banner hidden"></div>
+
+        <!-- Landing Dashboard (Initial State) -->
+        <div id="landing-dashboard" class="landing-dashboard">
+            <div class="landing-hero">
+                <h2>Welcome to PrepChat</h2>
+                <p>Select a company from the catalog or type a search query above to instantly retrieve interview questions, format guidelines, and presentation slide decks.</p>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-num" id="stat-questions">0</div>
+                        <div class="stat-label">Interview Questions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-num" id="stat-companies">0</div>
+                        <div class="stat-label">Companies Tracked</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-num" id="stat-formats">0</div>
+                        <div class="stat-label">Process Formats</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-num" id="stat-slides">0</div>
+                        <div class="stat-label">Slide Chunks</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Company Display Container -->
+        <div id="company-content" class="company-content hidden">
+
+            <!-- Company Header Info -->
+            <div class="company-header-banner">
+                <h2 id="display-company-name">Company Name</h2>
+                <div class="company-sector-badge" id="display-sector-name">Sector: Other</div>
+            </div>
+
+            <!-- FIXED ORDER SECTION 1: Previous Year Questions -->
+            <section id="section-questions" class="result-section hidden">
+                <div class="section-title">
+                    <span class="title-icon">📚</span>
+                    <h3>Previous Year Questions</h3>
+                </div>
+                <div id="questions-container" class="questions-container">
+                    <!-- Rendered dynamically -->
+                </div>
+            </section>
+
+            <!-- FIXED ORDER SECTION 2: Interview Format -->
+            <section id="section-format" class="result-section hidden">
+                <div class="section-title">
+                    <span class="title-icon">📝</span>
+                    <h3>Interview Format & Process Details</h3>
+                </div>
+                <div id="format-container" class="format-container format-card">
+                    <!-- Rendered dynamically -->
+                </div>
+            </section>
+
+            <!-- FIXED ORDER SECTION 3: Company & Industry Decks -->
+            <section id="section-slides" class="result-section hidden">
+                <div class="section-title">
+                    <span class="title-icon">📊</span>
+                    <h3>Company & Industry Decks</h3>
+                </div>
+                
+                <!-- Slide Deck Tabs -->
+                <div class="deck-tabs-header">
+                    <button class="deck-tab-btn active" id="tab-btn-company" data-tab="company-slides-pane">🏢 Company Presentation Slides</button>
+                    <button class="deck-tab-btn" id="tab-btn-industry" data-tab="industry-slides-pane">📈 Industry Sector Slides</button>
+                </div>
+
+                <div class="deck-tabs-content">
+                    <div id="company-slides-pane" class="tab-pane active">
+                        <div id="company-slides-container"></div>
+                    </div>
+                    <div id="industry-slides-pane" class="tab-pane hidden">
+                        <div id="industry-slides-container"></div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        PrepCom Material &bull; Pure Retrieval Lookup System
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
