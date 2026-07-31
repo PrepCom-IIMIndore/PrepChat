@@ -1,4 +1,4 @@
-/* Stitch-Inspired Dark Mode Theme */
+/* Stitch-Inspired Theme & Design Tokens */
 :root {
     --bg-dark: #0f172a;
     --surface-dark: #1e293b;
@@ -10,9 +10,9 @@
     --text-secondary: #94a3b8;
     --text-muted: #64748b;
     
-    --accent-blue: #3b82f6;
-    --accent-blue-hover: #2563eb;
-    --accent-glow: rgba(59, 130, 246, 0.15);
+    --accent-blue: #1a73e8;
+    --accent-blue-hover: #1557b0;
+    --accent-glow: rgba(26, 115, 232, 0.25);
     
     /* Category Tags */
     --tag-gd-bg: rgba(245, 158, 11, 0.15);
@@ -51,7 +51,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
-    padding: 1rem 2rem;
+    padding: 0.85rem 2rem;
 }
 
 .header-container {
@@ -60,16 +60,18 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
 }
 
 .logo-area {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.6rem;
 }
 
-.logo-icon {
-    font-size: 2rem;
+.logo-icon-symbol {
+    font-size: 2.2rem;
+    color: var(--accent-blue);
 }
 
 .logo-text h1 {
@@ -84,17 +86,56 @@ body {
     font-size: 0.65rem;
     font-weight: 700;
     text-transform: uppercase;
-    background: rgba(59, 130, 246, 0.2);
+    background: rgba(26, 115, 232, 0.2);
     color: #60a5fa;
     padding: 2px 6px;
     border-radius: 4px;
-    border: 1px solid rgba(59, 130, 246, 0.3);
+    border: 1px solid rgba(26, 115, 232, 0.3);
 }
 
 .header-tagline {
     font-size: 0.85rem;
     color: var(--text-secondary);
     font-weight: 500;
+}
+
+/* View Mode Segmented Control */
+.view-mode-toggle {
+    display: flex;
+    background: #090d16;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 4px;
+}
+
+.view-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.view-btn:hover {
+    color: var(--text-primary);
+}
+
+.view-btn.active {
+    background: var(--accent-blue);
+    color: #ffffff;
+    box-shadow: 0 2px 8px var(--accent-glow);
+}
+
+.btn-icon {
+    font-size: 1.1rem;
 }
 
 /* Main Container */
@@ -255,48 +296,158 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* Company Results Container */
+/* Company Header Banner */
 .company-header-banner {
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 2px solid var(--border-color);
     padding-bottom: 1rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.75rem;
 }
 
 .company-header-banner h2 {
     font-size: 2rem;
     font-weight: 800;
     color: #ffffff;
+    margin-bottom: 0.2rem;
 }
 
 .company-sector-badge {
-    background: rgba(59, 130, 246, 0.15);
+    background: rgba(26, 115, 232, 0.15);
     color: #60a5fa;
-    border: 1px solid rgba(59, 130, 246, 0.3);
+    border: 1px solid rgba(26, 115, 232, 0.3);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.view-indicator-pill {
+    background: var(--surface-hover);
+    border: 1px solid var(--border-highlight);
+    color: var(--text-secondary);
     padding: 6px 14px;
     border-radius: 20px;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 600;
 }
 
-/* Section Title */
-.result-section {
-    margin-bottom: 3rem;
+/* ========================================================= */
+/* BASIC VIEW STYLES                                         */
+/* ========================================================= */
+.bento-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
 }
 
-.section-title {
+@media (max-width: 768px) {
+    .bento-metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.bento-card {
+    background: var(--surface-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.bento-icon {
+    font-size: 1.8rem;
+    color: var(--accent-blue);
+    margin-bottom: 0.5rem;
+}
+
+.bento-num {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.bento-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+/* Academic Cards */
+.academic-card {
+    background: var(--surface-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.academic-card-header {
+    background: var(--surface-hover);
+    padding: 1rem 1.25rem;
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    font-size: 1.35rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.academic-card-header h3 {
+    font-size: 1.05rem;
     font-weight: 700;
     color: #f1f5f9;
-    margin-bottom: 1.25rem;
-    border-bottom: 2px solid var(--accent-blue);
-    padding-bottom: 8px;
-    width: max-content;
+}
+
+.academic-card-body {
+    padding: 1.25rem;
+    color: #cbd5e1;
+    font-size: 0.95rem;
+    line-height: 1.65;
+}
+
+/* ========================================================= */
+/* ADVANCED VIEW STYLES                                      */
+/* ========================================================= */
+.advanced-nav-tabs {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 2px;
+}
+
+.adv-tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 8px 8px 0 0;
+    transition: all 0.2s;
+}
+
+.adv-tab-btn:hover {
+    color: var(--text-primary);
+    background: var(--surface-hover);
+}
+
+.adv-tab-btn.active {
+    color: #ffffff;
+    background: var(--accent-blue);
+}
+
+.adv-pane {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
 }
 
 /* Questions Section */
@@ -413,9 +564,8 @@ body {
 }
 
 .deck-tab-btn.active {
-    color: var(--accent-blue);
-    background: var(--surface-dark);
-    border-bottom: 2px solid var(--accent-blue);
+    color: #ffffff;
+    background: var(--accent-blue);
 }
 
 .tab-pane {
@@ -450,6 +600,10 @@ body {
 /* Utilities */
 .hidden {
     display: none !important;
+}
+
+.mb-4 {
+    margin-bottom: 1.5rem;
 }
 
 /* Footer */

@@ -1,4 +1,4 @@
-// PrepChat - Frontend JS
+// PrepChat - Frontend JS (Basic & Advanced View Modes)
 
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
@@ -12,14 +12,35 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const displayCompanyName = document.getElementById('display-company-name');
     const displaySectorName = document.getElementById('display-sector-name');
+    const currentViewPill = document.getElementById('current-view-pill');
     
-    const sectionQuestions = document.getElementById('section-questions');
+    // View Switcher Buttons
+    const btnViewBasic = document.getElementById('btn-view-basic');
+    const btnViewAdvanced = document.getElementById('btn-view-advanced');
+    const viewBasicPane = document.getElementById('view-basic');
+    const viewAdvancedPane = document.getElementById('view-advanced');
+
+    // Basic View Elements
+    const basicStatQuestions = document.getElementById('basic-stat-questions');
+    const basicStatCycles = document.getElementById('basic-stat-cycles');
+    const basicStatSlides = document.getElementById('basic-stat-slides');
+    const basicStatStatus = document.getElementById('basic-stat-status');
+    const basicOverviewSection = document.getElementById('basic-overview-section');
+    const basicOverviewText = document.getElementById('basic-overview-text');
+    const basicQuestionsSection = document.getElementById('basic-questions-section');
+    const basicQuestionsContainer = document.getElementById('basic-questions-container');
+
+    // Advanced View Elements & Nav Tabs
+    const advBtnQuestions = document.getElementById('adv-btn-questions');
+    const advBtnFormat = document.getElementById('adv-btn-format');
+    const advBtnSlides = document.getElementById('adv-btn-slides');
+    const advPaneQuestions = document.getElementById('adv-pane-questions');
+    const advPaneFormat = document.getElementById('adv-pane-format');
+    const advPaneSlides = document.getElementById('adv-pane-slides');
+
     const questionsContainer = document.getElementById('questions-container');
-    
-    const sectionFormat = document.getElementById('section-format');
     const formatContainer = document.getElementById('format-container');
     
-    const sectionSlides = document.getElementById('section-slides');
     const tabBtnCompany = document.getElementById('tab-btn-company');
     const tabBtnIndustry = document.getElementById('tab-btn-industry');
     const companySlidesPane = document.getElementById('company-slides-pane');
@@ -27,21 +48,62 @@ document.addEventListener('DOMContentLoaded', () => {
     const companySlidesContainer = document.getElementById('company-slides-container');
     const industrySlidesContainer = document.getElementById('industry-slides-container');
 
+    // Landing Stats
     const statQuestions = document.getElementById('stat-questions');
     const statCompanies = document.getElementById('stat-companies');
     const statFormats = document.getElementById('stat-formats');
     const statSlides = document.getElementById('stat-slides');
 
+    // App State
+    let currentViewMode = 'basic'; // 'basic' | 'advanced'
+    let currentCompanyData = null;
     let debounceTimer = null;
 
-    // 1. Load Initial Stats & Catalog
+    // 1. View Switcher Event Handlers
+    btnViewBasic.addEventListener('click', () => setViewMode('basic'));
+    btnViewAdvanced.addEventListener('click', () => setViewMode('advanced'));
+
+    function setViewMode(mode) {
+        currentViewMode = mode;
+        if (mode === 'basic') {
+            btnViewBasic.classList.add('active');
+            btnViewAdvanced.classList.remove('active');
+            viewBasicPane.classList.remove('hidden');
+            viewAdvancedPane.classList.add('hidden');
+            currentViewPill.textContent = 'Showing Basic View';
+        } else {
+            btnViewAdvanced.classList.add('active');
+            btnViewBasic.classList.remove('active');
+            viewAdvancedPane.classList.remove('hidden');
+            viewBasicPane.classList.add('hidden');
+            currentViewPill.textContent = 'Showing Advanced View';
+        }
+
+        if (currentCompanyData) {
+            renderCurrentView();
+        }
+    }
+
+    // Advanced Nav Tab Switching
+    function setAdvNavTab(targetPaneId, activeBtn) {
+        document.querySelectorAll('.adv-tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.adv-pane').forEach(pane => pane.classList.add('hidden'));
+
+        activeBtn.classList.add('active');
+        document.getElementById(targetPaneId).classList.remove('hidden');
+    }
+
+    advBtnQuestions.addEventListener('click', () => setAdvNavTab('adv-pane-questions', advBtnQuestions));
+    advBtnFormat.addEventListener('click', () => setAdvNavTab('adv-pane-format', advBtnFormat));
+    advBtnSlides.addEventListener('click', () => setAdvNavTab('adv-pane-slides', advBtnSlides));
+
+    // 2. Load Initial Catalog & Stats
     async function loadCatalog() {
         try {
             const res = await fetch('/api/companies');
             if (!res.ok) throw new Error("Failed to load catalog");
             const data = await res.json();
 
-            // Populate stats
             if (data.stats) {
                 statQuestions.textContent = data.stats.total_questions || 0;
                 statCompanies.textContent = data.stats.total_companies || 0;
@@ -49,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 statSlides.textContent = data.stats.total_slides || 0;
             }
 
-            // Populate dropdown
             if (data.companies && Array.isArray(data.companies)) {
                 companySelect.innerHTML = '<option value="">-- Choose a company --</option>';
                 data.companies.forEach(company => {
@@ -64,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 2. Perform Fuzzy Search
+    // 3. Perform Fuzzy Search
     async function handleFuzzySearch(query) {
         if (!query || !query.trim()) {
             hideMatchBanner();
@@ -88,56 +149,144 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 3. Load Company Details & Render Fixed Order Sections
+    // 4. Fetch Company Details
     async function loadCompanyDetails(companyName) {
         if (!companyName) {
             landingDashboard.classList.remove('hidden');
             companyContent.classList.add('hidden');
+            currentCompanyData = null;
             return;
         }
 
         try {
             const res = await fetch(`/api/company?name=${encodeURIComponent(companyName)}`);
             if (!res.ok) throw new Error("Company fetch failed");
-            const data = await res.json();
+            currentCompanyData = await res.json();
 
             landingDashboard.classList.add('hidden');
             companyContent.classList.remove('hidden');
 
-            displayCompanyName.textContent = data.company;
-            displaySectorName.textContent = `Sector: ${data.industry || 'Other'}`;
+            displayCompanyName.textContent = currentCompanyData.company;
+            displaySectorName.textContent = `Sector: ${currentCompanyData.industry || 'Other'}`;
 
-            // RENDER FIXED ORDER SECTIONS
-
-            // SECTION 1: Previous Year Questions
-            if (data.questions && data.questions.length > 0) {
-                renderQuestions(data.questions);
-                sectionQuestions.classList.remove('hidden');
-            } else {
-                sectionQuestions.classList.add('hidden');
-            }
-
-            // SECTION 2: Interview Format
-            if (data.format_text && data.format_text.trim()) {
-                formatContainer.textContent = data.format_text;
-                sectionFormat.classList.remove('hidden');
-            } else {
-                sectionFormat.classList.add('hidden');
-            }
-
-            // SECTION 3: Company & Industry Decks
-            const hasCompanySlides = data.company_slides && data.company_slides.length > 0;
-            const hasIndustrySlides = data.industry_slides && data.industry_slides.length > 0;
-
-            if (hasCompanySlides || hasIndustrySlides) {
-                renderSlides(data.company_slides || [], data.industry_slides || [], data.industry);
-                sectionSlides.classList.remove('hidden');
-            } else {
-                sectionSlides.classList.add('hidden');
-            }
+            renderCurrentView();
 
         } catch (err) {
             console.error("Error loading company details:", err);
+        }
+    }
+
+    // 5. Render View Based on State
+    function renderCurrentView() {
+        if (!currentCompanyData) return;
+
+        if (currentViewMode === 'basic') {
+            renderBasicView(currentCompanyData);
+        } else {
+            renderAdvancedView(currentCompanyData);
+        }
+    }
+
+    // =========================================================
+    // BASIC VIEW RENDERER
+    // =========================================================
+    function renderBasicView(data) {
+        const questions = data.questions || [];
+        const slides = (data.company_slides || []).concat(data.industry_slides || []);
+        
+        // Bento Metrics
+        basicStatQuestions.textContent = questions.length;
+        
+        const yearsSet = new Set(questions.map(q => q.year).filter(Boolean));
+        basicStatCycles.textContent = yearsSet.size;
+        
+        basicStatSlides.textContent = slides.length;
+        basicStatStatus.textContent = data.format_text ? "Available" : "N/A";
+
+        // Executive Overview Card
+        if (data.format_text && data.format_text.trim()) {
+            // Snippet first 400 chars for executive overview
+            let snippet = data.format_text.trim();
+            if (snippet.length > 500) {
+                snippet = snippet.substring(0, 500) + "...";
+            }
+            basicOverviewText.textContent = snippet;
+            basicOverviewSection.classList.remove('hidden');
+        } else {
+            basicOverviewSection.classList.add('hidden');
+        }
+
+        // Top Questions Preview (Top 5)
+        if (questions.length > 0) {
+            basicQuestionsContainer.innerHTML = '';
+            const top5 = questions.slice(0, 5);
+            
+            top5.forEach(q => {
+                const card = document.createElement('div');
+                card.className = 'question-card';
+
+                const qType = (q.question_type || 'General').toLowerCase();
+                let tagClass = 'tag-unknown';
+                if (qType.includes('gd')) tagClass = 'tag-gd';
+                else if (qType.includes('domain')) tagClass = 'tag-domain';
+                else if (qType.includes('behavioural') || qType.includes('situational')) tagClass = 'tag-behavioural';
+                else if (qType.includes('technical')) tagClass = 'tag-technical';
+                else if (qType.includes('hr')) tagClass = 'tag-hr';
+
+                card.innerHTML = `
+                    <div class="question-meta">
+                        <span class="tag-base ${tagClass}">${escapeHtml(q.question_type)}</span>
+                        <span class="question-domain">${escapeHtml(q.domain || '')} (${escapeHtml(q.year || '')})</span>
+                    </div>
+                    <div class="question-text">${escapeHtml(q.question)}</div>
+                `;
+                basicQuestionsContainer.appendChild(card);
+            });
+            
+            basicQuestionsSection.classList.remove('hidden');
+        } else {
+            basicQuestionsSection.classList.add('hidden');
+        }
+    }
+
+    // =========================================================
+    // ADVANCED VIEW RENDERER
+    // =========================================================
+    function renderAdvancedView(data) {
+        // Questions
+        if (data.questions && data.questions.length > 0) {
+            renderQuestions(data.questions);
+            advBtnQuestions.style.display = 'inline-flex';
+        } else {
+            advBtnQuestions.style.display = 'none';
+        }
+
+        // Format
+        if (data.format_text && data.format_text.trim()) {
+            formatContainer.textContent = data.format_text;
+            advBtnFormat.style.display = 'inline-flex';
+        } else {
+            advBtnFormat.style.display = 'none';
+        }
+
+        // Decks
+        const hasCompanySlides = data.company_slides && data.company_slides.length > 0;
+        const hasIndustrySlides = data.industry_slides && data.industry_slides.length > 0;
+
+        if (hasCompanySlides || hasIndustrySlides) {
+            renderSlides(data.company_slides || [], data.industry_slides || [], data.industry);
+            advBtnSlides.style.display = 'inline-flex';
+        } else {
+            advBtnSlides.style.display = 'none';
+        }
+
+        // Set default active tab in advanced view
+        if (data.questions && data.questions.length > 0) {
+            setAdvNavTab('adv-pane-questions', advBtnQuestions);
+        } else if (data.format_text && data.format_text.trim()) {
+            setAdvNavTab('adv-pane-format', advBtnFormat);
+        } else if (hasCompanySlides || hasIndustrySlides) {
+            setAdvNavTab('adv-pane-slides', advBtnSlides);
         }
     }
 
@@ -167,7 +316,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const listDiv = document.createElement('div');
             listDiv.className = 'year-questions-list';
 
-            // Accordion toggle click handler
             headerDiv.addEventListener('click', () => {
                 const isHidden = listDiv.classList.toggle('hidden');
                 const arrow = headerDiv.querySelector('.accordion-arrow');
@@ -239,16 +387,14 @@ document.addEventListener('DOMContentLoaded', () => {
             tabBtnIndustry.style.display = 'none';
         }
 
-        // Set default active tab
         if (companySlides.length > 0) {
-            switchTab('company-slides-pane', tabBtnCompany);
+            switchDeckTab('company-slides-pane', tabBtnCompany);
         } else if (industrySlides.length > 0) {
-            switchTab('industry-slides-pane', tabBtnIndustry);
+            switchDeckTab('industry-slides-pane', tabBtnIndustry);
         }
     }
 
-    // Tab Switcher
-    function switchTab(paneId, btnElem) {
+    function switchDeckTab(paneId, btnElem) {
         document.querySelectorAll('.deck-tab-btn').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.add('hidden'));
 
@@ -256,10 +402,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById(paneId).classList.remove('hidden');
     }
 
-    tabBtnCompany.addEventListener('click', () => switchTab('company-slides-pane', tabBtnCompany));
-    tabBtnIndustry.addEventListener('click', () => switchTab('industry-slides-pane', tabBtnIndustry));
+    tabBtnCompany.addEventListener('click', () => switchDeckTab('company-slides-pane', tabBtnCompany));
+    tabBtnIndustry.addEventListener('click', () => switchDeckTab('industry-slides-pane', tabBtnIndustry));
 
-    // Match Banner Display
+    // Match Banner
     function showMatchBanner(query, matched, score) {
         matchBanner.classList.remove('hidden', 'success', 'warning');
         if (score >= 55) {
@@ -285,12 +431,12 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/'/g, "&#039;");
     }
 
-    // Event Listeners
+    // Input Listeners
     fuzzySearchInput.addEventListener('input', (e) => {
         const val = e.target.value;
         clearSearchBtn.style.display = val ? 'inline' : 'none';
 
-        companySelect.value = ""; // reset dropdown
+        companySelect.value = "";
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
             handleFuzzySearch(val);
@@ -307,7 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     companySelect.addEventListener('change', (e) => {
         const val = e.target.value;
-        fuzzySearchInput.value = ""; // reset search box
+        fuzzySearchInput.value = "";
         clearSearchBtn.style.display = 'none';
         hideMatchBanner();
         loadCompanyDetails(val);

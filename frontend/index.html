@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 </head>
 <body>
 
@@ -15,14 +16,25 @@
     <header class="app-header">
         <div class="header-container">
             <div class="logo-area">
-                <span class="logo-icon">🎓</span>
+                <span class="material-symbols-outlined logo-icon-symbol">school</span>
                 <div class="logo-text">
                     <h1>PrepChat</h1>
                     <span class="badge-proxy">Backend Secured Proxy</span>
                 </div>
             </div>
+
+            <!-- View Switcher Segmented Control -->
+            <div class="view-mode-toggle" id="view-mode-toggle">
+                <button class="view-btn active" id="btn-view-basic">
+                    <span class="material-symbols-outlined btn-icon">grid_view</span> Basic View
+                </button>
+                <button class="view-btn" id="btn-view-advanced">
+                    <span class="material-symbols-outlined btn-icon">analytics</span> Advanced View
+                </button>
+            </div>
+
             <div class="header-tagline">
-                Deterministic Search & Knowledge Retrieval
+                Institutional Placement Intelligence
             </div>
         </div>
     </header>
@@ -85,54 +97,108 @@
 
             <!-- Company Header Info -->
             <div class="company-header-banner">
-                <h2 id="display-company-name">Company Name</h2>
-                <div class="company-sector-badge" id="display-sector-name">Sector: Other</div>
+                <div>
+                    <h2 id="display-company-name">Company Name</h2>
+                    <div class="company-sector-badge" id="display-sector-name">Sector: Other</div>
+                </div>
+                <div class="view-indicator-pill" id="current-view-pill">Showing Basic View</div>
             </div>
 
-            <!-- FIXED ORDER SECTION 1: Previous Year Questions -->
-            <section id="section-questions" class="result-section hidden">
-                <div class="section-title">
-                    <span class="title-icon">📚</span>
-                    <h3>Previous Year Questions</h3>
-                </div>
-                <div id="questions-container" class="questions-container">
-                    <!-- Rendered dynamically -->
-                </div>
-            </section>
-
-            <!-- FIXED ORDER SECTION 2: Interview Format -->
-            <section id="section-format" class="result-section hidden">
-                <div class="section-title">
-                    <span class="title-icon">📝</span>
-                    <h3>Interview Format & Process Details</h3>
-                </div>
-                <div id="format-container" class="format-container format-card">
-                    <!-- Rendered dynamically -->
-                </div>
-            </section>
-
-            <!-- FIXED ORDER SECTION 3: Company & Industry Decks -->
-            <section id="section-slides" class="result-section hidden">
-                <div class="section-title">
-                    <span class="title-icon">📊</span>
-                    <h3>Company & Industry Decks</h3>
-                </div>
-                
-                <!-- Slide Deck Tabs -->
-                <div class="deck-tabs-header">
-                    <button class="deck-tab-btn active" id="tab-btn-company" data-tab="company-slides-pane">🏢 Company Presentation Slides</button>
-                    <button class="deck-tab-btn" id="tab-btn-industry" data-tab="industry-slides-pane">📈 Industry Sector Slides</button>
-                </div>
-
-                <div class="deck-tabs-content">
-                    <div id="company-slides-pane" class="tab-pane active">
-                        <div id="company-slides-container"></div>
+            <!-- ======================================================= -->
+            <!-- 1. BASIC VIEW LAYOUT (#view-basic)                      -->
+            <!-- ======================================================= -->
+            <div id="view-basic" class="view-pane">
+                <!-- Bento Grid for Quick Metrics -->
+                <div class="bento-metrics-grid mb-4">
+                    <div class="bento-card">
+                        <span class="material-symbols-outlined bento-icon">quiz</span>
+                        <div class="bento-num" id="basic-stat-questions">0</div>
+                        <div class="bento-label">Questions Asked</div>
                     </div>
-                    <div id="industry-slides-pane" class="tab-pane hidden">
-                        <div id="industry-slides-container"></div>
+                    <div class="bento-card">
+                        <span class="material-symbols-outlined bento-icon">calendar_month</span>
+                        <div class="bento-num" id="basic-stat-cycles">0</div>
+                        <div class="bento-label">Cycles Tracked</div>
+                    </div>
+                    <div class="bento-card">
+                        <span class="material-symbols-outlined bento-icon">slideshow</span>
+                        <div class="bento-num" id="basic-stat-slides">0</div>
+                        <div class="bento-label">Deck Slides</div>
+                    </div>
+                    <div class="bento-card">
+                        <span class="material-symbols-outlined bento-icon">format_list_bulleted</span>
+                        <div class="bento-num" id="basic-stat-status">Available</div>
+                        <div class="bento-label">Process Overview</div>
                     </div>
                 </div>
-            </section>
+
+                <!-- Process Summary Overview Card -->
+                <div id="basic-overview-section" class="academic-card mb-4 hidden">
+                    <div class="academic-card-header">
+                        <span class="material-symbols-outlined">summarize</span>
+                        <h3>Executive Process Overview</h3>
+                    </div>
+                    <div class="academic-card-body" id="basic-overview-text"></div>
+                </div>
+
+                <!-- Top Questions Preview Card -->
+                <div id="basic-questions-section" class="academic-card mb-4 hidden">
+                    <div class="academic-card-header">
+                        <span class="material-symbols-outlined">star</span>
+                        <h3>Top Frequent Questions Preview</h3>
+                    </div>
+                    <div class="academic-card-body" id="basic-questions-container"></div>
+                </div>
+            </div>
+
+            <!-- ======================================================= -->
+            <!-- 2. ADVANCED VIEW LAYOUT (#view-advanced)                -->
+            <!-- ======================================================= -->
+            <div id="view-advanced" class="view-pane hidden">
+
+                <!-- Advanced Navigation Tabs -->
+                <div class="advanced-nav-tabs">
+                    <button class="adv-tab-btn active" id="adv-btn-questions" data-target="adv-pane-questions">
+                        <span class="material-symbols-outlined">quiz</span> Previous Questions
+                    </button>
+                    <button class="adv-tab-btn" id="adv-btn-format" data-target="adv-pane-format">
+                        <span class="material-symbols-outlined">description</span> Interview Format Details
+                    </button>
+                    <button class="adv-tab-btn" id="adv-btn-slides" data-target="adv-pane-slides">
+                        <span class="material-symbols-outlined">present_to_all</span> Company & Sector Decks
+                    </button>
+                </div>
+
+                <div class="adv-tab-panes">
+                    <!-- Advanced Pane: Questions -->
+                    <div id="adv-pane-questions" class="adv-pane active">
+                        <div id="questions-container" class="questions-container"></div>
+                    </div>
+
+                    <!-- Advanced Pane: Format Details -->
+                    <div id="adv-pane-format" class="adv-pane hidden">
+                        <div id="format-container" class="format-container format-card"></div>
+                    </div>
+
+                    <!-- Advanced Pane: Decks -->
+                    <div id="adv-pane-slides" class="adv-pane hidden">
+                        <div class="deck-tabs-header">
+                            <button class="deck-tab-btn active" id="tab-btn-company" data-tab="company-slides-pane">🏢 Company Presentation Slides</button>
+                            <button class="deck-tab-btn" id="tab-btn-industry" data-tab="industry-slides-pane">📈 Industry Sector Slides</button>
+                        </div>
+
+                        <div class="deck-tabs-content">
+                            <div id="company-slides-pane" class="tab-pane active">
+                                <div id="company-slides-container"></div>
+                            </div>
+                            <div id="industry-slides-pane" class="tab-pane hidden">
+                                <div id="industry-slides-container"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
 
         </div>
 
