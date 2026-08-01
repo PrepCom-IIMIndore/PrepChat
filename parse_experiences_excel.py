@@ -136,13 +136,27 @@ def main():
             "additional_remarks": clean_val(row_full.get("Additional Remarks"))
         }
 
+        # Calculate total word count for sorting (most detailed responses first)
+        text_parts = [
+            exp_item["pre_process_tips"], exp_item["gd_topics_tips"], exp_item["interview_outline"],
+            exp_item["domain_questions"], exp_item["situational_questions"], exp_item["hr_gk_questions"],
+            exp_item["prep_resources"], exp_item["looking_for"], exp_item["right_wrong"],
+            exp_item["tips"], exp_item["tech_skills"], exp_item["dos_and_donts"],
+            exp_item["additional_remarks"]
+        ]
+        full_text = " ".join([t for t in text_parts if t])
+        exp_item["word_count"] = len(full_text.split()) if full_text.strip() else 0
+
         experiences.append(exp_item)
+
+    # Sort experiences by word_count descending (most detailed entries first)
+    experiences.sort(key=lambda x: x.get("word_count", 0), reverse=True)
 
     # Save experiences dataset
     out_experiences_path = Path("interview_experiences_data.json")
     with open(out_experiences_path, "w", encoding="utf-8") as f:
         json.dump(experiences, f, indent=2, ensure_ascii=False)
-    print(f"Saved {len(experiences)} experiences to {out_experiences_path}.")
+    print(f"Saved {len(experiences)} experiences sorted by word count descending to {out_experiences_path}.")
 
     # --- Precompute Statistics (Sheets 2, 3, 5 & Company Aggregations) ---
     

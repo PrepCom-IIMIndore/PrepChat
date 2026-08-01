@@ -779,9 +779,27 @@ document.addEventListener('DOMContentLoaded', () => {
             return true;
         });
 
+        // Always sort by word count descending (entries with most words first)
+        filteredExperiences.sort((a, b) => {
+            const wA = a.word_count !== undefined ? a.word_count : getExpWordCount(a);
+            const wB = b.word_count !== undefined ? b.word_count : getExpWordCount(b);
+            return wB - wA;
+        });
+
         displayedCardCount = 20;
         renderActiveFilterTags(cVal, dVal, yVal, pVal, sVal);
         renderExperienceCards();
+    }
+
+    function getExpWordCount(exp) {
+        if (exp.word_count !== undefined) return exp.word_count;
+        const text = [
+            exp.pre_process_tips, exp.gd_topics_tips, exp.interview_outline,
+            exp.domain_questions, exp.situational_questions, exp.hr_gk_questions,
+            exp.prep_resources, exp.looking_for, exp.right_wrong, exp.tips,
+            exp.tech_skills, exp.dos_and_donts, exp.additional_remarks
+        ].filter(Boolean).join(' ');
+        return text.trim() ? text.trim().split(/\s+/).length : 0;
     }
 
     function renderActiveFilterTags(cVal, dVal, yVal, pVal, sVal) {
@@ -829,6 +847,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const gdPct = cStats ? cStats.gd_conducted_pct : (exp.gd_conducted === 'Yes' ? 100 : 0);
             const buddyPct = cStats ? cStats.buddy_round_pct : (exp.buddy_round === 'Yes' ? 100 : 0);
             const topBuckets = cStats && cStats.top_buckets ? cStats.top_buckets : exp.buckets;
+            const wordCount = exp.word_count !== undefined ? exp.word_count : getExpWordCount(exp);
 
             const snippetText = exp.pre_process_tips || exp.interview_outline || exp.tips || exp.domain_questions || "Detailed interview experience record available. Click to read full candidate outline and GD topics.";
 
@@ -850,6 +869,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     <!-- Company At-a-Glance Badges Bar -->
                     <div class="at-a-glance-bar">
+                        <span class="glance-pill pill-words" title="Total Word Count of Response">📝 ${wordCount.toLocaleString()} words</span>
                         <span class="glance-pill pill-rounds" title="Average Interview Rounds">🎯 Avg ${avgRounds} Rounds</span>
                         <span class="glance-pill ${exp.gd_conducted === 'Yes' ? 'pill-gd-yes' : 'pill-gd-no'}">
                             🗣️ GD: ${exp.gd_conducted === 'Yes' ? 'Yes' : 'No'}

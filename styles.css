@@ -1190,6 +1190,7 @@ body::after {
     gap: 3px;
 }
 
+.pill-words { background: rgba(124, 58, 237, 0.12); color: #6d28d9; border: 1px solid rgba(124, 58, 237, 0.2); }
 .pill-rounds { background: rgba(37, 99, 235, 0.12); color: #1d4ed8; }
 .pill-gd-yes { background: rgba(239, 68, 68, 0.12); color: #b91c1c; }
 .pill-gd-no { background: rgba(100, 116, 139, 0.12); color: #475569; }

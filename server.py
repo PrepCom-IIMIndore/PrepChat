@@ -180,6 +180,9 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
                 
                 results.append(exp)
 
+            # Sort filtered results by word count descending (most detailed responses first)
+            results.sort(key=lambda x: x.get('word_count', 0), reverse=True)
+
             self._send_json({
                 "total_matching": len(results),
                 "experiences": results
