@@ -58,7 +58,12 @@ def main():
 
         domain = clean_val(row_lean.get("Domain")) or clean_val(row_full.get("Domain")) or "Other"
         year = clean_val(row_lean.get("Year")) or clean_val(row_full.get("Year")) or "Unknown"
-        process_type = clean_val(row_lean.get("Process Type")) or clean_val(row_full.get("Process Type")) or "General"
+        raw_proc = clean_val(row_lean.get("Process Type")) or clean_val(row_full.get("Process Type")) or ""
+        p_lower = raw_proc.lower().strip()
+        if "summer" in p_lower:
+            process_type = "Summer"
+        else:
+            process_type = "Other"
         role_offered = clean_val(row_lean.get("Profile/Role Offered")) or clean_val(row_full.get("Profile/Role Offered")) or ""
 
         gd_conducted = parse_yes_no(row_lean.get("GD Conducted"))
