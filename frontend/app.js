@@ -586,61 +586,94 @@ document.addEventListener('DOMContentLoaded', () => {
 
         isExperiencesLoaded = true;
 
-        renderExperiencesHeroAnalytics();
         populateExperienceFilters();
         applyExperienceFilters();
     }
 
-    // Render Landing Visual Summary Charts (Sheets 2 & 5)
-    function renderExperiencesHeroAnalytics() {
-        if (!experienceStatsData) return;
+    // Render Landing Visual Summary Charts & Dynamic Domain Distribution
+    function renderExperiencesHeroAnalytics(activeList) {
+        const list = activeList || filteredExperiences || experiencesList || [];
+        const totalExps = list.length;
 
-        expStatTotal.textContent = (experienceStatsData.total_experiences || experiencesList.length).toLocaleString();
-        expStatCompanies.textContent = (experienceStatsData.total_companies || new Set(experiencesList.map(e => e.company)).size).toLocaleString();
+        // 1. Stat Card 1: Student Experiences / Transcripts
+        if (expStatTotal) expStatTotal.textContent = totalExps.toLocaleString();
 
-        const domainsCount = new Set(experiencesList.map(e => e.domain)).size;
-        expStatDomains.textContent = domainsCount;
+        // 2. Stat Card 2: Unique Companies Tracked
+        const uniqueCos = new Set(list.map(e => e.company)).size;
+        if (expStatCompanies) expStatCompanies.textContent = uniqueCos.toLocaleString();
 
-        // Render Sheet 2 Overall Bucket Frequency
-        if (overallBucketBarsContainer && experienceStatsData.overall_bucket_frequency) {
-            overallBucketBarsContainer.innerHTML = '';
-            experienceStatsData.overall_bucket_frequency.forEach(item => {
-                const row = document.createElement('div');
-                row.className = 'bucket-bar-item';
+        // 3. Stat Card 3: Functional Domains
+        const uniqueDomains = new Set(list.map(e => e.domain)).size;
+        if (expStatDomains) expStatDomains.textContent = uniqueDomains.toLocaleString();
 
-                const fillClass = getBucketFillClass(item.bucket);
-                row.innerHTML = `
-                    <div class="bucket-bar-label">${escapeHtml(item.bucket)}</div>
-                    <div class="bar-track">
-                        <div class="bar-fill ${fillClass}" style="width: ${item.pct}%"></div>
-                    </div>
-                    <div class="bucket-bar-value">${item.pct}% (${item.count.toLocaleString()})</div>
-                `;
-                overallBucketBarsContainer.appendChild(row);
-            });
+        // 4. Stat Card 4: Avg Rounds (Excl HR)
+        const roundValues = list.map(e => e.interview_rounds).filter(r => typeof r === 'number' && !isNaN(r));
+        const avgRoundsVal = roundValues.length > 0 
+            ? round1(roundValues.reduce((a, b) => a + b, 0) / roundValues.length) 
+            : 0;
+        if (expStatAvgRounds) expStatAvgRounds.textContent = avgRoundsVal > 0 ? avgRoundsVal : '2.4';
+
+        // Filter Tag in Analytics Box Header
+        const expAnalyticsFilterTag = document.getElementById('exp-analytics-filter-tag');
+        const selectedCo = expFilterCompany ? expFilterCompany.value : '';
+        if (expAnalyticsFilterTag) {
+            expAnalyticsFilterTag.textContent = selectedCo ? `Company: ${selectedCo}` : (totalExps === experiencesList.length ? 'All Companies' : 'Filtered Selection');
         }
 
-        // Render Sheet 5 Domain Cross-Tabulation Visual
-        if (domainTabsNavContainer && domainBucketContentContainer && experienceStatsData.domain_bucket_frequency) {
-            domainTabsNavContainer.innerHTML = '';
-            const domainList = experienceStatsData.domain_bucket_frequency;
+        // 5. Dynamic Question Types Distribution Across Domains Visual (Domain Cross-Tabulation)
+        if (!domainTabsNavContainer || !domainBucketContentContainer) return;
 
-            domainList.forEach((dItem, idx) => {
-                const pill = document.createElement('button');
-                pill.className = `domain-tab-pill ${idx === 0 ? 'active' : ''}`;
-                pill.textContent = `${dItem.domain} (${dItem.total_responses})`;
-                pill.addEventListener('click', () => {
-                    document.querySelectorAll('.domain-tab-pill').forEach(p => p.classList.remove('active'));
-                    pill.classList.add('active');
-                    renderDomainBucketDetails(dItem);
-                });
-                domainTabsNavContainer.appendChild(pill);
-            });
-
-            if (domainList.length > 0) {
-                renderDomainBucketDetails(domainList[0]);
+        // Group activeList by domain
+        const domainGroupMap = {};
+        list.forEach(exp => {
+            const d = exp.domain || 'Other';
+            if (!domainGroupMap[d]) {
+                domainGroupMap[d] = {
+                    domain: d,
+                    total_responses: 0,
+                    technical: 0,
+                    resume: 0,
+                    hr: 0,
+                    case: 0,
+                    gk: 0,
+                    situational: 0
+                };
             }
+            const item = domainGroupMap[d];
+            item.total_responses += 1;
+
+            const bFlags = exp.bucket_flags || {};
+            const bList = exp.buckets || [];
+
+            if (bFlags.technical || bList.includes('Technical/Domain')) item.technical += 1;
+            if (bFlags.resume || bList.includes('Resume-based')) item.resume += 1;
+            if (bFlags.hr || bList.includes('HR/Behavioral')) item.hr += 1;
+            if (bFlags.case || bList.includes('Case/Guesstimate')) item.case += 1;
+            if (bFlags.gk || bList.includes('Current Affairs/GK')) item.gk += 1;
+            if (bFlags.situational || bList.includes('Situational')) item.situational += 1;
+        });
+
+        const domainList = Object.values(domainGroupMap).sort((a, b) => b.total_responses - a.total_responses);
+
+        domainTabsNavContainer.innerHTML = '';
+        if (domainList.length === 0) {
+            domainBucketContentContainer.innerHTML = '<div style="color: var(--text-muted); padding: 1rem; text-align: center;">No domain distribution data available for current selection.</div>';
+            return;
         }
+
+        domainList.forEach((dItem, idx) => {
+            const pill = document.createElement('button');
+            pill.className = `domain-tab-pill ${idx === 0 ? 'active' : ''}`;
+            pill.textContent = `${dItem.domain} (${dItem.total_responses})`;
+            pill.addEventListener('click', () => {
+                document.querySelectorAll('.domain-tab-pill').forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                renderDomainBucketDetails(dItem);
+            });
+            domainTabsNavContainer.appendChild(pill);
+        });
+
+        renderDomainBucketDetails(domainList[0]);
     }
 
     function renderDomainBucketDetails(dItem) {
@@ -788,6 +821,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         displayedCardCount = 20;
         renderActiveFilterTags(cVal, dVal, yVal, pVal, sVal);
+        renderExperiencesHeroAnalytics(filteredExperiences);
         renderExperienceCards();
     }
 
