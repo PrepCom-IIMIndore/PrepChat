@@ -430,6 +430,78 @@ document.addEventListener('DOMContentLoaded', () => {
             basicOverviewSection.classList.add('hidden');
         }
 
+        // Render Candidate Interview Experiences for this company
+        const basicExpSec = document.getElementById('basic-experiences-section');
+        const basicExpContainer = document.getElementById('basic-experiences-container');
+        const compExps = currentCompanyData.experiences || experiencesList.filter(e => e.company === currentCompanyData.company);
+
+        if (basicExpSec && basicExpContainer) {
+            if (compExps && compExps.length > 0) {
+                basicExpSec.classList.remove('hidden');
+                basicExpContainer.innerHTML = '';
+                
+                // Sort by word count descending
+                compExps.sort((a, b) => {
+                    const wA = a.word_count !== undefined ? a.word_count : getExpWordCount(a);
+                    const wB = b.word_count !== undefined ? b.word_count : getExpWordCount(b);
+                    return wB - wA;
+                });
+
+                compExps.slice(0, 6).forEach(exp => {
+                    const card = document.createElement('div');
+                    card.className = 'experience-card';
+
+                    const cStats = experienceStatsData && experienceStatsData.company_stats ? experienceStatsData.company_stats[exp.company] : null;
+                    const avgRounds = cStats ? cStats.avg_rounds : (exp.interview_rounds || 2);
+                    const topBuckets = cStats && cStats.top_buckets ? cStats.top_buckets : exp.buckets;
+                    const wordCount = exp.word_count !== undefined ? exp.word_count : getExpWordCount(exp);
+                    const snippetText = exp.pre_process_tips || exp.interview_outline || exp.tips || exp.domain_questions || "Detailed candidate interview experience record available. Click to read full outline.";
+
+                    card.innerHTML = `
+                        <div>
+                            <div class="exp-card-header">
+                                <div>
+                                    <div class="exp-card-company">${escapeHtml(exp.company)}</div>
+                                    <h3>${escapeHtml(exp.role_offered || 'Management Trainee / Role Offered')}</h3>
+                                </div>
+                                ${exp.converted ? `<span class="badge-converted-tag">Converted</span>` : ''}
+                            </div>
+
+                            <div class="meta-badges-row">
+                                <span class="badge-domain-tag">💼 ${escapeHtml(exp.domain)}</span>
+                                <span class="badge-year-tag">📅 ${escapeHtml(exp.year)}</span>
+                                <span class="badge-process-tag">🎯 ${escapeHtml(exp.process_type)}</span>
+                            </div>
+
+                            <div class="at-a-glance-bar">
+                                <span class="glance-pill pill-words" title="Total Word Count">📝 ${wordCount.toLocaleString()} words</span>
+                                <span class="glance-pill pill-rounds">🎯 Avg ${avgRounds} Rounds</span>
+                                <span class="glance-pill ${exp.gd_conducted === 'Yes' ? 'pill-gd-yes' : 'pill-gd-no'}">
+                                    🗣️ GD: ${exp.gd_conducted === 'Yes' ? 'Yes' : 'No'}
+                                </span>
+                                <span class="glance-pill ${exp.buddy_round === 'Yes' ? 'pill-buddy-yes' : 'pill-buddy-no'}">
+                                    👥 Buddy: ${exp.buddy_round === 'Yes' ? 'Yes' : 'No'}
+                                </span>
+                            </div>
+
+                            <div class="exp-card-snippet">${escapeHtml(snippetText)}</div>
+                        </div>
+
+                        <div class="exp-card-footer">
+                            <button class="btn-read-exp" data-id="${exp.id}">
+                                <span class="material-symbols-outlined" style="font-size: 1.1rem;">visibility</span> Read Full Experience
+                            </button>
+                        </div>
+                    `;
+
+                    card.querySelector('.btn-read-exp').addEventListener('click', () => openExperienceModal(exp));
+                    basicExpContainer.appendChild(card);
+                });
+            } else {
+                basicExpSec.classList.add('hidden');
+            }
+        }
+
         if (qCount > 0) {
             basicQuestionsSection.classList.remove('hidden');
             basicQuestionsContainer.innerHTML = '';
