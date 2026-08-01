@@ -1086,6 +1086,9 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/[\u2018\u2019]/g, "'")
             .replace(/[\u201C\u201D]/g, '"');
 
+        // Check if rawText contains real markdown table syntax (| --- | --- |)
+        const hasRealTable = /^\|?\s*:?-+:?\s*\|/m.test(cleaned);
+
         const lines = cleaned.split('\n');
         let htmlResult = '';
         let inTable = false;
@@ -1135,7 +1138,7 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 0; i < lines.length; i++) {
             let line = lines[i].trim();
 
-            if (line.includes('|') && (line.startsWith('|') || line.endsWith('|') || line.split('|').length > 2)) {
+            if (hasRealTable && line.includes('|') && (line.startsWith('|') || line.endsWith('|') || line.split('|').length > 2)) {
                 if (!inTable) {
                     inTable = true;
                     tableRows = [];
@@ -1148,6 +1151,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     tableRows.push(cells);
                 }
                 continue;
+            }
+
+            if (inTable) {
+                htmlResult += flushTable();
+            }
+
+            if (!line) {
+                continue;
+            }
+
+            if (line.includes('|')) {
+                line = line.replace(/\|/g, ' - ').replace(/\s{2,}/g, ' ');
             }
 
             if (inTable) {
