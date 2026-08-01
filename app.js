@@ -691,8 +691,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
 
         domainBucketContentContainer.innerHTML = `
-            <div style="font-weight: 700; color: #60a5fa; margin-bottom: 0.75rem; font-size: 0.95rem;">
-                Question Bucket Frequency for Domain: <span style="color:#ffffff;">${escapeHtml(dItem.domain)}</span> (${dItem.total_responses} Responses)
+            <div style="font-weight: 800; color: #1d4ed8; margin-bottom: 0.75rem; font-size: 0.95rem;">
+                Question Bucket Frequency for Domain: <span style="color: #0f172a;">${escapeHtml(dItem.domain)}</span> (${dItem.total_responses} Responses)
             </div>
             <div class="bucket-bars-grid">
                 ${buckets.map(b => `
@@ -956,14 +956,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cStats) {
             modalCompanySummaryBox.classList.remove('hidden');
             modalCompanySummaryBox.innerHTML = `
-                <div style="font-weight: 800; font-size: 1.05rem; color: #ffffff; margin-bottom: 0.5rem;">
-                    📊 Company Intelligence Summary: <span style="color:#60a5fa;">${escapeHtml(exp.company)}</span>
+                <div style="font-weight: 800; font-size: 1.05rem; color: #0f172a; margin-bottom: 0.55rem;">
+                    📊 Company Intelligence Summary: <span style="color: #1d4ed8;">${escapeHtml(exp.company)}</span>
                 </div>
-                <div style="display: flex; flex-wrap: wrap; gap: 1.25rem; font-size: 0.9rem; color: #cbd5e1;">
-                    <div>🎯 <strong>Avg Interview Rounds:</strong> ${cStats.avg_rounds} (Excl. HR)</div>
-                    <div>🗣️ <strong>GD Conducted:</strong> ${cStats.gd_conducted_count}/${cStats.total_experiences} (${cStats.gd_conducted_pct}%)</div>
-                    <div>👥 <strong>Buddy Round:</strong> ${cStats.buddy_round_count}/${cStats.total_experiences} (${cStats.buddy_round_pct}%)</div>
-                    <div>🏷️ <strong>Top Question Types:</strong> ${cStats.top_buckets.join(', ')}</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 1.25rem; font-size: 0.9rem; color: #334155; font-weight: 500;">
+                    <div>🎯 <strong style="color: #0f172a;">Avg Interview Rounds:</strong> ${cStats.avg_rounds} (Excl. HR)</div>
+                    <div>🗣️ <strong style="color: #0f172a;">GD Conducted:</strong> ${cStats.gd_conducted_count}/${cStats.total_experiences} (${cStats.gd_conducted_pct}%)</div>
+                    <div>👥 <strong style="color: #0f172a;">Buddy Round:</strong> ${cStats.buddy_round_count}/${cStats.total_experiences} (${cStats.buddy_round_pct}%)</div>
+                    <div>🏷️ <strong style="color: #0f172a;">Top Question Types:</strong> ${cStats.top_buckets.join(', ')}</div>
                 </div>
             `;
         } else {
