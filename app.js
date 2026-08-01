@@ -425,7 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (hasFormat) {
             basicOverviewSection.classList.remove('hidden');
-            basicOverviewText.textContent = currentCompanyData.format_text;
+            basicOverviewText.innerHTML = renderMarkdownOrTable(currentCompanyData.format_text);
         } else {
             basicOverviewSection.classList.add('hidden');
         }
@@ -498,9 +498,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Format Details Tab
         formatContainer.innerHTML = '';
         if (currentCompanyData.format_text) {
-            formatContainer.textContent = currentCompanyData.format_text;
+            formatContainer.innerHTML = renderMarkdownOrTable(currentCompanyData.format_text);
         } else {
-            formatContainer.textContent = "No specific interview format document recorded for this company.";
+            formatContainer.innerHTML = '<div style="color: var(--text-muted);">No specific interview format document recorded for this company.</div>';
         }
 
         // Slides Tab
@@ -996,12 +996,128 @@ document.addEventListener('DOMContentLoaded', () => {
     function setModalSectionText(element, boxId, text) {
         const box = document.getElementById(boxId);
         if (text && text.trim()) {
-            element.textContent = text.trim();
+            element.innerHTML = renderMarkdownOrTable(text.trim());
             if (box) box.classList.remove('hidden');
         } else {
-            element.textContent = '';
+            element.innerHTML = '';
             if (box) box.classList.add('hidden');
         }
+    }
+
+    // Smart Markdown & Pipe-Table Parser Renderer
+    function renderMarkdownOrTable(rawText) {
+        if (!rawText || !rawText.trim()) return '<div style="color: var(--text-muted);">No details recorded.</div>';
+
+        // Clean unicode bullets and special whitespace
+        let cleaned = rawText
+            .replace(/[\uF0B7\u2022\u2023\u2043\u204F\u2219]/g, '• ')
+            .replace(/[\u2018\u2019]/g, "'")
+            .replace(/[\u201C\u201D]/g, '"');
+
+        const lines = cleaned.split('\n');
+        let htmlResult = '';
+        let inTable = false;
+        let tableRows = [];
+
+        function flushTable() {
+            if (!inTable || tableRows.length === 0) return '';
+            
+            let tableHtml = '<div class="md-table-wrapper"><table class="md-styled-table">';
+            let isFirstHeader = false;
+            
+            if (tableRows.length > 1 && /^\|?\s*:?-+:?\s*(\||\s*:?-+:?\s*)*\|?$/.test(tableRows[1].join('|'))) {
+                isFirstHeader = true;
+            }
+
+            tableRows.forEach((rowCells, rIdx) => {
+                const rowStr = rowCells.join('').trim();
+                if (/^[-:\s|]+$/.test(rowStr)) return; // Skip divider rows like | --- | --- |
+
+                if (rIdx === 0 && isFirstHeader) {
+                    tableHtml += '<thead><tr>';
+                    rowCells.forEach(cell => {
+                        tableHtml += `<th>${formatInlineMarkdown(cell)}</th>`;
+                    });
+                    tableHtml += '</tr></thead><tbody>';
+                } else {
+                    if (rIdx === 0 && !isFirstHeader) tableHtml += '<tbody>';
+                    tableHtml += '<tr>';
+                    rowCells.forEach((cell, cIdx) => {
+                        const cellFormatted = formatInlineMarkdown(cell);
+                        if (cIdx === 0 && rowCells.length === 2 && !cellFormatted.startsWith('<strong>')) {
+                            tableHtml += `<td><strong>${cellFormatted}</strong></td>`;
+                        } else {
+                            tableHtml += `<td>${cellFormatted}</td>`;
+                        }
+                    });
+                    tableHtml += '</tr>';
+                }
+            });
+
+            tableHtml += '</tbody></table></div>';
+            inTable = false;
+            tableRows = [];
+            return tableHtml;
+        }
+
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim();
+
+            if (line.includes('|') && (line.startsWith('|') || line.endsWith('|') || line.split('|').length > 2)) {
+                if (!inTable) {
+                    inTable = true;
+                    tableRows = [];
+                }
+                let cells = line.split('|').map(c => c.trim());
+                if (cells.length > 0 && cells[0] === '') cells.shift();
+                if (cells.length > 0 && cells[cells.length - 1] === '') cells.pop();
+
+                if (cells.length > 0) {
+                    tableRows.push(cells);
+                }
+                continue;
+            }
+
+            if (inTable) {
+                htmlResult += flushTable();
+            }
+
+            if (!line) {
+                continue;
+            }
+
+            if (line.startsWith('### ')) {
+                htmlResult += `<h4 class="md-h4">${formatInlineMarkdown(line.slice(4))}</h4>`;
+            } else if (line.startsWith('## ')) {
+                htmlResult += `<h3 class="md-h3">${formatInlineMarkdown(line.slice(3))}</h3>`;
+            } else if (line.startsWith('# ')) {
+                htmlResult += `<h2 class="md-h2">${formatInlineMarkdown(line.slice(2))}</h2>`;
+            } else if (line.startsWith('---') || line.startsWith('***')) {
+                htmlResult += `<hr class="md-hr"/>`;
+            } else if (line.startsWith('• ') || line.startsWith('- ') || line.startsWith('* ')) {
+                const bulletText = line.replace(/^[•\-\*]\s*/, '');
+                htmlResult += `<div class="md-bullet-item"><span class="md-bullet-dot">•</span> <span>${formatInlineMarkdown(bulletText)}</span></div>`;
+            } else {
+                htmlResult += `<p class="md-para">${formatInlineMarkdown(line)}</p>`;
+            }
+        }
+
+        if (inTable) {
+            htmlResult += flushTable();
+        }
+
+        return htmlResult;
+    }
+
+    function formatInlineMarkdown(str) {
+        if (!str) return '';
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/`([^`]+)`/g, '<code>$1</code>');
     }
 
     // Modal Tabs Switcher

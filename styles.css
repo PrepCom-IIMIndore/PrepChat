@@ -1440,6 +1440,101 @@ body::after {
     color: var(--text-primary);
 }
 
+/* Markdown & Pipe Table Renderer Styles */
+.md-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    margin: 1rem 0;
+    border-radius: 10px;
+    border: 1px solid rgba(203, 213, 225, 0.8);
+    box-shadow: 0 4px 12px rgba(31, 38, 135, 0.03);
+}
+
+.md-styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    text-align: left;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.md-styled-table th {
+    background: rgba(241, 245, 249, 0.95);
+    color: var(--accent-blue);
+    font-weight: 800;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid var(--border-color);
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    letter-spacing: 0.5px;
+}
+
+.md-styled-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    color: var(--text-primary);
+    vertical-align: top;
+    line-height: 1.55;
+}
+
+.md-styled-table tr:last-child td {
+    border-bottom: none;
+}
+
+.md-styled-table tr:nth-child(even) td {
+    background: rgba(248, 250, 252, 0.6);
+}
+
+.md-bullet-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.45rem;
+    font-size: 0.93rem;
+    line-height: 1.6;
+    color: var(--text-primary);
+}
+
+.md-bullet-dot {
+    color: var(--accent-blue);
+    font-weight: 800;
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.md-h2 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 1.25rem 0 0.6rem 0;
+}
+
+.md-h3 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--accent-blue);
+    margin: 1rem 0 0.5rem 0;
+}
+
+.md-h4 {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0.85rem 0 0.4rem 0;
+}
+
+.md-para {
+    margin-bottom: 0.5rem;
+    line-height: 1.65;
+    color: var(--text-primary);
+}
+
+.md-hr {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 1rem 0;
+}
+
 /* ======================================================= */
 /* COMPREHENSIVE MOBILE OPTIMIZATIONS (<= 768px & <= 480px) */
 /* ======================================================= */
