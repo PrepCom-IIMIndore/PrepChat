@@ -19,9 +19,11 @@ FORMATS_DATA = {}
 SLIDES_DATA = []
 COMPANY_INDUSTRIES = {}
 ALL_COMPANIES = []
+EXPERIENCES_DATA = []
+EXPERIENCE_STATS = {}
 
 def load_data():
-    global QUESTIONS_DATA, FORMATS_DATA, SLIDES_DATA, COMPANY_INDUSTRIES, ALL_COMPANIES
+    global QUESTIONS_DATA, FORMATS_DATA, SLIDES_DATA, COMPANY_INDUSTRIES, ALL_COMPANIES, EXPERIENCES_DATA, EXPERIENCE_STATS
     
     q_path = Path("questions_data.json")
     if q_path.exists():
@@ -43,13 +45,24 @@ def load_data():
         with open(i_path, "r", encoding="utf-8") as f:
             COMPANY_INDUSTRIES = json.load(f)
             
+    exp_path = Path("interview_experiences_data.json")
+    if exp_path.exists():
+        with open(exp_path, "r", encoding="utf-8") as f:
+            EXPERIENCES_DATA = json.load(f)
+
+    stats_path = Path("interview_experience_stats.json")
+    if stats_path.exists():
+        with open(stats_path, "r", encoding="utf-8") as f:
+            EXPERIENCE_STATS = json.load(f)
+
     # Build list of all canonical companies
     excel_companies = {q["company"] for q in QUESTIONS_DATA}
     format_companies = set(FORMATS_DATA.keys())
     slides_companies = {s["company"] for s in SLIDES_DATA if s["deck_type"] == "company"}
+    exp_companies = {e["company"] for e in EXPERIENCES_DATA}
     
-    ALL_COMPANIES = sorted(list(excel_companies | format_companies | slides_companies))
-    print(f"[Server] Data loaded: {len(QUESTIONS_DATA)} questions, {len(FORMATS_DATA)} formats, {len(SLIDES_DATA)} slides, {len(ALL_COMPANIES)} canonical companies.")
+    ALL_COMPANIES = sorted(list(excel_companies | format_companies | slides_companies | exp_companies))
+    print(f"[Server] Data loaded: {len(QUESTIONS_DATA)} questions, {len(FORMATS_DATA)} formats, {len(SLIDES_DATA)} slides, {len(EXPERIENCES_DATA)} experiences, {len(ALL_COMPANIES)} canonical companies.")
 
 def perform_fuzzy_search(query: str):
     if not query:
@@ -122,7 +135,8 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
                     "total_questions": len(QUESTIONS_DATA),
                     "total_companies": len(ALL_COMPANIES),
                     "total_formats": len(FORMATS_DATA),
-                    "total_slides": len(SLIDES_DATA)
+                    "total_slides": len(SLIDES_DATA),
+                    "total_experiences": len(EXPERIENCES_DATA)
                 }
             })
             return
@@ -134,6 +148,41 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
                 "query": q,
                 "matched_company": matched,
                 "score": score
+            })
+            return
+
+        elif path == '/api/experiences/stats':
+            self._send_json(EXPERIENCE_STATS)
+            return
+
+        elif path == '/api/experiences':
+            company_filter = query_params.get('company', [''])[0].strip()
+            domain_filter = query_params.get('domain', [''])[0].strip()
+            year_filter = query_params.get('year', [''])[0].strip()
+            process_filter = query_params.get('process_type', [''])[0].strip()
+            search_query = query_params.get('search', [''])[0].strip().lower()
+
+            results = []
+            for exp in EXPERIENCES_DATA:
+                if company_filter and exp["company"].lower() != company_filter.lower():
+                    continue
+                if domain_filter and exp["domain"].lower() != domain_filter.lower():
+                    continue
+                if year_filter and exp["year"].lower() != year_filter.lower():
+                    continue
+                if process_filter and exp["process_type"].lower() != process_filter.lower():
+                    continue
+                
+                if search_query:
+                    searchable = f"{exp['company']} {exp['domain']} {exp['role_offered']} {exp['pre_process_tips']} {exp['gd_topics_tips']} {exp['interview_outline']} {exp['domain_questions']} {exp['hr_gk_questions']} {exp['prep_resources']} {exp['tips']} {exp['tech_skills']} {exp['dos_and_donts']}".lower()
+                    if search_query not in searchable:
+                        continue
+                
+                results.append(exp)
+
+            self._send_json({
+                "total_matching": len(results),
+                "experiences": results
             })
             return
             
@@ -167,13 +216,19 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
             if industry and industry != "Other":
                 industry_slides = [s for s in SLIDES_DATA if s["company"].lower() == industry.lower() and s["deck_type"] == "industry"]
 
+            # 4. Experiences & experience stats for this company
+            company_experiences = [e for e in EXPERIENCES_DATA if e["company"] == target_company]
+            comp_experience_stats = EXPERIENCE_STATS.get("company_stats", {}).get(target_company, None)
+
             self._send_json({
                 "company": target_company,
                 "industry": industry,
                 "questions": company_questions,
                 "format_text": format_text,
                 "company_slides": company_slides,
-                "industry_slides": industry_slides
+                "industry_slides": industry_slides,
+                "experiences": company_experiences,
+                "experience_stats": comp_experience_stats
             })
             return
 

@@ -1,7 +1,13 @@
 // PrepChat - Dual-Mode JS (Backend API Proxy + GitHub Pages Direct Support)
 
 document.addEventListener('DOMContentLoaded', () => {
-    // DOM Elements
+    // DOM Elements - Navigation Sections
+    const navBtnCatalog = document.getElementById('nav-btn-catalog');
+    const navBtnExperiences = document.getElementById('nav-btn-experiences');
+    const sectionCatalog = document.getElementById('section-catalog');
+    const sectionExperiences = document.getElementById('section-experiences');
+
+    // DOM Elements - Catalog Search & Display
     const fuzzySearchInput = document.getElementById('fuzzy-search-input');
     const companySelect = document.getElementById('company-select');
     const clearSearchBtn = document.getElementById('clear-search-btn');
@@ -55,20 +61,101 @@ document.addEventListener('DOMContentLoaded', () => {
     const statFormats = document.getElementById('stat-formats');
     const statSlides = document.getElementById('stat-slides');
 
+    // DOM Elements - Interview Experiences Section
+    const expStatTotal = document.getElementById('exp-stat-total');
+    const expStatCompanies = document.getElementById('exp-stat-companies');
+    const expStatDomains = document.getElementById('exp-stat-domains');
+    const expStatAvgRounds = document.getElementById('exp-stat-avg-rounds');
+    
+    const overallBucketBarsContainer = document.getElementById('overall-bucket-bars');
+    const domainTabsNavContainer = document.getElementById('domain-tabs-nav');
+    const domainBucketContentContainer = document.getElementById('domain-bucket-content');
+
+    const expFilterCompany = document.getElementById('exp-filter-company');
+    const expFilterDomain = document.getElementById('exp-filter-domain');
+    const expFilterYear = document.getElementById('exp-filter-year');
+    const expFilterProcess = document.getElementById('exp-filter-process');
+    const expFilterSearch = document.getElementById('exp-filter-search');
+    const expClearSearch = document.getElementById('exp-clear-search');
+    const expBtnReset = document.getElementById('exp-btn-reset');
+
+    const expShowingCount = document.getElementById('exp-showing-count');
+    const activeFilterTagsContainer = document.getElementById('active-filter-tags');
+    const expCardsContainer = document.getElementById('exp-cards-container');
+    const expLoadMoreContainer = document.getElementById('exp-load-more-container');
+    const expBtnLoadMore = document.getElementById('exp-btn-load-more');
+
+    // DOM Elements - Drill-Down Modal
+    const experienceModal = document.getElementById('experience-modal');
+    const modalExpClose = document.getElementById('modal-exp-close');
+    const modalExpCompany = document.getElementById('modal-exp-company');
+    const modalExpDomain = document.getElementById('modal-exp-domain');
+    const modalExpYear = document.getElementById('modal-exp-year');
+    const modalExpProcess = document.getElementById('modal-exp-process');
+    const modalExpConverted = document.getElementById('modal-exp-converted');
+    const modalExpTitle = document.getElementById('modal-exp-title');
+    const modalCompanySummaryBox = document.getElementById('modal-company-summary-box');
+
+    const modalExpPreProcess = document.getElementById('modal-exp-pre-process');
+    const modalExpUg = document.getElementById('modal-exp-ug');
+    const modalExpCertifications = document.getElementById('modal-exp-certifications');
+    const modalExpGdTopics = document.getElementById('modal-exp-gd-topics');
+    const modalExpOutline = document.getElementById('modal-exp-outline');
+    const modalExpTechSkills = document.getElementById('modal-exp-tech-skills');
+    const modalExpDomainQ = document.getElementById('modal-exp-domain-q');
+    const modalExpHrQ = document.getElementById('modal-exp-hr-q');
+    const modalExpSituationalQ = document.getElementById('modal-exp-situational-q');
+    const modalExpResources = document.getElementById('modal-exp-resources');
+    const modalExpLookingFor = document.getElementById('modal-exp-looking-for');
+    const modalExpRightWrong = document.getElementById('modal-exp-right-wrong');
+    const modalExpDosDonts = document.getElementById('modal-exp-dos-donts');
+    const modalExpTips = document.getElementById('modal-exp-tips');
+
     // App State
+    let currentAppSection = 'catalog'; // 'catalog' | 'experiences'
     let currentViewMode = 'basic'; // 'basic' | 'advanced'
     let currentCompanyData = null;
     let debounceTimer = null;
+    let expDebounceTimer = null;
     let useStaticFallback = false;
 
-    // Static Data Cache for GitHub Pages Fallback
+    // Static Data Cache for GitHub Pages & Fast Access
     let staticQuestions = [];
     let staticFormats = {};
     let staticSlides = [];
     let staticIndustries = {};
     let staticCompanies = [];
 
-    // 1. View Switcher Event Handlers
+    // Experience Datasets State
+    let experiencesList = [];
+    let experienceStatsData = null;
+    let filteredExperiences = [];
+    let displayedCardCount = 20;
+    let isExperiencesLoaded = false;
+
+    // 1. Primary App Section Navigation
+    navBtnCatalog.addEventListener('click', () => switchAppSection('catalog'));
+    navBtnExperiences.addEventListener('click', () => switchAppSection('experiences'));
+
+    function switchAppSection(section) {
+        currentAppSection = section;
+        if (section === 'catalog') {
+            navBtnCatalog.classList.add('active');
+            navBtnExperiences.classList.remove('active');
+            sectionCatalog.classList.remove('hidden');
+            sectionExperiences.classList.add('hidden');
+        } else {
+            navBtnExperiences.classList.add('active');
+            navBtnCatalog.classList.remove('active');
+            sectionExperiences.classList.remove('hidden');
+            sectionCatalog.classList.add('hidden');
+            if (!isExperiencesLoaded) {
+                loadExperiencesData();
+            }
+        }
+    }
+
+    // 2. View Switcher Event Handlers (Catalog Section)
     btnViewBasic.addEventListener('click', () => setViewMode('basic'));
     btnViewAdvanced.addEventListener('click', () => setViewMode('advanced'));
 
@@ -99,14 +186,29 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.adv-pane').forEach(pane => pane.classList.add('hidden'));
 
         activeBtn.classList.add('active');
-        document.getElementById(targetPaneId).classList.remove('hidden');
+        const pane = document.getElementById(targetPaneId);
+        if (pane) pane.classList.remove('hidden');
     }
 
     advBtnQuestions.addEventListener('click', () => setAdvNavTab('adv-pane-questions', advBtnQuestions));
     advBtnFormat.addEventListener('click', () => setAdvNavTab('adv-pane-format', advBtnFormat));
     advBtnSlides.addEventListener('click', () => setAdvNavTab('adv-pane-slides', advBtnSlides));
 
-    // 2. Load Catalog (Tries API first, falls back to direct JSON for GitHub Pages)
+    tabBtnCompany.addEventListener('click', () => {
+        tabBtnCompany.classList.add('active');
+        tabBtnIndustry.classList.remove('active');
+        companySlidesPane.classList.remove('hidden');
+        industrySlidesPane.classList.add('hidden');
+    });
+
+    tabBtnIndustry.addEventListener('click', () => {
+        tabBtnIndustry.classList.add('active');
+        tabBtnCompany.classList.remove('active');
+        industrySlidesPane.classList.remove('hidden');
+        companySlidesPane.classList.add('hidden');
+    });
+
+    // 3. Load Catalog & Experiences Data
     async function loadCatalog() {
         try {
             const res = await fetch('/api/companies');
@@ -178,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Perform Fuzzy Search
+    // 4. Catalog Fuzzy Search Logic
     async function handleFuzzySearch(query) {
         if (!query || !query.trim()) {
             hideMatchBanner();
@@ -216,9 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function performStaticFuzzySearch(query) {
         const qLower = query.toLowerCase();
         for (let c of staticCompanies) {
-            if (c.toLowerCase() === qLower) {
-                return { company: c, score: 100.0 };
-            }
+            if (c.toLowerCase() === qLower) return { company: c, score: 100.0 };
         }
         for (let c of staticCompanies) {
             if (c.toLowerCase().includes(qLower) || qLower.includes(c.toLowerCase())) {
@@ -228,7 +328,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return { company: staticCompanies[0] || null, score: 50.0 };
     }
 
-    // 4. Fetch Company Details
+    function showMatchBanner(query, company, score) {
+        if (!matchBanner) return;
+        matchBanner.classList.remove('hidden', 'success', 'warning');
+        if (score >= 80) {
+            matchBanner.classList.add('success');
+            matchBanner.innerHTML = `✅ Exact/High Match: <strong>${company}</strong> (Score: ${Math.round(score)}%)`;
+        } else {
+            matchBanner.classList.add('warning');
+            matchBanner.innerHTML = `🔍 Closest Match for "${query}": <strong>${company}</strong> (Score: ${Math.round(score)}%)`;
+        }
+    }
+
+    function hideMatchBanner() {
+        if (matchBanner) matchBanner.classList.add('hidden');
+    }
+
+    // 5. Load Company Details
     async function loadCompanyDetails(companyName) {
         if (!companyName) {
             landingDashboard.classList.remove('hidden');
@@ -250,27 +366,36 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Static Client-side Company Assembly Fallback
-        const questions = staticQuestions.filter(q => q.company === companyName);
-        const formatText = staticFormats[companyName] || null;
-        let industry = staticIndustries[companyName] || (questions[0] ? questions[0].industry : "Other");
-        
-        const companySlides = staticSlides.filter(s => s.company === companyName && s.deck_type === 'company');
-        const industrySlides = staticSlides.filter(s => s.company.toLowerCase() === (industry || '').toLowerCase() && s.deck_type === 'industry');
+        // Static Client-side Company Details Builder
+        const cQuestions = staticQuestions.filter(q => q.company === companyName);
+        const fText = staticFormats[companyName] || null;
+        let ind = staticIndustries[companyName];
+        if (!ind && cQuestions.length > 0) ind = cQuestions[0].industry;
+        if (!ind) ind = "Other";
+
+        const cSlides = staticSlides.filter(s => s.company === companyName && s.deck_type === 'company');
+        const iSlides = ind !== "Other" ? staticSlides.filter(s => s.company.toLowerCase() === ind.toLowerCase() && s.deck_type === 'industry') : [];
+
+        const compExps = experiencesList.filter(e => e.company === companyName);
+        const compStats = experienceStatsData && experienceStatsData.company_stats ? experienceStatsData.company_stats[companyName] : null;
 
         currentCompanyData = {
             company: companyName,
-            industry: industry || "Other",
-            questions: questions,
-            format_text: formatText,
-            company_slides: companySlides,
-            industry_slides: industrySlides
+            industry: ind,
+            questions: cQuestions,
+            format_text: fText,
+            company_slides: cSlides,
+            industry_slides: iSlides,
+            experiences: compExps,
+            experience_stats: compStats
         };
 
         renderCompanyDataUI();
     }
 
     function renderCompanyDataUI() {
+        if (!currentCompanyData) return;
+
         landingDashboard.classList.add('hidden');
         companyContent.classList.remove('hidden');
 
@@ -280,272 +405,637 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCurrentView();
     }
 
-    // 5. Render View Based on State
     function renderCurrentView() {
-        if (!currentCompanyData) return;
-
         if (currentViewMode === 'basic') {
-            renderBasicView(currentCompanyData);
+            renderBasicView();
         } else {
-            renderAdvancedView(currentCompanyData);
+            renderAdvancedView();
         }
     }
 
-    // BASIC VIEW RENDERER
-    function renderBasicView(data) {
-        const questions = data.questions || [];
-        const slides = (data.company_slides || []).concat(data.industry_slides || []);
-        
-        basicStatQuestions.textContent = questions.length;
-        
-        const yearsSet = new Set(questions.map(q => q.year).filter(Boolean));
-        basicStatCycles.textContent = yearsSet.size;
-        
-        basicStatSlides.textContent = slides.length;
-        basicStatStatus.textContent = data.format_text ? "Available" : "N/A";
+    function renderBasicView() {
+        const qCount = currentCompanyData.questions ? currentCompanyData.questions.length : 0;
+        const slidesCount = currentCompanyData.company_slides ? currentCompanyData.company_slides.length : 0;
+        const hasFormat = !!currentCompanyData.format_text;
 
-        if (data.format_text && data.format_text.trim()) {
-            let snippet = data.format_text.trim();
-            if (snippet.length > 500) {
-                snippet = snippet.substring(0, 500) + "...";
-            }
-            basicOverviewText.textContent = snippet;
+        basicStatQuestions.textContent = qCount;
+        basicStatCycles.textContent = currentCompanyData.questions ? new Set(currentCompanyData.questions.map(q => q.year)).size : 0;
+        basicStatSlides.textContent = slidesCount;
+        basicStatStatus.textContent = hasFormat ? "Detailed" : "Standard";
+
+        if (hasFormat) {
             basicOverviewSection.classList.remove('hidden');
+            basicOverviewText.textContent = currentCompanyData.format_text;
         } else {
             basicOverviewSection.classList.add('hidden');
         }
 
-        if (questions.length > 0) {
+        if (qCount > 0) {
+            basicQuestionsSection.classList.remove('hidden');
             basicQuestionsContainer.innerHTML = '';
-            const top5 = questions.slice(0, 5);
-            
-            top5.forEach(q => {
-                const card = document.createElement('div');
-                card.className = 'question-card';
-
-                const qType = (q.question_type || 'General').toLowerCase();
-                let tagClass = 'tag-unknown';
-                if (qType.includes('gd')) tagClass = 'tag-gd';
-                else if (qType.includes('domain')) tagClass = 'tag-domain';
-                else if (qType.includes('behavioural') || qType.includes('situational')) tagClass = 'tag-behavioural';
-                else if (qType.includes('technical')) tagClass = 'tag-technical';
-                else if (qType.includes('hr')) tagClass = 'tag-hr';
-
-                card.innerHTML = `
+            const topQ = currentCompanyData.questions.slice(0, 5);
+            topQ.forEach(q => {
+                const item = document.createElement('div');
+                item.className = 'question-card mb-3';
+                item.innerHTML = `
                     <div class="question-meta">
-                        <span class="tag-base ${tagClass}">${escapeHtml(q.question_type)}</span>
-                        <span class="question-domain">${escapeHtml(q.domain || '')} (${escapeHtml(q.year || '')})</span>
+                        <span class="tag-base tag-${getCategoryTagClass(q.question_type)}">${q.question_type}</span>
+                        <span class="question-domain">${q.domain} &bull; ${q.year}</span>
                     </div>
                     <div class="question-text">${escapeHtml(q.question)}</div>
                 `;
-                basicQuestionsContainer.appendChild(card);
+                basicQuestionsContainer.appendChild(item);
             });
-            
-            basicQuestionsSection.classList.remove('hidden');
         } else {
             basicQuestionsSection.classList.add('hidden');
         }
     }
 
-    // ADVANCED VIEW RENDERER
-    function renderAdvancedView(data) {
-        if (data.questions && data.questions.length > 0) {
-            renderQuestions(data.questions);
-            advBtnQuestions.style.display = 'inline-flex';
-        } else {
-            advBtnQuestions.style.display = 'none';
-        }
-
-        if (data.format_text && data.format_text.trim()) {
-            formatContainer.textContent = data.format_text;
-            advBtnFormat.style.display = 'inline-flex';
-        } else {
-            advBtnFormat.style.display = 'none';
-        }
-
-        const hasCompanySlides = data.company_slides && data.company_slides.length > 0;
-        const hasIndustrySlides = data.industry_slides && data.industry_slides.length > 0;
-
-        if (hasCompanySlides || hasIndustrySlides) {
-            renderSlides(data.company_slides || [], data.industry_slides || [], data.industry);
-            advBtnSlides.style.display = 'inline-flex';
-        } else {
-            advBtnSlides.style.display = 'none';
-        }
-
-        if (data.questions && data.questions.length > 0) {
-            setAdvNavTab('adv-pane-questions', advBtnQuestions);
-        } else if (data.format_text && data.format_text.trim()) {
-            setAdvNavTab('adv-pane-format', advBtnFormat);
-        } else if (hasCompanySlides || hasIndustrySlides) {
-            setAdvNavTab('adv-pane-slides', advBtnSlides);
-        }
-    }
-
-    function renderQuestions(questions) {
+    function renderAdvancedView() {
+        // Questions Tab
         questionsContainer.innerHTML = '';
-
-        const byYear = {};
-        questions.forEach(q => {
-            const year = q.year || 'Unknown';
-            if (!byYear[year]) byYear[year] = [];
-            byYear[year].push(q);
-        });
-
-        const sortedYears = Object.keys(byYear).sort().reverse();
-
-        sortedYears.forEach(year => {
-            const yearQs = byYear[year];
-
-            const groupDiv = document.createElement('div');
-            groupDiv.className = 'year-group';
-
-            const headerDiv = document.createElement('div');
-            headerDiv.className = 'year-header';
-            headerDiv.innerHTML = `<span>🗓️ Recruitment Cycle: ${year} (${yearQs.length} Questions)</span> <span class="accordion-arrow">&#9660;</span>`;
-
-            const listDiv = document.createElement('div');
-            listDiv.className = 'year-questions-list';
-
-            headerDiv.addEventListener('click', () => {
-                const isHidden = listDiv.classList.toggle('hidden');
-                const arrow = headerDiv.querySelector('.accordion-arrow');
-                if (arrow) {
-                    arrow.innerHTML = isHidden ? '&#9654;' : '&#9660;';
-                }
+        if (currentCompanyData.questions && currentCompanyData.questions.length > 0) {
+            const byYear = {};
+            currentCompanyData.questions.forEach(q => {
+                if (!byYear[q.year]) byYear[q.year] = [];
+                byYear[q.year].push(q);
             });
 
-            yearQs.forEach(q => {
-                const card = document.createElement('div');
-                card.className = 'question-card';
+            Object.keys(byYear).sort().reverse().forEach(year => {
+                const group = document.createElement('div');
+                group.className = 'year-group';
+                
+                const header = document.createElement('div');
+                header.className = 'year-header';
+                header.innerHTML = `<span>📅 Batch Year: ${year}</span> <span>${byYear[year].length} questions ▼</span>`;
+                
+                const qList = document.createElement('div');
+                qList.className = 'year-questions-list';
+                
+                byYear[year].forEach(q => {
+                    const qCard = document.createElement('div');
+                    qCard.className = 'question-card';
+                    qCard.innerHTML = `
+                        <div class="question-meta">
+                            <span class="tag-base tag-${getCategoryTagClass(q.question_type)}">${q.question_type}</span>
+                            <span class="question-domain">${q.domain}</span>
+                        </div>
+                        <div class="question-text">${escapeHtml(q.question)}</div>
+                    `;
+                    qList.appendChild(qCard);
+                });
 
-                const qType = (q.question_type || 'General').toLowerCase();
-                let tagClass = 'tag-unknown';
-                if (qType.includes('gd')) tagClass = 'tag-gd';
-                else if (qType.includes('domain')) tagClass = 'tag-domain';
-                else if (qType.includes('behavioural') || qType.includes('situational')) tagClass = 'tag-behavioural';
-                else if (qType.includes('technical')) tagClass = 'tag-technical';
-                else if (qType.includes('hr')) tagClass = 'tag-hr';
-
-                card.innerHTML = `
-                    <div class="question-meta">
-                        <span class="tag-base ${tagClass}">${escapeHtml(q.question_type)}</span>
-                        <span class="question-domain">${escapeHtml(q.domain || '')}</span>
-                    </div>
-                    <div class="question-text">${escapeHtml(q.question)}</div>
-                `;
-                listDiv.appendChild(card);
+                header.addEventListener('click', () => qList.classList.toggle('hidden'));
+                
+                group.appendChild(header);
+                group.appendChild(qList);
+                questionsContainer.appendChild(group);
             });
+        } else {
+            questionsContainer.innerHTML = '<div class="format-card">No interview questions recorded for this company yet.</div>';
+        }
 
-            groupDiv.appendChild(headerDiv);
-            groupDiv.appendChild(listDiv);
-            questionsContainer.appendChild(groupDiv);
-        });
-    }
+        // Format Details Tab
+        formatContainer.innerHTML = '';
+        if (currentCompanyData.format_text) {
+            formatContainer.textContent = currentCompanyData.format_text;
+        } else {
+            formatContainer.textContent = "No specific interview format document recorded for this company.";
+        }
 
-    function renderSlides(companySlides, industrySlides, industryName) {
+        // Slides Tab
         companySlidesContainer.innerHTML = '';
+        if (currentCompanyData.company_slides && currentCompanyData.company_slides.length > 0) {
+            currentCompanyData.company_slides.forEach(s => {
+                const sCard = document.createElement('div');
+                sCard.className = 'slide-card';
+                sCard.innerHTML = `
+                    <div class="slide-header">Slide ${s.slide_number}: ${escapeHtml(s.slide_title)}</div>
+                    <div class="slide-text">${escapeHtml(s.slide_text)}</div>
+                `;
+                companySlidesContainer.appendChild(sCard);
+            });
+        } else {
+            companySlidesContainer.innerHTML = '<div class="format-card">No company presentation slides available.</div>';
+        }
+
         industrySlidesContainer.innerHTML = '';
-
-        if (companySlides.length > 0) {
-            tabBtnCompany.style.display = 'inline-block';
-            companySlides.sort((a, b) => a.slide_number - b.slide_number).forEach(s => {
-                const card = document.createElement('div');
-                card.className = 'slide-card';
-                card.innerHTML = `
-                    <div class="slide-header">Slide ${s.slide_number}: ${escapeHtml(s.slide_title)}</div>
+        if (currentCompanyData.industry_slides && currentCompanyData.industry_slides.length > 0) {
+            currentCompanyData.industry_slides.forEach(s => {
+                const sCard = document.createElement('div');
+                sCard.className = 'slide-card';
+                sCard.innerHTML = `
+                    <div class="slide-header">Sector Deck - Slide ${s.slide_number}: ${escapeHtml(s.slide_title)}</div>
                     <div class="slide-text">${escapeHtml(s.slide_text)}</div>
                 `;
-                companySlidesContainer.appendChild(card);
+                industrySlidesContainer.appendChild(sCard);
             });
         } else {
-            tabBtnCompany.style.display = 'none';
+            industrySlidesContainer.innerHTML = '<div class="format-card">No industry sector slides available.</div>';
+        }
+    }
+
+    function getCategoryTagClass(qType) {
+        if (!qType) return 'unknown';
+        const t = qType.toLowerCase();
+        if (t.includes('gd')) return 'gd';
+        if (t.includes('domain')) return 'domain';
+        if (t.includes('behavioural') || t.includes('situational')) return 'behavioural';
+        if (t.includes('technical')) return 'technical';
+        if (t.includes('hr') || t.includes('current')) return 'hr';
+        return 'unknown';
+    }
+
+    // =======================================================
+    // 6. INTERVIEW EXPERIENCES DATABASE CONTROLLER & VIEWS
+    // =======================================================
+    async function loadExperiencesData() {
+        if (isExperiencesLoaded) return;
+
+        try {
+            const [expRes, statsRes] = await Promise.all([
+                fetch('/api/experiences').catch(() => null),
+                fetch('/api/experiences/stats').catch(() => null)
+            ]);
+
+            if (expRes && expRes.ok) {
+                const data = await expRes.json();
+                experiencesList = data.experiences || [];
+            }
+            if (statsRes && statsRes.ok) {
+                experienceStatsData = await statsRes.json();
+            }
+        } catch (e) {
+            console.log("Experiences API not available, loading static JSON...");
         }
 
-        if (industrySlides.length > 0) {
-            tabBtnIndustry.style.display = 'inline-block';
-            industrySlides.sort((a, b) => a.slide_number - b.slide_number).forEach(s => {
-                const card = document.createElement('div');
-                card.className = 'slide-card';
-                card.innerHTML = `
-                    <div class="slide-header">Slide ${s.slide_number}: ${escapeHtml(s.slide_title)}</div>
-                    <div class="slide-text">${escapeHtml(s.slide_text)}</div>
+        // Static fallback for experiences
+        if (!experiencesList || experiencesList.length === 0) {
+            try {
+                const [expStatic, statsStatic] = await Promise.all([
+                    fetch('interview_experiences_data.json').catch(() => null),
+                    fetch('interview_experience_stats.json').catch(() => null)
+                ]);
+
+                if (expStatic && expStatic.ok) experiencesList = await expStatic.json();
+                if (statsStatic && statsStatic.ok) experienceStatsData = await statsStatic.json();
+            } catch (err) {
+                console.error("Error loading interview experiences static data:", err);
+            }
+        }
+
+        isExperiencesLoaded = true;
+
+        renderExperiencesHeroAnalytics();
+        populateExperienceFilters();
+        applyExperienceFilters();
+    }
+
+    // Render Landing Visual Summary Charts (Sheets 2 & 5)
+    function renderExperiencesHeroAnalytics() {
+        if (!experienceStatsData) return;
+
+        expStatTotal.textContent = (experienceStatsData.total_experiences || experiencesList.length).toLocaleString();
+        expStatCompanies.textContent = (experienceStatsData.total_companies || new Set(experiencesList.map(e => e.company)).size).toLocaleString();
+
+        const domainsCount = new Set(experiencesList.map(e => e.domain)).size;
+        expStatDomains.textContent = domainsCount;
+
+        // Render Sheet 2 Overall Bucket Frequency
+        if (overallBucketBarsContainer && experienceStatsData.overall_bucket_frequency) {
+            overallBucketBarsContainer.innerHTML = '';
+            experienceStatsData.overall_bucket_frequency.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'bucket-bar-item';
+
+                const fillClass = getBucketFillClass(item.bucket);
+                row.innerHTML = `
+                    <div class="bucket-bar-label">${escapeHtml(item.bucket)}</div>
+                    <div class="bar-track">
+                        <div class="bar-fill ${fillClass}" style="width: ${item.pct}%"></div>
+                    </div>
+                    <div class="bucket-bar-value">${item.pct}% (${item.count.toLocaleString()})</div>
                 `;
-                industrySlidesContainer.appendChild(card);
+                overallBucketBarsContainer.appendChild(row);
             });
+        }
+
+        // Render Sheet 5 Domain Cross-Tabulation Visual
+        if (domainTabsNavContainer && domainBucketContentContainer && experienceStatsData.domain_bucket_frequency) {
+            domainTabsNavContainer.innerHTML = '';
+            const domainList = experienceStatsData.domain_bucket_frequency;
+
+            domainList.forEach((dItem, idx) => {
+                const pill = document.createElement('button');
+                pill.className = `domain-tab-pill ${idx === 0 ? 'active' : ''}`;
+                pill.textContent = `${dItem.domain} (${dItem.total_responses})`;
+                pill.addEventListener('click', () => {
+                    document.querySelectorAll('.domain-tab-pill').forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                    renderDomainBucketDetails(dItem);
+                });
+                domainTabsNavContainer.appendChild(pill);
+            });
+
+            if (domainList.length > 0) {
+                renderDomainBucketDetails(domainList[0]);
+            }
+        }
+    }
+
+    function renderDomainBucketDetails(dItem) {
+        if (!domainBucketContentContainer || !dItem) return;
+
+        const total = dItem.total_responses || 1;
+        const buckets = [
+            { name: "Technical/Domain", count: dItem.technical, pct: round1((dItem.technical / total) * 100), fill: "fill-technical" },
+            { name: "Resume-based", count: dItem.resume, pct: round1((dItem.resume / total) * 100), fill: "fill-resume" },
+            { name: "HR/Behavioral", count: dItem.hr, pct: round1((dItem.hr / total) * 100), fill: "fill-hr" },
+            { name: "Case/Guesstimate", count: dItem.case, pct: round1((dItem.case / total) * 100), fill: "fill-case" },
+            { name: "Current Affairs/GK", count: dItem.gk, pct: round1((dItem.gk / total) * 100), fill: "fill-gk" },
+            { name: "Situational", count: dItem.situational, pct: round1((dItem.situational / total) * 100), fill: "fill-situational" }
+        ];
+
+        domainBucketContentContainer.innerHTML = `
+            <div style="font-weight: 700; color: #60a5fa; margin-bottom: 0.75rem; font-size: 0.95rem;">
+                Question Bucket Frequency for Domain: <span style="color:#ffffff;">${escapeHtml(dItem.domain)}</span> (${dItem.total_responses} Responses)
+            </div>
+            <div class="bucket-bars-grid">
+                ${buckets.map(b => `
+                    <div class="bucket-bar-item">
+                        <div class="bucket-bar-label">${b.name}</div>
+                        <div class="bar-track">
+                            <div class="bar-fill ${b.fill}" style="width: ${b.pct}%"></div>
+                        </div>
+                        <div class="bucket-bar-value">${b.pct}% (${b.count})</div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    function getBucketFillClass(bName) {
+        const b = bName.toLowerCase();
+        if (b.includes('technical')) return 'fill-technical';
+        if (b.includes('resume')) return 'fill-resume';
+        if (b.includes('hr')) return 'fill-hr';
+        if (b.includes('case')) return 'fill-case';
+        if (b.includes('gk') || b.includes('current')) return 'fill-gk';
+        if (b.includes('situational')) return 'fill-situational';
+        return 'fill-technical';
+    }
+
+    // Populate Filter Dropdowns
+    function populateExperienceFilters() {
+        // Companies
+        const companies = Array.from(new Set(experiencesList.map(e => e.company))).sort();
+        expFilterCompany.innerHTML = '<option value="">All Companies</option>';
+        companies.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c;
+            opt.textContent = c;
+            expFilterCompany.appendChild(opt);
+        });
+
+        // Domains
+        const domains = Array.from(new Set(experiencesList.map(e => e.domain))).sort();
+        expFilterDomain.innerHTML = '<option value="">All Domains</option>';
+        domains.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d;
+            opt.textContent = d;
+            expFilterDomain.appendChild(opt);
+        });
+
+        // Years
+        const years = Array.from(new Set(experiencesList.map(e => e.year))).sort();
+        expFilterYear.innerHTML = '<option value="">All Years</option>';
+        years.forEach(y => {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.textContent = y;
+            expFilterYear.appendChild(opt);
+        });
+
+        // Process Types
+        const processes = Array.from(new Set(experiencesList.map(e => e.process_type))).sort();
+        expFilterProcess.innerHTML = '<option value="">All Process Types</option>';
+        processes.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p;
+            opt.textContent = p;
+            expFilterProcess.appendChild(opt);
+        });
+    }
+
+    // Event Listeners for Filters
+    expFilterCompany.addEventListener('change', () => applyExperienceFilters());
+    expFilterDomain.addEventListener('change', () => applyExperienceFilters());
+    expFilterYear.addEventListener('change', () => applyExperienceFilters());
+    expFilterProcess.addEventListener('change', () => applyExperienceFilters());
+
+    expFilterSearch.addEventListener('input', () => {
+        clearTimeout(expDebounceTimer);
+        expDebounceTimer = setTimeout(() => applyExperienceFilters(), 250);
+    });
+
+    expClearSearch.addEventListener('click', () => {
+        expFilterSearch.value = '';
+        applyExperienceFilters();
+    });
+
+    expBtnReset.addEventListener('click', () => {
+        expFilterCompany.value = '';
+        expFilterDomain.value = '';
+        expFilterYear.value = '';
+        expFilterProcess.value = '';
+        expFilterSearch.value = '';
+        applyExperienceFilters();
+    });
+
+    expBtnLoadMore.addEventListener('click', () => {
+        displayedCardCount += 20;
+        renderExperienceCards();
+    });
+
+    // Apply Filter Logic
+    function applyExperienceFilters() {
+        const cVal = expFilterCompany.value.toLowerCase();
+        const dVal = expFilterDomain.value.toLowerCase();
+        const yVal = expFilterYear.value.toLowerCase();
+        const pVal = expFilterProcess.value.toLowerCase();
+        const sVal = expFilterSearch.value.trim().toLowerCase();
+
+        filteredExperiences = experiencesList.filter(exp => {
+            if (cVal && exp.company.toLowerCase() !== cVal) return false;
+            if (dVal && exp.domain.toLowerCase() !== dVal) return false;
+            if (yVal && exp.year.toLowerCase() !== yVal) return false;
+            if (pVal && exp.process_type.toLowerCase() !== pVal) return false;
+
+            if (sVal) {
+                const searchable = `${exp.company} ${exp.domain} ${exp.role_offered} ${exp.pre_process_tips} ${exp.gd_topics_tips} ${exp.interview_outline} ${exp.domain_questions} ${exp.hr_gk_questions} ${exp.prep_resources} ${exp.tips} ${exp.tech_skills} ${exp.dos_and_donts}`.toLowerCase();
+                if (!searchable.includes(sVal)) return false;
+            }
+            return true;
+        });
+
+        displayedCardCount = 20;
+        renderActiveFilterTags(cVal, dVal, yVal, pVal, sVal);
+        renderExperienceCards();
+    }
+
+    function renderActiveFilterTags(cVal, dVal, yVal, pVal, sVal) {
+        activeFilterTagsContainer.innerHTML = '';
+        const tags = [];
+        if (cVal) tags.push(`Co: ${expFilterCompany.value}`);
+        if (dVal) tags.push(`Domain: ${expFilterDomain.value}`);
+        if (yVal) tags.push(`Year: ${expFilterYear.value}`);
+        if (pVal) tags.push(`Process: ${expFilterProcess.value}`);
+        if (sVal) tags.push(`Keyword: "${sVal}"`);
+
+        tags.forEach(t => {
+            const pill = document.createElement('span');
+            pill.className = 'filter-tag-pill';
+            pill.textContent = t;
+            activeFilterTagsContainer.appendChild(pill);
+        });
+    }
+
+    // Render Experience Response Cards Grid
+    function renderExperienceCards() {
+        expShowingCount.textContent = filteredExperiences.length.toLocaleString();
+        expCardsContainer.innerHTML = '';
+
+        if (filteredExperiences.length === 0) {
+            expCardsContainer.innerHTML = `
+                <div class="format-card search-span-full" style="text-align: center; padding: 3rem;">
+                    <h3>No interview experiences match your selected filters.</h3>
+                    <p style="color: var(--text-muted); margin-top: 0.5rem;">Try broadening your filter criteria or clicking "Reset Filters".</p>
+                </div>
+            `;
+            expLoadMoreContainer.classList.add('hidden');
+            return;
+        }
+
+        const visibleItems = filteredExperiences.slice(0, displayedCardCount);
+
+        visibleItems.forEach(exp => {
+            const card = document.createElement('div');
+            card.className = 'experience-card';
+
+            // Lookup Company At-a-Glance Stats
+            const cStats = experienceStatsData && experienceStatsData.company_stats ? experienceStatsData.company_stats[exp.company] : null;
+            const avgRounds = cStats ? cStats.avg_rounds : (exp.interview_rounds || 2);
+            const gdPct = cStats ? cStats.gd_conducted_pct : (exp.gd_conducted === 'Yes' ? 100 : 0);
+            const buddyPct = cStats ? cStats.buddy_round_pct : (exp.buddy_round === 'Yes' ? 100 : 0);
+            const topBuckets = cStats && cStats.top_buckets ? cStats.top_buckets : exp.buckets;
+
+            const snippetText = exp.pre_process_tips || exp.interview_outline || exp.tips || exp.domain_questions || "Detailed interview experience record available. Click to read full candidate outline and GD topics.";
+
+            card.innerHTML = `
+                <div>
+                    <div class="exp-card-header">
+                        <div>
+                            <div class="exp-card-company">${escapeHtml(exp.company)}</div>
+                            <h3>${escapeHtml(exp.role_offered || 'Management Trainee / Role Offered')}</h3>
+                        </div>
+                        ${exp.converted ? `<span class="badge-converted-tag">Converted</span>` : ''}
+                    </div>
+
+                    <div class="meta-badges-row">
+                        <span class="badge-domain-tag">💼 ${escapeHtml(exp.domain)}</span>
+                        <span class="badge-year-tag">📅 ${escapeHtml(exp.year)}</span>
+                        <span class="badge-process-tag">🎯 ${escapeHtml(exp.process_type)}</span>
+                    </div>
+
+                    <!-- Company At-a-Glance Badges Bar -->
+                    <div class="at-a-glance-bar">
+                        <span class="glance-pill pill-rounds" title="Average Interview Rounds">🎯 Avg ${avgRounds} Rounds</span>
+                        <span class="glance-pill ${exp.gd_conducted === 'Yes' ? 'pill-gd-yes' : 'pill-gd-no'}">
+                            🗣️ GD: ${exp.gd_conducted === 'Yes' ? 'Yes' : 'No'}
+                        </span>
+                        <span class="glance-pill ${exp.buddy_round === 'Yes' ? 'pill-buddy-yes' : 'pill-buddy-no'}">
+                            👥 Buddy: ${exp.buddy_round === 'Yes' ? 'Yes' : 'No'}
+                        </span>
+                        ${topBuckets.slice(0, 2).map(b => `<span class="bucket-tag-pill">${escapeHtml(b)}</span>`).join('')}
+                    </div>
+
+                    <div class="exp-card-snippet">${escapeHtml(snippetText)}</div>
+                </div>
+
+                <div class="exp-card-footer">
+                    <button class="btn-read-exp" data-id="${exp.id}">
+                        <span class="material-symbols-outlined" style="font-size: 1.1rem;">visibility</span> Read Full Experience
+                    </button>
+                </div>
+            `;
+
+            card.querySelector('.btn-read-exp').addEventListener('click', () => openExperienceModal(exp));
+            expCardsContainer.appendChild(card);
+        });
+
+        if (displayedCardCount < filteredExperiences.length) {
+            expLoadMoreContainer.classList.remove('hidden');
         } else {
-            tabBtnIndustry.style.display = 'none';
-        }
-
-        if (companySlides.length > 0) {
-            switchDeckTab('company-slides-pane', tabBtnCompany);
-        } else if (industrySlides.length > 0) {
-            switchDeckTab('industry-slides-pane', tabBtnIndustry);
+            expLoadMoreContainer.classList.add('hidden');
         }
     }
 
-    function switchDeckTab(paneId, btnElem) {
-        document.querySelectorAll('.deck-tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.add('hidden'));
+    // 7. Drill-Down Experience Modal Controller
+    function openExperienceModal(exp) {
+        modalExpCompany.textContent = exp.company;
+        modalExpDomain.textContent = exp.domain;
+        modalExpYear.textContent = exp.year;
+        modalExpProcess.textContent = exp.process_type;
+        modalExpTitle.textContent = exp.role_offered || `Interview Experience #${exp.id}`;
 
-        btnElem.classList.add('active');
-        document.getElementById(paneId).classList.remove('hidden');
-    }
-
-    tabBtnCompany.addEventListener('click', () => switchDeckTab('company-slides-pane', tabBtnCompany));
-    tabBtnIndustry.addEventListener('click', () => switchDeckTab('industry-slides-pane', tabBtnIndustry));
-
-    function showMatchBanner(query, matched, score) {
-        matchBanner.classList.remove('hidden', 'success', 'warning');
-        if (score >= 55) {
-            matchBanner.classList.add('success');
-            matchBanner.innerHTML = `Matched query <strong>"${escapeHtml(query)}"</strong> to canonical company <strong>${escapeHtml(matched)}</strong> (Confidence: ${score.toFixed(1)}%)`;
+        if (exp.converted) {
+            modalExpConverted.classList.remove('hidden');
+            modalExpConverted.textContent = `Converted: ${exp.converted}`;
         } else {
-            matchBanner.classList.add('warning');
-            matchBanner.innerHTML = `Low confidence match for <strong>"${escapeHtml(query)}"</strong>. Displaying best result: <strong>${escapeHtml(matched)}</strong> (Confidence: ${score.toFixed(1)}%)`;
+            modalExpConverted.classList.add('hidden');
+        }
+
+        // Render Company At-a-Glance Summary in Modal
+        const cStats = experienceStatsData && experienceStatsData.company_stats ? experienceStatsData.company_stats[exp.company] : null;
+        if (cStats) {
+            modalCompanySummaryBox.classList.remove('hidden');
+            modalCompanySummaryBox.innerHTML = `
+                <div style="font-weight: 800; font-size: 1.05rem; color: #ffffff; margin-bottom: 0.5rem;">
+                    📊 Company Intelligence Summary: <span style="color:#60a5fa;">${escapeHtml(exp.company)}</span>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 1.25rem; font-size: 0.9rem; color: #cbd5e1;">
+                    <div>🎯 <strong>Avg Interview Rounds:</strong> ${cStats.avg_rounds} (Excl. HR)</div>
+                    <div>🗣️ <strong>GD Conducted:</strong> ${cStats.gd_conducted_count}/${cStats.total_experiences} (${cStats.gd_conducted_pct}%)</div>
+                    <div>👥 <strong>Buddy Round:</strong> ${cStats.buddy_round_count}/${cStats.total_experiences} (${cStats.buddy_round_pct}%)</div>
+                    <div>🏷️ <strong>Top Question Types:</strong> ${cStats.top_buckets.join(', ')}</div>
+                </div>
+            `;
+        } else {
+            modalCompanySummaryBox.classList.add('hidden');
+        }
+
+        // Fill modal section contents
+        setModalSectionText(modalExpPreProcess, 'box-pre-process', exp.pre_process_tips);
+        setModalSectionText(modalExpUg, 'box-ug', exp.ug_background);
+        setModalSectionText(modalExpCertifications, 'box-certifications', exp.certifications);
+        setModalSectionText(modalExpGdTopics, 'box-gd-details', exp.gd_topics_tips ? `GD Conducted: ${exp.gd_conducted}\nGD Duration: ${exp.gd_duration || 'N/A'}\n\n${exp.gd_topics_tips}` : null);
+        setModalSectionText(modalExpOutline, 'box-interview-outline', exp.interview_outline ? `Interview Rounds: ${exp.interview_rounds || 'N/A'}\nDuration Details: ${exp.no_interviews_duration || 'N/A'}\n\n${exp.interview_outline}` : null);
+        setModalSectionText(modalExpTechSkills, 'box-tech-skills', exp.tech_skills);
+        setModalSectionText(modalExpDomainQ, 'box-domain-q', exp.domain_questions);
+        setModalSectionText(modalExpHrQ, 'box-hr-q', exp.hr_gk_questions);
+        setModalSectionText(modalExpSituationalQ, 'box-situational-q', exp.situational_questions);
+        setModalSectionText(modalExpResources, 'box-resources', exp.prep_resources);
+        setModalSectionText(modalExpLookingFor, 'box-looking-for', exp.looking_for);
+        setModalSectionText(modalExpRightWrong, 'box-right-wrong', exp.right_wrong);
+        setModalSectionText(modalExpDosDonts, 'box-dos-donts', exp.dos_and_donts);
+        setModalSectionText(modalExpTips, 'box-tips', exp.tips || exp.additional_remarks);
+
+        // Reset modal tabs to first active tab
+        setModalTab('modal-tab-overview');
+
+        experienceModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function setModalSectionText(element, boxId, text) {
+        const box = document.getElementById(boxId);
+        if (text && text.trim()) {
+            element.textContent = text.trim();
+            if (box) box.classList.remove('hidden');
+        } else {
+            element.textContent = '';
+            if (box) box.classList.add('hidden');
         }
     }
 
-    function hideMatchBanner() {
-        matchBanner.classList.add('hidden');
+    // Modal Tabs Switcher
+    document.querySelectorAll('.modal-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.getAttribute('data-tab');
+            setModalTab(target);
+        });
+    });
+
+    function setModalTab(targetPaneId) {
+        document.querySelectorAll('.modal-tab-btn').forEach(btn => {
+            if (btn.getAttribute('data-tab') === targetPaneId) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        document.querySelectorAll('.modal-tab-pane').forEach(pane => {
+            if (pane.id === targetPaneId) {
+                pane.classList.remove('hidden');
+            } else {
+                pane.classList.add('hidden');
+            }
+        });
     }
 
+    function closeExperienceModal() {
+        experienceModal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    modalExpClose.addEventListener('click', closeExperienceModal);
+
+    experienceModal.addEventListener('click', (e) => {
+        if (e.target === experienceModal) closeExperienceModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !experienceModal.classList.contains('hidden')) {
+            closeExperienceModal();
+        }
+    });
+
+    // Helper Utility Functions
     function escapeHtml(str) {
         if (!str) return '';
         return String(str)
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
     }
 
+    function round1(val) {
+        return Math.round(val * 10) / 10;
+    }
+
+    // Search input listeners (Catalog Section)
     fuzzySearchInput.addEventListener('input', (e) => {
         const val = e.target.value;
-        clearSearchBtn.style.display = val ? 'inline' : 'none';
+        if (val) {
+            clearSearchBtn.style.display = 'block';
+        } else {
+            clearSearchBtn.style.display = 'none';
+        }
 
-        companySelect.value = "";
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
             handleFuzzySearch(val);
-        }, 250);
+        }, 300);
     });
 
     clearSearchBtn.addEventListener('click', () => {
-        fuzzySearchInput.value = "";
+        fuzzySearchInput.value = '';
         clearSearchBtn.style.display = 'none';
         hideMatchBanner();
-        companySelect.value = "";
-        loadCompanyDetails(null);
+        loadCompanyDetails('');
     });
 
     companySelect.addEventListener('change', (e) => {
         const val = e.target.value;
-        fuzzySearchInput.value = "";
+        fuzzySearchInput.value = '';
         clearSearchBtn.style.display = 'none';
         hideMatchBanner();
         loadCompanyDetails(val);
     });
 
+    // Initial Kickoff
     loadCatalog();
 });

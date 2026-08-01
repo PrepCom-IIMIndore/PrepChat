@@ -19,7 +19,7 @@
                 <span class="material-symbols-outlined logo-icon-symbol">school</span>
                 <div class="logo-text">
                     <h1>PrepChat</h1>
-                    <span class="badge-proxy">Backend Secured Proxy</span>
+                    <span class="badge-proxy" id="server-status-badge">Backend Secured Proxy</span>
                 </div>
             </div>
 
@@ -37,172 +37,433 @@
                 Institutional Placement Intelligence
             </div>
         </div>
+
+        <!-- Primary App Section Navigation Bar -->
+        <div class="main-nav-bar">
+            <button class="main-nav-btn active" id="nav-btn-catalog">
+                <span class="material-symbols-outlined nav-btn-icon">menu_book</span> Company Catalog & Decks
+            </button>
+            <button class="main-nav-btn" id="nav-btn-experiences">
+                <span class="material-symbols-outlined nav-btn-icon">work_history</span> Interview Experiences <span class="nav-badge">1,200+</span>
+            </button>
+        </div>
     </header>
 
     <!-- Main Container -->
     <main class="main-container">
 
-        <!-- Search Controls -->
-        <section class="search-card">
-            <div class="search-grid">
-                <div class="search-field-group">
-                    <label for="fuzzy-search-input">🔍 Fuzzy Search Company Name</label>
-                    <div class="input-wrapper">
-                        <input type="text" id="fuzzy-search-input" placeholder="e.g. EY, Ernst & Young, BCG, McKinsey, Amex..." autocomplete="off">
-                        <span class="search-clear-btn" id="clear-search-btn" title="Clear">&times;</span>
+        <!-- ======================================================= -->
+        <!-- SECTION 1: COMPANY CATALOG & DECKS                      -->
+        <!-- ======================================================= -->
+        <div id="section-catalog" class="app-section">
+            <!-- Search Controls -->
+            <section class="search-card">
+                <div class="search-grid">
+                    <div class="search-field-group">
+                        <label for="fuzzy-search-input">🔍 Fuzzy Search Company Name</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="fuzzy-search-input" placeholder="e.g. EY, Ernst & Young, BCG, McKinsey, Amex..." autocomplete="off">
+                            <span class="search-clear-btn" id="clear-search-btn" title="Clear">&times;</span>
+                        </div>
+                    </div>
+
+                    <div class="search-field-group">
+                        <label for="company-select">📋 Or Select From Company Catalog</label>
+                        <select id="company-select">
+                            <option value="">-- Choose a company --</option>
+                        </select>
                     </div>
                 </div>
+            </section>
 
-                <div class="search-field-group">
-                    <label for="company-select">📋 Or Select From Company Catalog</label>
-                    <select id="company-select">
-                        <option value="">-- Choose a company --</option>
-                    </select>
+            <!-- Match Info Banner -->
+            <div id="match-banner" class="match-banner hidden"></div>
+
+            <!-- Landing Dashboard (Initial State) -->
+            <div id="landing-dashboard" class="landing-dashboard">
+                <div class="landing-hero">
+                    <h2>Welcome to PrepChat</h2>
+                    <p>Select a company from the catalog or type a search query above to instantly retrieve interview questions, format guidelines, and presentation slide decks.</p>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-num" id="stat-questions">0</div>
+                            <div class="stat-label">Interview Questions</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-num" id="stat-companies">0</div>
+                            <div class="stat-label">Companies Tracked</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-num" id="stat-formats">0</div>
+                            <div class="stat-label">Process Formats</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-num" id="stat-slides">0</div>
+                            <div class="stat-label">Slide Chunks</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </section>
 
-        <!-- Match Info Banner -->
-        <div id="match-banner" class="match-banner hidden"></div>
+            <!-- Active Company Display Container -->
+            <div id="company-content" class="company-content hidden">
 
-        <!-- Landing Dashboard (Initial State) -->
-        <div id="landing-dashboard" class="landing-dashboard">
-            <div class="landing-hero">
-                <h2>Welcome to PrepChat</h2>
-                <p>Select a company from the catalog or type a search query above to instantly retrieve interview questions, format guidelines, and presentation slide decks.</p>
-                
-                <div class="stats-grid">
+                <!-- Company Header Info -->
+                <div class="company-header-banner">
+                    <div>
+                        <h2 id="display-company-name">Company Name</h2>
+                        <div class="company-sector-badge" id="display-sector-name">Sector: Other</div>
+                    </div>
+                    <div class="view-indicator-pill" id="current-view-pill">Showing Basic View</div>
+                </div>
+
+                <!-- ======================================================= -->
+                <!-- 1. BASIC VIEW LAYOUT (#view-basic)                      -->
+                <!-- ======================================================= -->
+                <div id="view-basic" class="view-pane">
+                    <!-- Bento Grid for Quick Metrics -->
+                    <div class="bento-metrics-grid mb-4">
+                        <div class="bento-card">
+                            <span class="material-symbols-outlined bento-icon">quiz</span>
+                            <div class="bento-num" id="basic-stat-questions">0</div>
+                            <div class="bento-label">Questions Asked</div>
+                        </div>
+                        <div class="bento-card">
+                            <span class="material-symbols-outlined bento-icon">calendar_month</span>
+                            <div class="bento-num" id="basic-stat-cycles">0</div>
+                            <div class="bento-label">Cycles Tracked</div>
+                        </div>
+                        <div class="bento-card">
+                            <span class="material-symbols-outlined bento-icon">slideshow</span>
+                            <div class="bento-num" id="basic-stat-slides">0</div>
+                            <div class="bento-label">Deck Slides</div>
+                        </div>
+                        <div class="bento-card">
+                            <span class="material-symbols-outlined bento-icon">format_list_bulleted</span>
+                            <div class="bento-num" id="basic-stat-status">Available</div>
+                            <div class="bento-label">Process Overview</div>
+                        </div>
+                    </div>
+
+                    <!-- Process Summary Overview Card -->
+                    <div id="basic-overview-section" class="academic-card mb-4 hidden">
+                        <div class="academic-card-header">
+                            <span class="material-symbols-outlined">summarize</span>
+                            <h3>Executive Process Overview</h3>
+                        </div>
+                        <div class="academic-card-body" id="basic-overview-text"></div>
+                    </div>
+
+                    <!-- Top Questions Preview Card -->
+                    <div id="basic-questions-section" class="academic-card mb-4 hidden">
+                        <div class="academic-card-header">
+                            <span class="material-symbols-outlined">star</span>
+                            <h3>Top Frequent Questions Preview</h3>
+                        </div>
+                        <div class="academic-card-body" id="basic-questions-container"></div>
+                    </div>
+                </div>
+
+                <!-- ======================================================= -->
+                <!-- 2. ADVANCED VIEW LAYOUT (#view-advanced)                -->
+                <!-- ======================================================= -->
+                <div id="view-advanced" class="view-pane hidden">
+
+                    <!-- Advanced Navigation Tabs -->
+                    <div class="advanced-nav-tabs">
+                        <button class="adv-tab-btn active" id="adv-btn-questions" data-target="adv-pane-questions">
+                            <span class="material-symbols-outlined">quiz</span> Previous Questions
+                        </button>
+                        <button class="adv-tab-btn" id="adv-btn-format" data-target="adv-pane-format">
+                            <span class="material-symbols-outlined">description</span> Interview Format Details
+                        </button>
+                        <button class="adv-tab-btn" id="adv-btn-slides" data-target="adv-pane-slides">
+                            <span class="material-symbols-outlined">present_to_all</span> Company & Sector Decks
+                        </button>
+                    </div>
+
+                    <div class="adv-tab-panes">
+                        <!-- Advanced Pane: Questions -->
+                        <div id="adv-pane-questions" class="adv-pane active">
+                            <div id="questions-container" class="questions-container"></div>
+                        </div>
+
+                        <!-- Advanced Pane: Format Details -->
+                        <div id="adv-pane-format" class="adv-pane hidden">
+                            <div id="format-container" class="format-container format-card"></div>
+                        </div>
+
+                        <!-- Advanced Pane: Decks -->
+                        <div id="adv-pane-slides" class="adv-pane hidden">
+                            <div class="deck-tabs-header">
+                                <button class="deck-tab-btn active" id="tab-btn-company" data-tab="company-slides-pane">🏢 Company Presentation Slides</button>
+                                <button class="deck-tab-btn" id="tab-btn-industry" data-tab="industry-slides-pane">📈 Industry Sector Slides</button>
+                            </div>
+
+                            <div class="deck-tabs-content">
+                                <div id="company-slides-pane" class="tab-pane active">
+                                    <div id="company-slides-container"></div>
+                                </div>
+                                <div id="industry-slides-pane" class="tab-pane hidden">
+                                    <div id="industry-slides-container"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- SECTION 2: INTERVIEW EXPERIENCES DATABASE                -->
+        <!-- ======================================================= -->
+        <div id="section-experiences" class="app-section hidden">
+            
+            <!-- Multi-Filter & Search Controls Card (Top Position) -->
+            <section class="exp-filter-card mb-4">
+                <div class="filter-card-header">
+                    <span class="material-symbols-outlined">filter_list</span>
+                    <h3>Filter & Search Interview Experiences</h3>
+                    <button class="btn-reset-filters" id="exp-btn-reset" title="Reset all filters">
+                        <span class="material-symbols-outlined">refresh</span> Reset Filters
+                    </button>
+                </div>
+
+                <div class="exp-filter-grid">
+                    <div class="exp-filter-group">
+                        <label for="exp-filter-company">🏢 Company</label>
+                        <select id="exp-filter-company">
+                            <option value="">All Companies</option>
+                        </select>
+                    </div>
+
+                    <div class="exp-filter-group">
+                        <label for="exp-filter-domain">💼 Domain</label>
+                        <select id="exp-filter-domain">
+                            <option value="">All Domains</option>
+                        </select>
+                    </div>
+
+                    <div class="exp-filter-group">
+                        <label for="exp-filter-year">📅 Year / Batch</label>
+                        <select id="exp-filter-year">
+                            <option value="">All Years</option>
+                        </select>
+                    </div>
+
+                    <div class="exp-filter-group">
+                        <label for="exp-filter-process">🎯 Process Type</label>
+                        <select id="exp-filter-process">
+                            <option value="">All Process Types</option>
+                        </select>
+                    </div>
+
+                    <div class="exp-filter-group search-span-full">
+                        <label for="exp-filter-search">🔍 Keyword Search (Tips, GD Topics, Questions, Roles...)</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="exp-filter-search" placeholder="Search keywords e.g. valuation, case, guesstimate, IoT, Python, conflict..." autocomplete="off">
+                            <span class="search-clear-btn" id="exp-clear-search" title="Clear">&times;</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Hero Landing Analytics Visual Banner -->
+            <div class="experiences-hero-card mb-4">
+                <div class="exp-hero-header">
+                    <div>
+                        <h2><span class="material-symbols-outlined hero-title-icon">school</span> IIM Indore Interview Experience Database</h2>
+                        <p class="hero-subtext">Real candidate transcripts, GD topics, round structures, and tribal preparation advice.</p>
+                    </div>
+                </div>
+
+                <!-- Hero Quick Stats Grid -->
+                <div class="stats-grid mb-4">
                     <div class="stat-card">
-                        <div class="stat-num" id="stat-questions">0</div>
-                        <div class="stat-label">Interview Questions</div>
+                        <div class="stat-num" id="exp-stat-total">1,202</div>
+                        <div class="stat-label">Student Experiences</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-num" id="stat-companies">0</div>
+                        <div class="stat-num" id="exp-stat-companies">556</div>
                         <div class="stat-label">Companies Tracked</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-num" id="stat-formats">0</div>
-                        <div class="stat-label">Process Formats</div>
+                        <div class="stat-num" id="exp-stat-domains">17</div>
+                        <div class="stat-label">Functional Domains</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-num" id="stat-slides">0</div>
-                        <div class="stat-label">Slide Chunks</div>
+                        <div class="stat-num" id="exp-stat-avg-rounds">2.0</div>
+                        <div class="stat-label">Avg Rounds (Excl HR)</div>
+                    </div>
+                </div>
+
+                <!-- Domain Question Types Breakdown Visual (Sheet 5) -->
+                <div class="visual-analytics-box">
+                    <div class="analytics-header">
+                        <span class="material-symbols-outlined icon">domain</span>
+                        <h3>Question Types Distribution Across Domains</h3>
+                        <span class="badge-tag">Domain Cross-Tabulation</span>
+                    </div>
+                    <div id="domain-tabs-nav" class="domain-tabs-nav">
+                        <!-- Domain Pills rendered dynamically -->
+                    </div>
+                    <div id="domain-bucket-content" class="domain-bucket-content">
+                        <!-- Domain breakdown rendered dynamically -->
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Active Company Display Container -->
-        <div id="company-content" class="company-content hidden">
-
-            <!-- Company Header Info -->
-            <div class="company-header-banner">
-                <div>
-                    <h2 id="display-company-name">Company Name</h2>
-                    <div class="company-sector-badge" id="display-sector-name">Sector: Other</div>
+            <!-- Results Summary Banner -->
+            <div class="results-bar-header mb-3">
+                <div class="results-count-text">
+                    Showing <strong id="exp-showing-count">0</strong> matching interview experiences
                 </div>
-                <div class="view-indicator-pill" id="current-view-pill">Showing Basic View</div>
+                <div id="active-filter-tags" class="active-filter-tags"></div>
             </div>
 
-            <!-- ======================================================= -->
-            <!-- 1. BASIC VIEW LAYOUT (#view-basic)                      -->
-            <!-- ======================================================= -->
-            <div id="view-basic" class="view-pane">
-                <!-- Bento Grid for Quick Metrics -->
-                <div class="bento-metrics-grid mb-4">
-                    <div class="bento-card">
-                        <span class="material-symbols-outlined bento-icon">quiz</span>
-                        <div class="bento-num" id="basic-stat-questions">0</div>
-                        <div class="bento-label">Questions Asked</div>
-                    </div>
-                    <div class="bento-card">
-                        <span class="material-symbols-outlined bento-icon">calendar_month</span>
-                        <div class="bento-num" id="basic-stat-cycles">0</div>
-                        <div class="bento-label">Cycles Tracked</div>
-                    </div>
-                    <div class="bento-card">
-                        <span class="material-symbols-outlined bento-icon">slideshow</span>
-                        <div class="bento-num" id="basic-stat-slides">0</div>
-                        <div class="bento-label">Deck Slides</div>
-                    </div>
-                    <div class="bento-card">
-                        <span class="material-symbols-outlined bento-icon">format_list_bulleted</span>
-                        <div class="bento-num" id="basic-stat-status">Available</div>
-                        <div class="bento-label">Process Overview</div>
-                    </div>
-                </div>
-
-                <!-- Process Summary Overview Card -->
-                <div id="basic-overview-section" class="academic-card mb-4 hidden">
-                    <div class="academic-card-header">
-                        <span class="material-symbols-outlined">summarize</span>
-                        <h3>Executive Process Overview</h3>
-                    </div>
-                    <div class="academic-card-body" id="basic-overview-text"></div>
-                </div>
-
-                <!-- Top Questions Preview Card -->
-                <div id="basic-questions-section" class="academic-card mb-4 hidden">
-                    <div class="academic-card-header">
-                        <span class="material-symbols-outlined">star</span>
-                        <h3>Top Frequent Questions Preview</h3>
-                    </div>
-                    <div class="academic-card-body" id="basic-questions-container"></div>
-                </div>
+            <!-- Experience Card Grid Container -->
+            <div id="exp-cards-container" class="exp-cards-grid">
+                <!-- Rendered dynamically by app.js -->
             </div>
 
-            <!-- ======================================================= -->
-            <!-- 2. ADVANCED VIEW LAYOUT (#view-advanced)                -->
-            <!-- ======================================================= -->
-            <div id="view-advanced" class="view-pane hidden">
-
-                <!-- Advanced Navigation Tabs -->
-                <div class="advanced-nav-tabs">
-                    <button class="adv-tab-btn active" id="adv-btn-questions" data-target="adv-pane-questions">
-                        <span class="material-symbols-outlined">quiz</span> Previous Questions
-                    </button>
-                    <button class="adv-tab-btn" id="adv-btn-format" data-target="adv-pane-format">
-                        <span class="material-symbols-outlined">description</span> Interview Format Details
-                    </button>
-                    <button class="adv-tab-btn" id="adv-btn-slides" data-target="adv-pane-slides">
-                        <span class="material-symbols-outlined">present_to_all</span> Company & Sector Decks
-                    </button>
-                </div>
-
-                <div class="adv-tab-panes">
-                    <!-- Advanced Pane: Questions -->
-                    <div id="adv-pane-questions" class="adv-pane active">
-                        <div id="questions-container" class="questions-container"></div>
-                    </div>
-
-                    <!-- Advanced Pane: Format Details -->
-                    <div id="adv-pane-format" class="adv-pane hidden">
-                        <div id="format-container" class="format-container format-card"></div>
-                    </div>
-
-                    <!-- Advanced Pane: Decks -->
-                    <div id="adv-pane-slides" class="adv-pane hidden">
-                        <div class="deck-tabs-header">
-                            <button class="deck-tab-btn active" id="tab-btn-company" data-tab="company-slides-pane">🏢 Company Presentation Slides</button>
-                            <button class="deck-tab-btn" id="tab-btn-industry" data-tab="industry-slides-pane">📈 Industry Sector Slides</button>
-                        </div>
-
-                        <div class="deck-tabs-content">
-                            <div id="company-slides-pane" class="tab-pane active">
-                                <div id="company-slides-container"></div>
-                            </div>
-                            <div id="industry-slides-pane" class="tab-pane hidden">
-                                <div id="industry-slides-container"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+            <!-- Pagination / Load More Controls -->
+            <div id="exp-load-more-container" class="load-more-container mt-4 hidden">
+                <button class="btn-load-more" id="exp-btn-load-more">
+                    Load More Experiences
+                </button>
             </div>
-
         </div>
 
     </main>
+
+    <!-- ======================================================= -->
+    <!-- DRILL-DOWN EXPERIENCE MODAL DIALOG (#experience-modal)   -->
+    <!-- ======================================================= -->
+    <div id="experience-modal" class="modal-overlay hidden" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <div class="modal-title-area">
+                    <div class="modal-meta-pills">
+                        <span class="badge-company-tag" id="modal-exp-company">Company Name</span>
+                        <span class="badge-domain-tag" id="modal-exp-domain">Domain</span>
+                        <span class="badge-year-tag" id="modal-exp-year">Year</span>
+                        <span class="badge-process-tag" id="modal-exp-process">Process</span>
+                        <span class="badge-converted-tag hidden" id="modal-exp-converted">Converted</span>
+                    </div>
+                    <h3 id="modal-exp-title">Role / Profile Offered</h3>
+                </div>
+                <button class="modal-close-btn" id="modal-exp-close" title="Close dialog">&times;</button>
+            </div>
+
+            <div class="modal-nav-tabs">
+                <button class="modal-tab-btn active" data-tab="modal-tab-overview">
+                    <span class="material-symbols-outlined">info</span> Process Overview & At-a-Glance
+                </button>
+                <button class="modal-tab-btn" data-tab="modal-tab-gd">
+                    <span class="material-symbols-outlined">forum</span> GD & Interview Structure
+                </button>
+                <button class="modal-tab-btn" data-tab="modal-tab-questions">
+                    <span class="material-symbols-outlined">quiz</span> Questions Asked
+                </button>
+                <button class="modal-tab-btn" data-tab="modal-tab-tips">
+                    <span class="material-symbols-outlined">lightbulb</span> Strategy, Do's & Don'ts
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Modal Tab 1: Overview & At-a-Glance -->
+                <div id="modal-tab-overview" class="modal-tab-pane active">
+                    <!-- Company At-a-Glance Summary Card -->
+                    <div class="company-summary-card mb-4" id="modal-company-summary-box">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <div class="modal-section-box mb-3" id="box-pre-process">
+                        <h4><span class="material-symbols-outlined">event_note</span> Pre-Process Details & Selection Tips</h4>
+                        <div class="modal-text-content" id="modal-exp-pre-process"></div>
+                    </div>
+
+                    <div class="modal-grid-2">
+                        <div class="modal-section-box" id="box-ug">
+                            <h4><span class="material-symbols-outlined">school</span> UG Academic Background</h4>
+                            <div class="modal-text-content" id="modal-exp-ug"></div>
+                        </div>
+                        <div class="modal-section-box" id="box-certifications">
+                            <h4><span class="material-symbols-outlined">verified</span> Professional Certifications</h4>
+                            <div class="modal-text-content" id="modal-exp-certifications"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Tab 2: GD & Interview Structure -->
+                <div id="modal-tab-gd" class="modal-tab-pane hidden">
+                    <div class="modal-section-box mb-3" id="box-gd-details">
+                        <h4><span class="material-symbols-outlined">groups</span> Group Discussion (GD) Topics & Tips</h4>
+                        <div class="modal-text-content" id="modal-exp-gd-topics"></div>
+                    </div>
+
+                    <div class="modal-section-box" id="box-interview-outline">
+                        <h4><span class="material-symbols-outlined">format_list_numbered</span> Outline of Interview Rounds</h4>
+                        <div class="modal-text-content" id="modal-exp-outline"></div>
+                    </div>
+                </div>
+
+                <!-- Modal Tab 3: Questions Asked -->
+                <div id="modal-tab-questions" class="modal-tab-pane hidden">
+                    <div class="modal-section-box mb-3" id="box-tech-skills">
+                        <h4><span class="material-symbols-outlined">build</span> Technical Skills Assessed</h4>
+                        <div class="modal-text-content" id="modal-exp-tech-skills"></div>
+                    </div>
+
+                    <div class="modal-section-box mb-3" id="box-domain-q">
+                        <h4><span class="material-symbols-outlined">domain</span> Domain Specific Questions</h4>
+                        <div class="modal-text-content" id="modal-exp-domain-q"></div>
+                    </div>
+
+                    <div class="modal-section-box mb-3" id="box-hr-q">
+                        <h4><span class="material-symbols-outlined">record_voice_over</span> HR & Current Affairs Questions</h4>
+                        <div class="modal-text-content" id="modal-exp-hr-q"></div>
+                    </div>
+
+                    <div class="modal-section-box" id="box-situational-q">
+                        <h4><span class="material-symbols-outlined">psychology</span> Situational & Behavioural Questions</h4>
+                        <div class="modal-text-content" id="modal-exp-situational-q"></div>
+                    </div>
+                </div>
+
+                <!-- Modal Tab 4: Strategy, Do's & Don'ts -->
+                <div id="modal-tab-tips" class="modal-tab-pane hidden">
+                    <div class="modal-section-box mb-3" id="box-resources">
+                        <h4><span class="material-symbols-outlined">menu_book</span> Resources & Prep Methods That Helped</h4>
+                        <div class="modal-text-content" id="modal-exp-resources"></div>
+                    </div>
+
+                    <div class="modal-section-box mb-3" id="box-looking-for">
+                        <h4><span class="material-symbols-outlined">search</span> What the Interviewers Were Looking For</h4>
+                        <div class="modal-text-content" id="modal-exp-looking-for"></div>
+                    </div>
+
+                    <div class="modal-section-box mb-3" id="box-right-wrong">
+                        <h4><span class="material-symbols-outlined">thumbs_up_down</span> What Went Right / Wrong</h4>
+                        <div class="modal-text-content" id="modal-exp-right-wrong"></div>
+                    </div>
+
+                    <div class="modal-section-box mb-3" id="box-dos-donts">
+                        <h4><span class="material-symbols-outlined">gavel</span> Do's & Don'ts / Special Preparation</h4>
+                        <div class="modal-text-content" id="modal-exp-dos-donts"></div>
+                    </div>
+
+                    <div class="modal-section-box" id="box-tips">
+                        <h4><span class="material-symbols-outlined">auto_awesome</span> Key Tips & Additional Remarks</h4>
+                        <div class="modal-text-content" id="modal-exp-tips"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="app-footer">
