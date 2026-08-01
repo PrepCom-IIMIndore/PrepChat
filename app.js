@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalExpTips = document.getElementById('modal-exp-tips');
 
     // App State
-    let currentAppSection = 'catalog'; // 'catalog' | 'experiences'
+    let currentAppSection = 'experiences'; // 'experiences' | 'catalog'
     let currentViewMode = 'basic'; // 'basic' | 'advanced'
     let currentCompanyData = null;
     let debounceTimer = null;
@@ -1058,4 +1058,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial Kickoff
     loadCatalog();
+    loadExperiencesData();
 });
