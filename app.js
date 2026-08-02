@@ -690,8 +690,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 questionsContainer.appendChild(group);
             });
         }
-            questionsContainer.innerHTML = '<div class="format-card">No interview questions recorded for this company yet.</div>';
-        }
 
         // Format Details Tab
         formatContainer.innerHTML = '';
