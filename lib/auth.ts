@@ -1,6 +1,6 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import { checkEmailAccess } from "@/lib/accessControl";
+import { checkEmailAccessAsync } from "@/lib/accessControl";
 
 const HOSTED_DOMAIN = process.env.HOSTED_DOMAIN || "iimidr.ac.in";
 
@@ -37,8 +37,8 @@ export const authOptions: NextAuthOptions = {
         return `/auth/error?error=AccessRestricted&email=${encodeURIComponent(email)}`;
       }
 
-      // Check Server-Side Email Access Control (Blocklist & Whitelist)
-      const accessCheck = checkEmailAccess(email);
+      // Check Server-Side Email Access Control (Blocklist & Whitelist) asynchronously
+      const accessCheck = await checkEmailAccessAsync(email);
       if (!accessCheck.allowed) {
         return `/auth/error?error=BlockedOrRestricted&email=${encodeURIComponent(email)}&reason=${encodeURIComponent(accessCheck.reason || "")}`;
       }

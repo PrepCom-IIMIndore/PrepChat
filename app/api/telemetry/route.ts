@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import fs from "fs";
 import path from "path";
 import {
-  getAccessControlState,
+  getAccessControlStateAsync,
   blockEmail,
   unblockEmail,
   allowEmail,
@@ -36,12 +36,61 @@ export interface TelemetryUser {
   };
 }
 
-function loadTelemetryDb(): { [email: string]: TelemetryUser } {
+let telemetryCache: { [email: string]: TelemetryUser } | null = null;
+
+async function fetchTelemetryFromCloudKV(): Promise<{ [email: string]: TelemetryUser } | null> {
+  const kvUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  const kvToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  if (!kvUrl || !kvToken) return null;
+
+  try {
+    const res = await fetch(`${kvUrl}/get/user_activity`, {
+      headers: { Authorization: `Bearer ${kvToken}` },
+      cache: "no-store"
+    });
+    if (res.ok) {
+      const json = await res.json();
+      if (json.result) {
+        const parsed = typeof json.result === "string" ? JSON.parse(json.result) : json.result;
+        return parsed;
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
+async function saveTelemetryToCloudKV(db: { [email: string]: TelemetryUser }): Promise<boolean> {
+  const kvUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  const kvToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  if (!kvUrl || !kvToken) return false;
+
+  try {
+    const res = await fetch(`${kvUrl}/set/user_activity`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${kvToken}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(JSON.stringify(db))
+    });
+    return res.ok;
+  } catch (e) {}
+  return false;
+}
+
+function loadTelemetryDbFromFile(): { [email: string]: TelemetryUser } {
+  if (telemetryCache) return telemetryCache;
+
   try {
     if (fs.existsSync(TMP_USER_FILE)) {
       const data = fs.readFileSync(TMP_USER_FILE, "utf-8");
       const parsed = JSON.parse(data);
-      if (parsed && typeof parsed === "object") return parsed;
+      if (parsed && typeof parsed === "object") {
+        telemetryCache = parsed;
+        return parsed;
+      }
     }
   } catch (e) {}
 
@@ -49,14 +98,19 @@ function loadTelemetryDb(): { [email: string]: TelemetryUser } {
     if (fs.existsSync(LOCAL_USER_FILE)) {
       const data = fs.readFileSync(LOCAL_USER_FILE, "utf-8");
       const parsed = JSON.parse(data);
-      if (parsed && typeof parsed === "object") return parsed;
+      if (parsed && typeof parsed === "object") {
+        telemetryCache = parsed;
+        return parsed;
+      }
     }
   } catch (e) {}
 
+  telemetryCache = {};
   return {};
 }
 
-function saveTelemetryDb(db: { [email: string]: TelemetryUser }) {
+function saveTelemetryDbToFile(db: { [email: string]: TelemetryUser }) {
+  telemetryCache = db;
   const jsonStr = JSON.stringify(db, null, 2);
 
   try {
@@ -66,6 +120,20 @@ function saveTelemetryDb(db: { [email: string]: TelemetryUser }) {
   try {
     fs.writeFileSync(LOCAL_USER_FILE, jsonStr, "utf-8");
   } catch (e) {}
+}
+
+async function getTelemetryDbAsync(): Promise<{ [email: string]: TelemetryUser }> {
+  const cloudData = await fetchTelemetryFromCloudKV();
+  if (cloudData) {
+    telemetryCache = cloudData;
+    return cloudData;
+  }
+  return loadTelemetryDbFromFile();
+}
+
+async function persistTelemetryDb(db: { [email: string]: TelemetryUser }) {
+  saveTelemetryDbToFile(db);
+  await saveTelemetryToCloudKV(db);
 }
 
 export async function GET() {
@@ -82,8 +150,8 @@ export async function GET() {
     return NextResponse.json({ error: "Access Denied: Telemetry monitoring is restricted exclusively to prepcom@iimidr.ac.in" }, { status: 403 });
   }
 
-  const telemetryDb = loadTelemetryDb();
-  const accessControlState = getAccessControlState();
+  const telemetryDb = await getTelemetryDbAsync();
+  const accessControlState = await getAccessControlStateAsync();
   const blockedSet = new Set((accessControlState.blockedEmails || []).map(e => e.toLowerCase()));
 
   const userList = Object.values(telemetryDb);
@@ -97,7 +165,6 @@ export async function GET() {
   const avgTimeSecondsPerUser = totalUsers > 0 ? Math.round(totalTimeSeconds / totalUsers) : 0;
   const avgTimeMinutesPerUser = (avgTimeSecondsPerUser / 60).toFixed(1);
 
-  // Total Unique Companies Visited across all users
   const allCompaniesVisitedSet = new Set<string>();
   userList.forEach(u => {
     (u.companies_visited || []).forEach(c => allCompaniesVisitedSet.add(c));
@@ -105,25 +172,20 @@ export async function GET() {
 
   const avgCompaniesPerUser = totalUsers > 0 ? (Array.from(allCompaniesVisitedSet).length / totalUsers).toFixed(1) : "0.0";
 
-  // Daily Aggregated Trends Calculation (Past 7 Days)
   const dailyMap: { [date: string]: { users: Set<string>; total_time_sec: number; companies: Set<string> } } = {};
   
   const today = new Date();
   for (let i = 6; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
-    const dateKey = d.toISOString().split("T")[0]; // YYYY-MM-DD
-    const dateDisplay = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    const dateKey = d.toISOString().split("T")[0];
     dailyMap[dateKey] = { users: new Set(), total_time_sec: 0, companies: new Set() };
   }
 
-  // Populate daily stats from user activities
   userList.forEach(u => {
     if (u.daily_stats) {
       Object.keys(u.daily_stats).forEach(dateKey => {
         if (!dailyMap[dateKey]) {
-          const d = new Date(dateKey);
-          const dateDisplay = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
           dailyMap[dateKey] = { users: new Set(), total_time_sec: 0, companies: new Set() };
         }
         const ds = u.daily_stats![dateKey];
@@ -132,7 +194,6 @@ export async function GET() {
         (ds.companies || []).forEach(c => dailyMap[dateKey].companies.add(c));
       });
     } else {
-      // Fallback: assign current date if no daily_stats struct exists
       const dateKey = new Date().toISOString().split("T")[0];
       if (!dailyMap[dateKey]) {
         dailyMap[dateKey] = { users: new Set(), total_time_sec: 0, companies: new Set() };
@@ -205,52 +266,52 @@ export async function POST(request: Request) {
   const email = session.user.email.toLowerCase().trim();
   const role = (session.user as any)?.role || "user";
   const nowStr = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
-  const todayKey = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+  const todayKey = new Date().toISOString().split("T")[0];
 
   try {
     const body = await request.json().catch(() => ({}));
     const action = body.action || "heartbeat";
 
-    const telemetryDb = loadTelemetryDb();
-    const accessControlState = getAccessControlState();
+    const telemetryDb = await getTelemetryDbAsync();
+    const accessControlState = await getAccessControlStateAsync();
     const blockedSet = new Set((accessControlState.blockedEmails || []).map(e => e.toLowerCase()));
 
     // ADMIN MANAGEMENT ACTIONS (RESTRICTED TO prepcom@iimidr.ac.in)
     if (role === "admin" || email.startsWith("prepcom")) {
       if (action === "block_email" && body.targetEmail) {
         const parsed = parseEmails(body.targetEmail);
-        blockEmail(body.targetEmail);
+        await blockEmail(body.targetEmail);
         parsed.forEach(e => {
           if (telemetryDb[e]) telemetryDb[e].status = "Blocked";
         });
-        saveTelemetryDb(telemetryDb);
+        await persistTelemetryDb(telemetryDb);
         return NextResponse.json({ success: true, message: `Blocked ${parsed.length} email(s): ${parsed.join(", ")}` });
       }
 
       if (action === "unblock_email" && body.targetEmail) {
         const parsed = parseEmails(body.targetEmail);
-        unblockEmail(body.targetEmail);
+        await unblockEmail(body.targetEmail);
         parsed.forEach(e => {
           if (telemetryDb[e]) telemetryDb[e].status = "Active";
         });
-        saveTelemetryDb(telemetryDb);
+        await persistTelemetryDb(telemetryDb);
         return NextResponse.json({ success: true, message: `Unblocked ${parsed.length} email(s)` });
       }
 
       if (action === "allow_email" && body.targetEmail) {
         const parsed = parseEmails(body.targetEmail);
-        allowEmail(body.targetEmail);
+        await allowEmail(body.targetEmail);
         return NextResponse.json({ success: true, message: `Added ${parsed.length} email(s) to allowed list` });
       }
 
       if (action === "remove_allowed_email" && body.targetEmail) {
         const parsed = parseEmails(body.targetEmail);
-        removeAllowedEmail(body.targetEmail);
+        await removeAllowedEmail(body.targetEmail);
         return NextResponse.json({ success: true, message: `Removed ${parsed.length} email(s) from allowed list` });
       }
 
       if (action === "toggle_whitelist") {
-        setWhitelistMode(body.enabled === true);
+        await setWhitelistMode(body.enabled === true);
         return NextResponse.json({ success: true, isWhitelistMode: body.enabled === true });
       }
     }
@@ -305,7 +366,7 @@ export async function POST(request: Request) {
       }
     }
 
-    saveTelemetryDb(telemetryDb);
+    await persistTelemetryDb(telemetryDb);
     return NextResponse.json({ success: true, user: telemetryDb[email] });
   } catch (e) {
     return NextResponse.json({ error: "Failed to record telemetry action" }, { status: 500 });
