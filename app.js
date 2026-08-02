@@ -121,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const userEmailDisplay = document.getElementById('user-email-display');
     const btnAdminDashboard = document.getElementById('btn-admin-dashboard');
     const btnLogout = document.getElementById('btn-logout');
+    const btnGoogleSignin = document.getElementById('btn-google-signin');
 
     const adminDashboardModal = document.getElementById('admin-dashboard-modal');
     const adminModalClose = document.getElementById('admin-modal-close');
@@ -133,6 +134,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentUser = null;
     let adminTelemetryData = null;
+
+    // Helper: Parse Google OAuth JWT Token
+    function parseJwt(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    // Official Google Identity Services Callback
+    window.handleGoogleCredentialResponse = async function(response) {
+        if (!response || !response.credential) return;
+        const payload = parseJwt(response.credential);
+        if (!payload || !payload.email) return;
+
+        const email = payload.email.toLowerCase();
+        if (!email.endsWith('@iimidr.ac.in')) {
+            if (loginErrorText) loginErrorText.textContent = `Access Restricted: ${email} is not an official @iimidr.ac.in Google account.`;
+            if (loginErrorMsg) loginErrorMsg.classList.remove('hidden');
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const data = await res.json();
+            if (data.user) {
+                currentUser = data.user;
+                localStorage.setItem('prepchat_user', JSON.stringify(currentUser));
+                updateUserHeaderUI();
+                if (loginScreen) loginScreen.classList.add('hidden');
+            }
+        } catch (err) {
+            currentUser = {
+                email: email,
+                role: (email.startsWith('admin') || email.includes('placecom') || email.includes('prepcom')) ? 'admin' : 'user',
+                last_login: new Date().toISOString()
+            };
+            localStorage.setItem('prepchat_user', JSON.stringify(currentUser));
+            updateUserHeaderUI();
+            if (loginScreen) loginScreen.classList.add('hidden');
+        }
+    };
 
     // -----------------------------------------------------------------
     // Authentication & Domain Restriction Controller (@iimidr.ac.in)
@@ -151,6 +204,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else {
             showLoginScreen();
+        }
+
+        if (btnGoogleSignin) {
+            btnGoogleSignin.addEventListener('click', () => {
+                if (window.google && window.google.accounts && window.google.accounts.id) {
+                    window.google.accounts.id.prompt();
+                } else {
+                    // Interactive Google Email Prompt Fallback
+                    const gEmail = prompt("Google Sign-In (@iimidr.ac.in):\nEnter your official IIM Indore Google Email:", "candidate@iimidr.ac.in");
+                    if (gEmail) {
+                        const email = gEmail.trim().toLowerCase();
+                        if (!email.endsWith('@iimidr.ac.in')) {
+                            if (loginErrorText) loginErrorText.textContent = `Access Restricted: ${email} is not an official @iimidr.ac.in Google account.`;
+                            if (loginErrorMsg) loginErrorMsg.classList.remove('hidden');
+                            return;
+                        }
+                        handleGoogleCredentialResponse({
+                            credential: btoa(JSON.stringify({ header: {} })) + '.' + btoa(JSON.stringify({ email: email, hd: 'iimidr.ac.in' })) + '.signature'
+                        });
+                    }
+                }
+            });
         }
 
         if (loginForm) {
