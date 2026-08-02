@@ -1,9 +1,17 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import {
+  blockedEmails,
+  allowedEmails,
+  isWhitelistMode,
+  blockEmail,
+  unblockEmail,
+  allowEmail,
+  removeAllowedEmail,
+  setWhitelistMode
+} from "@/lib/accessControl";
 
-// In-Memory Telemetry Database for Serverless Execution
-// Stores user session start, end, and duration stats
 const telemetryDb: {
   [email: string]: {
     email: string;
@@ -27,7 +35,6 @@ export async function GET() {
   const email = session.user.email.toLowerCase().trim();
   const role = (session.user as any)?.role || "user";
 
-  // STRICT AUTHORIZATION: ONLY prepcom@iimidr.ac.in OR ADMIN ROLE HAS ACCESS TO TELEMETRY
   if (role !== "admin" && !email.startsWith("prepcom")) {
     return NextResponse.json({ error: "Access Denied: Telemetry monitoring is restricted exclusively to prepcom@iimidr.ac.in" }, { status: 403 });
   }
@@ -40,7 +47,6 @@ export async function GET() {
   const totalActions = userList.reduce((acc, u) => acc + (u.activity_count || 0), 0);
   const totalTimeSeconds = userList.reduce((acc, u) => acc + (u.total_time_seconds || 0), 0);
 
-  // Calculate Average Time per User
   const avgTimeSecondsPerUser = totalUsers > 0 ? Math.round(totalTimeSeconds / totalUsers) : 0;
   const avgTimeMinutesPerUser = (avgTimeSecondsPerUser / 60).toFixed(1);
 
@@ -48,6 +54,7 @@ export async function GET() {
     const mins = Math.max(1, Math.round((u.total_time_seconds || 0) / 60));
     return {
       ...u,
+      is_blocked: blockedEmails.has(u.email),
       duration_display: `${mins} min${mins === 1 ? "" : "s"}`,
       avg_time_display: `${mins} mins`
     };
@@ -63,6 +70,11 @@ export async function GET() {
       avg_time_minutes_per_user: avgTimeMinutesPerUser,
       avg_time_display: `${avgTimeMinutesPerUser} mins / user`
     },
+    accessControl: {
+      blockedEmails: Array.from(blockedEmails),
+      allowedEmails: Array.from(allowedEmails),
+      isWhitelistMode: isWhitelistMode
+    },
     users: formattedUserList
   });
 }
@@ -77,12 +89,46 @@ export async function POST(request: Request) {
   const email = session.user.email.toLowerCase().trim();
   const role = (session.user as any)?.role || "user";
   const nowStr = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
-  const nowTs = Math.floor(Date.now() / 1000);
 
   try {
     const body = await request.json().catch(() => ({}));
     const action = body.action || "heartbeat";
 
+    // ADMIN MANAGEMENT ACTIONS (RESTRICED TO prepcom@iimidr.ac.in)
+    if (role === "admin" || email.startsWith("prepcom")) {
+      if (action === "block_email" && body.targetEmail) {
+        blockEmail(body.targetEmail);
+        if (telemetryDb[body.targetEmail.toLowerCase()]) {
+          telemetryDb[body.targetEmail.toLowerCase()].status = "Blocked";
+        }
+        return NextResponse.json({ success: true, message: `Email ${body.targetEmail} has been blocked.` });
+      }
+
+      if (action === "unblock_email" && body.targetEmail) {
+        unblockEmail(body.targetEmail);
+        if (telemetryDb[body.targetEmail.toLowerCase()]) {
+          telemetryDb[body.targetEmail.toLowerCase()].status = "Active";
+        }
+        return NextResponse.json({ success: true, message: `Email ${body.targetEmail} unblocked.` });
+      }
+
+      if (action === "allow_email" && body.targetEmail) {
+        allowEmail(body.targetEmail);
+        return NextResponse.json({ success: true, message: `Email ${body.targetEmail} added to allowed list.` });
+      }
+
+      if (action === "remove_allowed_email" && body.targetEmail) {
+        removeAllowedEmail(body.targetEmail);
+        return NextResponse.json({ success: true, message: `Email ${body.targetEmail} removed from allowed list.` });
+      }
+
+      if (action === "toggle_whitelist") {
+        setWhitelistMode(body.enabled === true);
+        return NextResponse.json({ success: true, isWhitelistMode: body.enabled === true });
+      }
+    }
+
+    // REGULAR USER HEARTBEAT
     if (!telemetryDb[email]) {
       telemetryDb[email] = {
         email: email,
@@ -92,13 +138,13 @@ export async function POST(request: Request) {
         total_time_seconds: 15,
         login_count: 1,
         activity_count: 1,
-        status: "Active"
+        status: blockedEmails.has(email) ? "Blocked" : "Active"
       };
     } else {
       const u = telemetryDb[email];
       u.last_active = nowStr;
       u.activity_count = (u.activity_count || 0) + 1;
-      u.total_time_seconds = (u.total_time_seconds || 0) + 15; // 15 seconds added per heartbeat interval
+      u.total_time_seconds = (u.total_time_seconds || 0) + 15;
       if (action === "login") {
         u.login_count = (u.login_count || 0) + 1;
         u.session_start = nowStr;
@@ -107,6 +153,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, user: telemetryDb[email] });
   } catch (e) {
-    return NextResponse.json({ error: "Failed to record heartbeat" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to record telemetry action" }, { status: 500 });
   }
 }

@@ -43,18 +43,20 @@ export default function DashboardPage() {
   const [adminTelemetry, setAdminTelemetry] = useState<any>(null);
   const [adminSearch, setAdminSearch] = useState("");
 
+  // Access Control State for Blocklist & Whitelist
+  const [blockInputEmail, setBlockInputEmail] = useState("");
+  const [allowInputEmail, setAllowInputEmail] = useState("");
+
   // Session Activity Heartbeat Timer
   useEffect(() => {
     if (!session || !userEmail) return;
 
-    // Send initial session login telemetry ping
     fetch("/api/telemetry", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "login" })
     }).catch(() => {});
 
-    // Send periodic session active heartbeats every 15 seconds
     const interval = setInterval(() => {
       fetch("/api/telemetry", {
         method: "POST",
@@ -161,6 +163,67 @@ export default function DashboardPage() {
     setAdminModalOpen(true);
   };
 
+  const handleBlockEmail = async (emailToBlock: string) => {
+    if (!emailToBlock) return;
+    try {
+      await fetch("/api/telemetry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "block_email", targetEmail: emailToBlock })
+      });
+      setBlockInputEmail("");
+      handleFetchAdminTelemetry();
+    } catch (e) {}
+  };
+
+  const handleUnblockEmail = async (emailToUnblock: string) => {
+    if (!emailToUnblock) return;
+    try {
+      await fetch("/api/telemetry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "unblock_email", targetEmail: emailToUnblock })
+      });
+      handleFetchAdminTelemetry();
+    } catch (e) {}
+  };
+
+  const handleAllowEmail = async (emailToAllow: string) => {
+    if (!emailToAllow) return;
+    try {
+      await fetch("/api/telemetry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "allow_email", targetEmail: emailToAllow })
+      });
+      setAllowInputEmail("");
+      handleFetchAdminTelemetry();
+    } catch (e) {}
+  };
+
+  const handleRemoveAllowedEmail = async (emailToRemove: string) => {
+    if (!emailToRemove) return;
+    try {
+      await fetch("/api/telemetry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "remove_allowed_email", targetEmail: emailToRemove })
+      });
+      handleFetchAdminTelemetry();
+    } catch (e) {}
+  };
+
+  const handleToggleWhitelistMode = async (enabled: boolean) => {
+    try {
+      await fetch("/api/telemetry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "toggle_whitelist", enabled })
+      });
+      handleFetchAdminTelemetry();
+    } catch (e) {}
+  };
+
   const toggleDomain = (domain: string) => {
     setSelectedDomains(prev => 
       prev.includes(domain) ? prev.filter(d => d !== domain) : [...prev, domain]
@@ -229,10 +292,10 @@ export default function DashboardPage() {
               <button
                 className="btn-admin-nav"
                 onClick={handleFetchAdminTelemetry}
-                title="PrepCom Session Telemetry & User Analytics"
+                title="PrepCom Session Telemetry & User Access Control"
                 style={{ background: "linear-gradient(135deg, #4f46e5, #7c3aed)", color: "#ffffff" }}
               >
-                <span className="material-symbols-outlined">monitoring</span> PrepCom Analytics
+                <span className="material-symbols-outlined">shield_person</span> PrepCom Control Panel
               </button>
             )}
 
@@ -872,56 +935,166 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* PrepCom Telemetry & Analytics Dashboard Modal */}
+      {/* PrepCom Telemetry & Security Control Panel Modal */}
       {adminModalOpen && isPrepComAdmin && (
         <div className="modal-overlay" onClick={() => setAdminModalOpen(false)}>
           <div className="modal-dialog modal-dialog-lg" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <div className="modal-title-area">
                 <div className="modal-meta-pills">
-                  <span className="meta-pill pill-domain" style={{ background: "#4f46e5", color: "#fff" }}>Exclusive Admin View</span>
+                  <span className="meta-pill pill-domain" style={{ background: "#4f46e5", color: "#fff" }}>Exclusive Admin Control</span>
                   <span className="meta-pill pill-process">prepcom@iimidr.ac.in</span>
                 </div>
-                <h3>📊 PrepCom Institutional Analytics & Session Audit Log</h3>
+                <h3>🛡️ PrepCom Security Control & Session Telemetry</h3>
               </div>
               <button className="modal-close-btn" onClick={() => setAdminModalOpen(false)}>&times;</button>
             </div>
 
             <div className="modal-body">
+              {/* Analytics Summary Stats Grid */}
               <div className="admin-stats-grid mb-4">
                 <div className="admin-stat-card">
                   <div className="stat-icon material-symbols-outlined">group</div>
                   <div className="stat-info">
                     <span className="stat-value">{adminTelemetry?.summary?.total_registered_users || 0}</span>
-                    <span className="stat-label">Unique Active Users</span>
-                  </div>
-                </div>
-                <div className="admin-stat-card">
-                  <div className="stat-icon material-symbols-outlined">login</div>
-                  <div className="stat-info">
-                    <span className="stat-value">{adminTelemetry?.summary?.total_logins || 0}</span>
-                    <span className="stat-label">Total Login Sessions</span>
+                    <span className="stat-label">Active Student Sessions</span>
                   </div>
                 </div>
                 <div className="admin-stat-card">
                   <div className="stat-icon material-symbols-outlined">timer</div>
                   <div className="stat-info">
                     <span className="stat-value" style={{ color: "#4f46e5" }}>{adminTelemetry?.summary?.avg_time_display || "0 mins"}</span>
-                    <span className="stat-label">Avg Duration / User</span>
+                    <span className="stat-label">Avg Time / User</span>
                   </div>
                 </div>
                 <div className="admin-stat-card">
-                  <div className="stat-icon material-symbols-outlined">schedule</div>
+                  <div className="stat-icon material-symbols-outlined">block</div>
                   <div className="stat-info">
-                    <span className="stat-value">{adminTelemetry?.summary?.total_time_hours || "0"} hrs</span>
-                    <span className="stat-label">Total Time Spent</span>
+                    <span className="stat-value" style={{ color: "#dc2626" }}>{(adminTelemetry?.accessControl?.blockedEmails || []).length}</span>
+                    <span className="stat-label">Blocked Emails</span>
+                  </div>
+                </div>
+                <div className="admin-stat-card">
+                  <div className="stat-icon material-symbols-outlined">verified_user</div>
+                  <div className="stat-info">
+                    <span className="stat-value" style={{ color: "#059669" }}>
+                      {adminTelemetry?.accessControl?.isWhitelistMode ? "RESTRICTED (ALLOWED ONLY)" : "OPEN (@iimidr.ac.in)"}
+                    </span>
+                    <span className="stat-label">Access Restriction Mode</span>
                   </div>
                 </div>
               </div>
 
+              {/* SECURITY CONTROL PANEL: BLOCKLIST & ALLOWED LIST */}
+              <div className="search-card mb-4" style={{ background: "#f8fafc", border: "1px solid #cbd5e1" }}>
+                <h4 style={{ fontSize: "1.05rem", fontWeight: 800, marginBottom: "0.75rem", color: "#0f172a", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                  <span className="material-symbols-outlined" style={{ color: "#dc2626" }}>lock</span>
+                  Email Access Control Settings (Block & Restrict Email IDs)
+                </h4>
+
+                {/* Whitelist Toggle */}
+                <div className="mb-3" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#ffffff", padding: "0.85rem 1.1rem", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                  <div>
+                    <strong style={{ fontSize: "0.9rem", color: "#1e293b" }}>Whitelist Mode (Restrict to Specific Allowed Emails Only):</strong>
+                    <p style={{ margin: 0, fontSize: "0.8rem", color: "#64748b" }}>
+                      When enabled, ONLY emails in the Allowed List can sign in. All other @iimidr.ac.in accounts will be rejected server-side.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleToggleWhitelistMode(!adminTelemetry?.accessControl?.isWhitelistMode)}
+                    style={{
+                      background: adminTelemetry?.accessControl?.isWhitelistMode ? "#dc2626" : "#2563eb",
+                      color: "#fff",
+                      border: "none",
+                      padding: "0.55rem 1.1rem",
+                      borderRadius: "8px",
+                      fontWeight: 700,
+                      cursor: "pointer"
+                    }}
+                  >
+                    {adminTelemetry?.accessControl?.isWhitelistMode ? "Disable Whitelist Mode" : "Enable Whitelist Mode"}
+                  </button>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
+                  {/* Blocklist Management Box */}
+                  <div style={{ background: "#fff", padding: "1rem", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                    <strong style={{ fontSize: "0.88rem", color: "#dc2626" }}>🚫 Block Email Address (Instant Server Lockout)</strong>
+                    <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+                      <input
+                        type="email"
+                        placeholder="e.g. abuser@iimidr.ac.in"
+                        value={blockInputEmail}
+                        onChange={(e) => setBlockInputEmail(e.target.value)}
+                        style={{ flex: 1, padding: "0.45rem 0.75rem", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "0.85rem" }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleBlockEmail(blockInputEmail)}
+                        style={{ background: "#dc2626", color: "#fff", border: "none", padding: "0.45rem 0.9rem", borderRadius: "8px", fontWeight: 700, cursor: "pointer", fontSize: "0.85rem" }}
+                      >
+                        Block ID
+                      </button>
+                    </div>
+
+                    <div style={{ marginTop: "0.75rem" }}>
+                      <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#64748b" }}>Currently Blocked ({adminTelemetry?.accessControl?.blockedEmails?.length || 0}):</span>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginTop: "0.35rem" }}>
+                        {(adminTelemetry?.accessControl?.blockedEmails || []).map((bEmail: string) => (
+                          <span key={bEmail} style={{ background: "#fee2e2", color: "#b91c1c", border: "1px solid #fca5a5", borderRadius: "12px", padding: "2px 8px", fontSize: "0.75rem", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                            {bEmail}
+                            <span style={{ cursor: "pointer", fontWeight: 800 }} onClick={() => handleUnblockEmail(bEmail)}>&times;</span>
+                          </span>
+                        ))}
+                        {(!adminTelemetry?.accessControl?.blockedEmails || adminTelemetry.accessControl.blockedEmails.length === 0) && (
+                          <span style={{ fontSize: "0.78rem", color: "#94a3b8" }}>No emails currently blocked.</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Allowed List Management Box */}
+                  <div style={{ background: "#fff", padding: "1rem", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                    <strong style={{ fontSize: "0.88rem", color: "#059669" }}>✅ Allowed Email Whitelist</strong>
+                    <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+                      <input
+                        type="email"
+                        placeholder="e.g. student@iimidr.ac.in"
+                        value={allowInputEmail}
+                        onChange={(e) => setAllowInputEmail(e.target.value)}
+                        style={{ flex: 1, padding: "0.45rem 0.75rem", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "0.85rem" }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleAllowEmail(allowInputEmail)}
+                        style={{ background: "#059669", color: "#fff", border: "none", padding: "0.45rem 0.9rem", borderRadius: "8px", fontWeight: 700, cursor: "pointer", fontSize: "0.85rem" }}
+                      >
+                        Allow ID
+                      </button>
+                    </div>
+
+                    <div style={{ marginTop: "0.75rem" }}>
+                      <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#64748b" }}>Allowed Accounts ({adminTelemetry?.accessControl?.allowedEmails?.length || 0}):</span>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginTop: "0.35rem" }}>
+                        {(adminTelemetry?.accessControl?.allowedEmails || []).map((aEmail: string) => (
+                          <span key={aEmail} style={{ background: "#d1fae5", color: "#047857", border: "1px solid #6ee7b7", borderRadius: "12px", padding: "2px 8px", fontSize: "0.75rem", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                            {aEmail}
+                            {aEmail !== "prepcom@iimidr.ac.in" && (
+                              <span style={{ cursor: "pointer", fontWeight: 800 }} onClick={() => handleRemoveAllowedEmail(aEmail)}>&times;</span>
+                            )}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* LIVE SESSION AUDIT TABLE */}
               <div className="admin-table-container">
                 <div className="admin-table-header">
-                  <h4>Live Session Audit Log of @iimidr.ac.in Accounts</h4>
+                  <h4>Live Session Audit Log & Quick Block Action</h4>
                   <input
                     type="text"
                     className="admin-search-input"
@@ -938,9 +1111,9 @@ export default function DashboardPage() {
                         <th>Role</th>
                         <th>Session Start</th>
                         <th>Session End / Last Active</th>
-                        <th>Total Time Spent</th>
-                        <th>Actions</th>
+                        <th>Total Duration</th>
                         <th>Status</th>
+                        <th>Admin Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -963,9 +1136,29 @@ export default function DashboardPage() {
                             <td>{u.session_start || "Just Now"}</td>
                             <td>{u.last_active || "Active Now"}</td>
                             <td><strong>{u.duration_display || "1 min"}</strong></td>
-                            <td>{u.activity_count || 1} pings</td>
                             <td>
-                              <span className="status-badge status-active">Active Session</span>
+                              <span className={`status-badge ${u.is_blocked ? "status-flagged" : "status-active"}`}>
+                                {u.is_blocked ? "BLOCKED" : "Active Session"}
+                              </span>
+                            </td>
+                            <td>
+                              {u.email !== "prepcom@iimidr.ac.in" && (
+                                u.is_blocked ? (
+                                  <button
+                                    onClick={() => handleUnblockEmail(u.email)}
+                                    style={{ background: "#d1fae5", color: "#047857", border: "1px solid #6ee7b7", padding: "2px 8px", borderRadius: "6px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}
+                                  >
+                                    Unblock
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => handleBlockEmail(u.email)}
+                                    style={{ background: "#fee2e2", color: "#dc2626", border: "1px solid #fca5a5", padding: "2px 8px", borderRadius: "6px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}
+                                  >
+                                    Block
+                                  </button>
+                                )
+                              )}
                             </td>
                           </tr>
                         ))}

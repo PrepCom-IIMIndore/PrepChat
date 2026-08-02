@@ -1,5 +1,6 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import { checkEmailAccess } from "@/lib/accessControl";
 
 const HOSTED_DOMAIN = process.env.HOSTED_DOMAIN || "iimidr.ac.in";
 
@@ -22,7 +23,7 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     // CRITICAL SERVER-SIDE SECURITY CHECK
-    // Rejects non-@iimidr.ac.in accounts BEFORE a session is ever created
+    // Rejects non-@iimidr.ac.in, blocked, or non-whitelisted emails BEFORE session creation
     async signIn({ profile }) {
       if (!profile || !profile.email) {
         return false;
@@ -33,8 +34,13 @@ export const authOptions: NextAuthOptions = {
       const isEmailVerified = (profile as any).email_verified === true;
 
       if (!isDomainValid || !isEmailVerified) {
-        // Return error page redirect before creating session
         return `/auth/error?error=AccessRestricted&email=${encodeURIComponent(email)}`;
+      }
+
+      // Check Server-Side Email Access Control (Blocklist & Whitelist)
+      const accessCheck = checkEmailAccess(email);
+      if (!accessCheck.allowed) {
+        return `/auth/error?error=BlockedOrRestricted&email=${encodeURIComponent(email)}&reason=${encodeURIComponent(accessCheck.reason || "")}`;
       }
 
       return true;
@@ -43,7 +49,6 @@ export const authOptions: NextAuthOptions = {
       if (profile && profile.email) {
         const email = profile.email.toLowerCase().trim();
         token.email = email;
-        // EXCLUSIVE ADMIN ACCESS TO prepcom@iimidr.ac.in
         token.role = (email === "prepcom@iimidr.ac.in" || email.startsWith("prepcom")) ? "admin" : "user";
       }
       return token;
