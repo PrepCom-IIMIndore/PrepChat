@@ -133,13 +133,22 @@ document.addEventListener('DOMContentLoaded', () => {
     let displayedCardCount = 20;
     let isExperiencesLoaded = false;
 
-    // Multi-Select Question Type Filter State
+    // Multi-Select Question Type & Year Filter State
     let selectedQTypes = new Set(['Domain', 'Technical', 'HR/Current Affairs', 'Behavioural', 'GD']);
+    let selectedQYear = '';
 
     function initQTypeFilterListeners() {
         const btnAll = document.getElementById('btn-qtype-all');
         const btnClear = document.getElementById('btn-qtype-clear');
         const pills = document.querySelectorAll('.qtype-pill');
+        const yearSelect = document.getElementById('qtype-filter-year');
+
+        if (yearSelect) {
+            yearSelect.addEventListener('change', (e) => {
+                selectedQYear = e.target.value;
+                if (currentCompanyData) renderAdvancedView();
+            });
+        }
 
         if (btnAll) {
             btnAll.addEventListener('click', () => {
@@ -575,7 +584,18 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderAdvancedView() {
         const allQuestions = (currentCompanyData && currentCompanyData.questions) ? currentCompanyData.questions : [];
         
-        // 1. Calculate question type breakdown counts for current company & update badges
+        // 1. Populate Batch Year filter dropdown options for this company
+        const yearSelect = document.getElementById('qtype-filter-year');
+        if (yearSelect) {
+            const companyYears = Array.from(new Set(allQuestions.map(q => q.year))).sort().reverse();
+            let optsHtml = '<option value="">All Batch Years</option>';
+            companyYears.forEach(y => {
+                optsHtml += `<option value="${y}" ${selectedQYear === y ? 'selected' : ''}>Batch Year ${y}</option>`;
+            });
+            yearSelect.innerHTML = optsHtml;
+        }
+
+        // 2. Calculate question type breakdown counts for current company & update badges
         const counts = {
             'Domain': 0,
             'Technical': 0,
@@ -599,8 +619,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (badgeBehav) badgeBehav.textContent = counts['Behavioural'];
         if (badgeGD) badgeGD.textContent = counts['GD'];
 
-        // 2. Filter questions based on selectedQTypes
-        const filteredQuestions = allQuestions.filter(q => selectedQTypes.has(q.question_type));
+        // 3. Filter questions based on selectedQTypes AND selectedQYear
+        const filteredQuestions = allQuestions.filter(q => {
+            if (!selectedQTypes.has(q.question_type)) return false;
+            if (selectedQYear && q.year !== selectedQYear) return false;
+            return true;
+        });
 
         questionsContainer.innerHTML = '';
         if (allQuestions.length === 0) {
@@ -608,8 +632,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (filteredQuestions.length === 0) {
             questionsContainer.innerHTML = `
                 <div class="format-card" style="text-align: center; padding: 2.5rem;">
-                    <h4>No questions match your multi-selected question type filters.</h4>
-                    <p style="color: var(--text-muted); margin-top: 0.5rem;">Click "Select All" above to view all question types.</p>
+                    <h4>No questions match your selected year and question type filters.</h4>
+                    <p style="color: var(--text-muted); margin-top: 0.5rem;">Try selecting "All Batch Years" or clicking "Select All Types" above.</p>
                 </div>
             `;
         } else {

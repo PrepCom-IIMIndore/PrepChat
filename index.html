@@ -198,15 +198,21 @@
                     <div class="adv-tab-panes">
                         <!-- Advanced Pane: Questions -->
                         <div id="adv-pane-questions" class="adv-pane active">
-                            <!-- Multi-Select Question Type Filter Control Bar -->
+                            <!-- Multi-Select Question Type & Year Filter Control Bar -->
                             <div class="qtype-filter-card mb-3" id="qtype-filter-card">
                                 <div class="qtype-filter-header">
                                     <div class="qtype-filter-title">
                                         <span class="material-symbols-outlined">filter_list</span>
-                                        <span>Filter Question Types (Multi-Select):</span>
+                                        <span>Filter Questions:</span>
+                                    </div>
+                                    <div class="qyear-filter-group">
+                                        <label for="qtype-filter-year">📅 Batch Year:</label>
+                                        <select id="qtype-filter-year" class="qyear-select">
+                                            <option value="">All Batch Years</option>
+                                        </select>
                                     </div>
                                     <div class="qtype-filter-actions">
-                                        <button class="btn-qtype-select-all" id="btn-qtype-all">Select All</button>
+                                        <button class="btn-qtype-select-all" id="btn-qtype-all">Select All Types</button>
                                         <button class="btn-qtype-clear" id="btn-qtype-clear">Clear All</button>
                                     </div>
                                 </div>
