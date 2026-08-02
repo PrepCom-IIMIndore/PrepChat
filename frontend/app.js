@@ -156,6 +156,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const gAccountAdmin = document.getElementById('g-account-admin');
     const gCustomEmailInput = document.getElementById('g-custom-email-input');
     const btnConfirmGCustom = document.getElementById('btn-confirm-g-custom');
+    const loginLoadingState = document.getElementById('login-loading-state');
+
+    let googleAuthConfig = { google_client_id: '', hosted_domain: 'iimidr.ac.in' };
+
+    async function loadAuthConfig() {
+        try {
+            const res = await fetch('/api/auth/config');
+            if (res.ok) {
+                googleAuthConfig = await res.json();
+            }
+        } catch (e) {}
+
+        // Initialize Official Google Identity Services GIS SDK with hd: 'iimidr.ac.in'
+        try {
+            if (window.google && window.google.accounts && window.google.accounts.id) {
+                window.google.accounts.id.initialize({
+                    client_id: googleAuthConfig.google_client_id || 'your-google-oauth-client-id.apps.googleusercontent.com',
+                    callback: window.handleGoogleCredentialResponse,
+                    hosted_domain: googleAuthConfig.hosted_domain || 'iimidr.ac.in',
+                    auto_select: false
+                });
+                const officialBtnContainer = document.getElementById('gsi-official-btn');
+                if (officialBtnContainer && googleAuthConfig.google_client_id && !googleAuthConfig.google_client_id.includes('example')) {
+                    window.google.accounts.id.renderButton(officialBtnContainer, {
+                        theme: 'outline',
+                        size: 'large',
+                        width: 380,
+                        text: 'signin_with',
+                        shape: 'rectangular'
+                    });
+                }
+            }
+        } catch (err) {}
+    }
 
     function showGoogleChooser() {
         if (loginErrorMsg) loginErrorMsg.classList.add('hidden');
@@ -171,14 +205,22 @@ document.addEventListener('DOMContentLoaded', () => {
     async function processGoogleEmailAuth(rawEmail) {
         const email = rawEmail.trim().toLowerCase();
         if (loginErrorMsg) loginErrorMsg.classList.add('hidden');
+        if (loginLoadingState) loginLoadingState.classList.remove('hidden');
 
-        if (!email.endsWith('@iimidr.ac.in')) {
-            if (loginErrorText) loginErrorText.textContent = `Access Restricted: '${email}' is not an official @iimidr.ac.in Google account.`;
+        const domain = googleAuthConfig.hosted_domain || 'iimidr.ac.in';
+
+        // 1. Client-side Domain Restriction Check
+        if (!email.endsWith(`@${domain}`)) {
+            if (loginLoadingState) loginLoadingState.classList.add('hidden');
+            if (loginErrorText) loginErrorText.textContent = `Access restricted to IIM Indore accounts (@${domain})`;
             if (loginErrorMsg) loginErrorMsg.classList.remove('hidden');
+            localStorage.removeItem('prepchat_user');
+            currentUser = null;
             showGoogleMain();
             return;
         }
 
+        // 2. Server-side Security Verification Check
         try {
             const res = await fetch('/api/auth/login', {
                 method: 'POST',
@@ -186,6 +228,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ email })
             });
             const data = await res.json();
+
+            if (loginLoadingState) loginLoadingState.classList.add('hidden');
+
+            if (!res.ok || data.error) {
+                // Server-side check failed
+                localStorage.removeItem('prepchat_user');
+                currentUser = null;
+                if (loginErrorText) loginErrorText.textContent = data.error || `Access restricted to IIM Indore accounts (@${domain})`;
+                if (loginErrorMsg) loginErrorMsg.classList.remove('hidden');
+                showGoogleMain();
+                return;
+            }
+
             if (data.user) {
                 currentUser = data.user;
                 localStorage.setItem('prepchat_user', JSON.stringify(currentUser));
@@ -193,6 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (loginScreen) loginScreen.classList.add('hidden');
             }
         } catch (err) {
+            if (loginLoadingState) loginLoadingState.classList.add('hidden');
             currentUser = {
                 email: email,
                 role: (email.startsWith('admin') || email.includes('placecom') || email.includes('prepcom')) ? 'admin' : 'user',
@@ -216,6 +272,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Authentication & Domain Restriction Controller (@iimidr.ac.in)
     // -----------------------------------------------------------------
     function initAuth() {
+        loadAuthConfig();
+
         const storedUser = localStorage.getItem('prepchat_user');
         if (storedUser) {
             try {
@@ -230,27 +288,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             showLoginScreen();
         }
-
-        // Initialize Official Google Identity Services GIS SDK button if available
-        try {
-            if (window.google && window.google.accounts && window.google.accounts.id) {
-                window.google.accounts.id.initialize({
-                    client_id: '10823491823-example.apps.googleusercontent.com',
-                    callback: window.handleGoogleCredentialResponse,
-                    auto_select: false
-                });
-                const officialBtnContainer = document.getElementById('gsi-official-btn');
-                if (officialBtnContainer) {
-                    window.google.accounts.id.renderButton(officialBtnContainer, {
-                        theme: 'outline',
-                        size: 'large',
-                        width: 380,
-                        text: 'signin_with',
-                        shape: 'rectangular'
-                    });
-                }
-            }
-        } catch (err) {}
 
         if (btnGoogleSignin) {
             btnGoogleSignin.addEventListener('click', () => {

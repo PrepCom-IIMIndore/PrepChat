@@ -25,5 +25,14 @@
     "login_count": 1,
     "activity_count": 0,
     "status": "Active"
+  },
+  "candidate@iimidr.ac.in": {
+    "email": "candidate@iimidr.ac.in",
+    "role": "user",
+    "first_login": "2026-08-02 17:23:16",
+    "last_login": "2026-08-02 17:23:16",
+    "login_count": 1,
+    "activity_count": 0,
+    "status": "Active"
   }
 }

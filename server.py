@@ -23,6 +23,22 @@ EXPERIENCES_DATA = []
 EXPERIENCE_STATS = {}
 USER_ACTIVITY = {}
 
+# Helper to load .env key-value pairs without external dependencies
+def load_env_file():
+    env_path = Path(".env")
+    if env_path.exists():
+        with open(env_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, val = line.split("=", 1)
+                    os.environ[key.strip()] = val.strip().strip('"').strip("'")
+
+load_env_file()
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "your-google-oauth-client-id.apps.googleusercontent.com")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
+HOSTED_DOMAIN = os.environ.get("HOSTED_DOMAIN", "iimidr.ac.in")
+
 def load_data():
     global QUESTIONS_DATA, FORMATS_DATA, SLIDES_DATA, COMPANY_INDUSTRIES, ALL_COMPANIES, EXPERIENCES_DATA, EXPERIENCE_STATS, USER_ACTIVITY
     
@@ -162,6 +178,14 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         # -------------------------------------------------------------
         if path == '/api/health':
             self._send_json({"status": "ok", "message": "Proxy server running"})
+            return
+
+        elif path == '/api/auth/config':
+            self._send_json({
+                "google_client_id": GOOGLE_CLIENT_ID,
+                "hosted_domain": HOSTED_DOMAIN,
+                "domain_restriction": f"@{HOSTED_DOMAIN}"
+            })
             return
             
         elif path == '/api/companies':
@@ -344,9 +368,9 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
                 return
 
             # Domain Restriction Enforcement: Must end with @iimidr.ac.in
-            if not email.endswith('@iimidr.ac.in'):
+            if not email.endswith(f'@{HOSTED_DOMAIN}'):
                 self._send_json({
-                    "error": "Access Restricted: Only official @iimidr.ac.in email accounts are permitted to log in."
+                    "error": f"Access restricted to IIM Indore accounts (@{HOSTED_DOMAIN})"
                 }, status=403)
                 return
 
