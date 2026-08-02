@@ -37,6 +37,13 @@
             <div class="header-tagline">
                 Institutional Placement Intelligence
             </div>
+
+            <!-- Logged-in User Profile & Admin Telemetry Navigation -->
+            <div class="header-user-area" id="header-user-area">
+                <span class="user-pill" id="user-profile-pill"><span class="material-symbols-outlined">person</span> <span id="user-email-display">candidate@iimidr.ac.in</span></span>
+                <button class="btn-admin-nav hidden" id="btn-admin-dashboard" title="Admin Usage & Abuse Monitor"><span class="material-symbols-outlined">analytics</span> Telemetry</button>
+                <button class="btn-logout-nav" id="btn-logout" title="Sign out"><span class="material-symbols-outlined">logout</span></button>
+            </div>
         </div>
 
         <!-- Primary App Section Navigation Bar -->
@@ -518,13 +525,112 @@
 
     </main>
 
-    <!-- Footer -->
-    <footer class="app-footer">
-        <div class="footer-content">
-            <img src="logo.png" alt="IIM Indore PrepCom Logo" class="footer-logo-img">
-            <span>Preparation Committee &bull; IIM Indore &bull; Pure Retrieval Lookup System</span>
+    <!-- Login Screen Overlay -->
+    <div id="login-screen" class="login-overlay-screen hidden">
+        <div class="login-glass-card">
+            <div class="login-header">
+                <img src="logo.png" alt="IIM Indore Logo" class="login-logo-img">
+                <h2>PrepChat Portal</h2>
+                <span class="login-badge">🔒 Official IIM Indore Access Only</span>
+            </div>
+            
+            <form id="login-form" class="login-form">
+                <label for="login-email-input">Official Student/Faculty Email Address:</label>
+                <div class="input-with-icon">
+                    <span class="material-symbols-outlined">mail</span>
+                    <input type="email" id="login-email-input" placeholder="e.g. candidate@iimidr.ac.in" required autocomplete="email">
+                </div>
+                <div id="login-error-msg" class="login-error-banner hidden">
+                    <span class="material-symbols-outlined">error</span>
+                    <span id="login-error-text">Access restricted. Only official @iimidr.ac.in accounts are permitted.</span>
+                </div>
+                <button type="submit" id="btn-submit-login" class="btn-login-submit">
+                    <span>Sign In with @iimidr.ac.in</span>
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </button>
+            </form>
+            
+            <div class="login-footer">
+                <p>Protected by IIM Indore Placement Committee Authentication. Unauthorized access or abuse attempt is logged and audited.</p>
+            </div>
         </div>
-    </footer>
+    </div>
+
+    <!-- Admin Telemetry & Usage Monitor Modal -->
+    <div id="admin-dashboard-modal" class="modal-overlay hidden">
+        <div class="modal-dialog modal-dialog-lg">
+            <div class="modal-header">
+                <div class="modal-title-area">
+                    <div class="modal-meta-pills">
+                        <span class="meta-pill pill-domain">Admin Control Panel</span>
+                        <span class="meta-pill pill-process">Usage Telemetry & Abuse Monitor</span>
+                    </div>
+                    <h3>📊 Institutional User Logins & Frequency Monitor</h3>
+                </div>
+                <button class="modal-close-btn" id="admin-modal-close" title="Close dialog">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Admin Stat Cards -->
+                <div class="admin-stats-grid mb-4">
+                    <div class="admin-stat-card">
+                        <div class="stat-icon material-symbols-outlined">group</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="admin-stat-users">0</span>
+                            <span class="stat-label">Registered Accounts</span>
+                        </div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="stat-icon material-symbols-outlined">login</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="admin-stat-logins">0</span>
+                            <span class="stat-label">Total Login Sessions</span>
+                        </div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="stat-icon material-symbols-outlined">bolt</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="admin-stat-actions">0</span>
+                            <span class="stat-label">Total Queries & Views</span>
+                        </div>
+                    </div>
+                    <div class="admin-stat-card stat-alert">
+                        <div class="stat-icon material-symbols-outlined">warning</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="admin-stat-abuse">0</span>
+                            <span class="stat-label">High-Usage Audit Flags</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Telemetry Search & Table -->
+                <div class="admin-table-container">
+                    <div class="admin-table-header">
+                        <h4>Audit Trail of Logged-in @iimidr.ac.in Users</h4>
+                        <input type="text" id="admin-user-search" class="admin-search-input" placeholder="Search user email address...">
+                    </div>
+                    <div class="table-scroll-wrap">
+                        <table class="telemetry-table">
+                            <thead>
+                                <tr>
+                                    <th>User Email (@iimidr.ac.in)</th>
+                                    <th>Role</th>
+                                    <th>Login Count (Frequency)</th>
+                                    <th>Actions / Queries</th>
+                                    <th>First Access</th>
+                                    <th>Last Active</th>
+                                    <th>Risk Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-telemetry-tbody">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>

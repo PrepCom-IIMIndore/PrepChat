@@ -21,9 +21,10 @@ COMPANY_INDUSTRIES = {}
 ALL_COMPANIES = []
 EXPERIENCES_DATA = []
 EXPERIENCE_STATS = {}
+USER_ACTIVITY = {}
 
 def load_data():
-    global QUESTIONS_DATA, FORMATS_DATA, SLIDES_DATA, COMPANY_INDUSTRIES, ALL_COMPANIES, EXPERIENCES_DATA, EXPERIENCE_STATS
+    global QUESTIONS_DATA, FORMATS_DATA, SLIDES_DATA, COMPANY_INDUSTRIES, ALL_COMPANIES, EXPERIENCES_DATA, EXPERIENCE_STATS, USER_ACTIVITY
     
     q_path = Path("questions_data.json")
     if q_path.exists():
@@ -55,6 +56,36 @@ def load_data():
         with open(stats_path, "r", encoding="utf-8") as f:
             EXPERIENCE_STATS = json.load(f)
 
+    act_path = Path("user_activity.json")
+    if act_path.exists():
+        with open(act_path, "r", encoding="utf-8") as f:
+            USER_ACTIVITY = json.load(f)
+    else:
+        # Initial sample telemetry dataset for demonstration
+        import datetime
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        USER_ACTIVITY = {
+            "admin@iimidr.ac.in": {
+                "email": "admin@iimidr.ac.in",
+                "role": "admin",
+                "first_login": now,
+                "last_login": now,
+                "login_count": 12,
+                "activity_count": 84,
+                "status": "Active"
+            },
+            "p22placecom@iimidr.ac.in": {
+                "email": "p22placecom@iimidr.ac.in",
+                "role": "user",
+                "first_login": now,
+                "last_login": now,
+                "login_count": 8,
+                "activity_count": 45,
+                "status": "Active"
+            }
+        }
+        save_user_activity()
+
     # Build list of all canonical companies
     excel_companies = {q["company"] for q in QUESTIONS_DATA}
     format_companies = set(FORMATS_DATA.keys())
@@ -62,7 +93,12 @@ def load_data():
     exp_companies = {e["company"] for e in EXPERIENCES_DATA}
     
     ALL_COMPANIES = sorted(list(excel_companies | format_companies | slides_companies | exp_companies))
-    print(f"[Server] Data loaded: {len(QUESTIONS_DATA)} questions, {len(FORMATS_DATA)} formats, {len(SLIDES_DATA)} slides, {len(EXPERIENCES_DATA)} experiences, {len(ALL_COMPANIES)} canonical companies.")
+    print(f"[Server] Data loaded: {len(QUESTIONS_DATA)} questions, {len(FORMATS_DATA)} formats, {len(SLIDES_DATA)} slides, {len(EXPERIENCES_DATA)} experiences, {len(ALL_COMPANIES)} canonical companies, {len(USER_ACTIVITY)} user audit records.")
+
+def save_user_activity():
+    act_path = Path("user_activity.json")
+    with open(act_path, "w", encoding="utf-8") as f:
+        json.dump(USER_ACTIVITY, f, indent=2, ensure_ascii=False)
 
 def perform_fuzzy_search(query: str):
     if not query:
@@ -234,6 +270,101 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
                 "experience_stats": comp_experience_stats
             })
             return
+
+        elif path == '/api/admin/usage':
+            # Returns full audit log of all @iimidr.ac.in user activity & usage telemetry
+            user_list = list(USER_ACTIVITY.values())
+            user_list.sort(key=lambda u: u.get('last_login', ''), reverse=True)
+            
+            total_logins = sum(u.get('login_count', 0) for u in user_list)
+            total_actions = sum(u.get('activity_count', 0) for u in user_list)
+            flagged_users = [u for u in user_list if u.get('login_count', 0) > 15 or u.get('activity_count', 0) > 100]
+            
+            self._send_json({
+                "summary": {
+                    "total_registered_users": len(user_list),
+                    "total_logins": total_logins,
+                    "total_actions": total_actions,
+                    "flagged_abuse_count": len(flagged_users)
+                },
+                "users": user_list
+            })
+            return
+
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        self.end_headers()
+
+    def do_POST(self):
+        parsed_url = urllib.parse.urlparse(self.path)
+        path = parsed_url.path
+
+        content_len = int(self.headers.get('Content-Length', 0))
+        post_body = self.rfile.read(content_len).decode('utf-8') if content_len > 0 else '{}'
+        try:
+            body = json.loads(post_body)
+        except Exception:
+            body = {}
+
+        if path == '/api/auth/login':
+            email = str(body.get('email', '')).strip().lower()
+            if not email:
+                self._send_json({"error": "Email address is required"}, status=400)
+                return
+
+            # Domain Restriction Enforcement: Must end with @iimidr.ac.in
+            if not email.endswith('@iimidr.ac.in'):
+                self._send_json({
+                    "error": "Access Restricted: Only official @iimidr.ac.in email accounts are permitted to log in."
+                }, status=403)
+                return
+
+            import datetime
+            now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            # Determine role (admin if starts with admin or in admin list)
+            role = "admin" if (email.startswith("admin") or "placecom" in email or "prepcom" in email) else "user"
+
+            if email in USER_ACTIVITY:
+                rec = USER_ACTIVITY[email]
+                rec["last_login"] = now_str
+                rec["login_count"] = rec.get("login_count", 0) + 1
+            else:
+                rec = {
+                    "email": email,
+                    "role": role,
+                    "first_login": now_str,
+                    "last_login": now_str,
+                    "login_count": 1,
+                    "activity_count": 0,
+                    "status": "Active"
+                }
+                USER_ACTIVITY[email] = rec
+
+            save_user_activity()
+
+            self._send_json({
+                "success": True,
+                "message": "Authentication successful",
+                "user": rec
+            })
+            return
+
+        elif path == '/api/auth/track':
+            email = str(body.get('email', '')).strip().lower()
+            if email in USER_ACTIVITY:
+                import datetime
+                rec = USER_ACTIVITY[email]
+                rec["activity_count"] = rec.get("activity_count", 0) + 1
+                rec["last_active"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                save_user_activity()
+            self._send_json({"status": "tracked"})
+            return
+
+        self._send_json({"error": "Endpoint not found"}, status=404)
 
         # -------------------------------------------------------------
         # Static Asset Proxy (Frontend & Root Support)

@@ -111,13 +111,199 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalExpDosDonts = document.getElementById('modal-exp-dos-donts');
     const modalExpTips = document.getElementById('modal-exp-tips');
 
-    // App State
-    let currentAppSection = 'experiences'; // 'experiences' | 'catalog'
-    let currentViewMode = 'basic'; // 'basic' | 'advanced'
-    let currentCompanyData = null;
-    let debounceTimer = null;
-    let expDebounceTimer = null;
-    let useStaticFallback = false;
+    // Auth & Telemetry DOM Elements
+    const loginScreen = document.getElementById('login-screen');
+    const loginForm = document.getElementById('login-form');
+    const loginEmailInput = document.getElementById('login-email-input');
+    const loginErrorMsg = document.getElementById('login-error-msg');
+    const loginErrorText = document.getElementById('login-error-text');
+    const userProfilePill = document.getElementById('user-profile-pill');
+    const userEmailDisplay = document.getElementById('user-email-display');
+    const btnAdminDashboard = document.getElementById('btn-admin-dashboard');
+    const btnLogout = document.getElementById('btn-logout');
+
+    const adminDashboardModal = document.getElementById('admin-dashboard-modal');
+    const adminModalClose = document.getElementById('admin-modal-close');
+    const adminStatUsers = document.getElementById('admin-stat-users');
+    const adminStatLogins = document.getElementById('admin-stat-logins');
+    const adminStatActions = document.getElementById('admin-stat-actions');
+    const adminStatAbuse = document.getElementById('admin-stat-abuse');
+    const adminUserSearch = document.getElementById('admin-user-search');
+    const adminTelemetryTbody = document.getElementById('admin-telemetry-tbody');
+
+    let currentUser = null;
+    let adminTelemetryData = null;
+
+    // -----------------------------------------------------------------
+    // Authentication & Domain Restriction Controller (@iimidr.ac.in)
+    // -----------------------------------------------------------------
+    function initAuth() {
+        const storedUser = localStorage.getItem('prepchat_user');
+        if (storedUser) {
+            try {
+                currentUser = JSON.parse(storedUser);
+                updateUserHeaderUI();
+                if (loginScreen) loginScreen.classList.add('hidden');
+                trackUserActivity('page_load');
+            } catch (e) {
+                localStorage.removeItem('prepchat_user');
+                showLoginScreen();
+            }
+        } else {
+            showLoginScreen();
+        }
+
+        if (loginForm) {
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = loginEmailInput.value.trim().toLowerCase();
+                if (loginErrorMsg) loginErrorMsg.classList.add('hidden');
+
+                if (!email.endsWith('@iimidr.ac.in')) {
+                    if (loginErrorText) loginErrorText.textContent = 'Access Restricted: Only official @iimidr.ac.in email accounts are permitted to log in.';
+                    if (loginErrorMsg) loginErrorMsg.classList.remove('hidden');
+                    return;
+                }
+
+                try {
+                    const res = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email })
+                    });
+                    const data = await res.json();
+                    if (!res.ok || data.error) {
+                        if (loginErrorText) loginErrorText.textContent = data.error || 'Authentication failed. Please use your official @iimidr.ac.in email.';
+                        if (loginErrorMsg) loginErrorMsg.classList.remove('hidden');
+                        return;
+                    }
+
+                    currentUser = data.user;
+                    localStorage.setItem('prepchat_user', JSON.stringify(currentUser));
+                    updateUserHeaderUI();
+                    if (loginScreen) loginScreen.classList.add('hidden');
+                } catch (err) {
+                    // Client-side fallback if offline
+                    currentUser = {
+                        email: email,
+                        role: (email.startsWith('admin') || email.includes('placecom') || email.includes('prepcom')) ? 'admin' : 'user',
+                        last_login: new Date().toISOString()
+                    };
+                    localStorage.setItem('prepchat_user', JSON.stringify(currentUser));
+                    updateUserHeaderUI();
+                    if (loginScreen) loginScreen.classList.add('hidden');
+                }
+            });
+        }
+
+        if (btnLogout) {
+            btnLogout.addEventListener('click', () => {
+                localStorage.removeItem('prepchat_user');
+                currentUser = null;
+                showLoginScreen();
+            });
+        }
+
+        if (btnAdminDashboard) {
+            btnAdminDashboard.addEventListener('click', () => openAdminDashboard());
+        }
+
+        if (adminModalClose) {
+            adminModalClose.addEventListener('click', () => adminDashboardModal.classList.add('hidden'));
+        }
+
+        if (adminUserSearch) {
+            adminUserSearch.addEventListener('input', () => renderAdminTelemetryTable());
+        }
+    }
+
+    function showLoginScreen() {
+        if (loginScreen) {
+            loginScreen.classList.remove('hidden');
+            if (loginEmailInput) loginEmailInput.focus();
+        }
+    }
+
+    function updateUserHeaderUI() {
+        if (!currentUser) return;
+        if (userEmailDisplay) userEmailDisplay.textContent = currentUser.email;
+
+        // Show Admin Telemetry button for admin roles or toggle
+        if (currentUser.role === 'admin' || currentUser.email.startsWith('admin') || currentUser.email.includes('placecom') || currentUser.email.includes('prepcom')) {
+            if (btnAdminDashboard) btnAdminDashboard.classList.remove('hidden');
+        } else {
+            if (btnAdminDashboard) btnAdminDashboard.classList.add('hidden');
+        }
+    }
+
+    function trackUserActivity(action) {
+        if (!currentUser || !currentUser.email) return;
+        fetch('/api/auth/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: currentUser.email, action })
+        }).catch(() => {});
+    }
+
+    async function openAdminDashboard() {
+        try {
+            const res = await fetch('/api/admin/usage');
+            if (res.ok) {
+                adminTelemetryData = await res.json();
+            }
+        } catch (e) {
+            // Local fallback simulation
+            adminTelemetryData = {
+                summary: { total_registered_users: 1, total_logins: 1, total_actions: 1, flagged_abuse_count: 0 },
+                users: [currentUser]
+            };
+        }
+
+        if (adminTelemetryData && adminTelemetryData.summary) {
+            if (adminStatUsers) adminStatUsers.textContent = adminTelemetryData.summary.total_registered_users || 0;
+            if (adminStatLogins) adminStatLogins.textContent = adminTelemetryData.summary.total_logins || 0;
+            if (adminStatActions) adminStatActions.textContent = adminTelemetryData.summary.total_actions || 0;
+            if (adminStatAbuse) adminStatAbuse.textContent = adminTelemetryData.summary.flagged_abuse_count || 0;
+        }
+
+        renderAdminTelemetryTable();
+        if (adminDashboardModal) adminDashboardModal.classList.remove('hidden');
+    }
+
+    function renderAdminTelemetryTable() {
+        if (!adminTelemetryTbody) return;
+        const users = (adminTelemetryData && adminTelemetryData.users) ? adminTelemetryData.users : [];
+        const filterStr = adminUserSearch ? adminUserSearch.value.trim().toLowerCase() : '';
+
+        const filtered = users.filter(u => !filterStr || u.email.toLowerCase().includes(filterStr));
+
+        adminTelemetryTbody.innerHTML = '';
+        if (filtered.length === 0) {
+            adminTelemetryTbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No user telemetry audit logs found.</td></tr>';
+            return;
+        }
+
+        filtered.forEach(u => {
+            const tr = document.createElement('tr');
+            const isHighUsage = (u.login_count > 15 || u.activity_count > 100);
+            const statusClass = u.role === 'admin' ? 'status-admin' : (isHighUsage ? 'status-flagged' : 'status-active');
+            const statusText = u.role === 'admin' ? 'Admin' : (isHighUsage ? '⚠️ High Usage Flag' : 'Active / Normal');
+
+            tr.innerHTML = `
+                <td><strong>${escapeHtml(u.email)}</strong></td>
+                <td><span class="status-badge ${statusClass}">${u.role.toUpperCase()}</span></td>
+                <td><strong>${u.login_count || 1}</strong> logins</td>
+                <td>${u.activity_count || 0} queries</td>
+                <td>${u.first_login || 'N/A'}</td>
+                <td>${u.last_login || u.last_active || 'N/A'}</td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+            `;
+            adminTelemetryTbody.appendChild(tr);
+        });
+    }
+
+    // Initialize Auth System
+    initAuth();
 
     // Static Data Cache for GitHub Pages & Fast Access
     let staticQuestions = [];

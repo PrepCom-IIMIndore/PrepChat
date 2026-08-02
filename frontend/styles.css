@@ -1990,6 +1990,385 @@ body::after {
     }
 }
 
+/* Header User Area & Profile Pill */
+.header-user-area {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-left: auto;
+}
+
+.user-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(241, 245, 249, 0.9);
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.user-pill span.material-symbols-outlined {
+    font-size: 1.1rem;
+    color: #2563eb;
+}
+
+.btn-admin-nav, .btn-logout-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.btn-admin-nav {
+    background: linear-gradient(135deg, #1e1b4b, #312e81);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(30, 27, 75, 0.25);
+}
+
+.btn-admin-nav:hover {
+    background: linear-gradient(135deg, #312e81, #4338ca);
+    transform: translateY(-1px);
+}
+
+.btn-logout-nav {
+    background: #f1f5f9;
+    color: #475569;
+    border-color: #cbd5e1;
+}
+
+.btn-logout-nav:hover {
+    background: #fee2e2;
+    color: #dc2626;
+    border-color: #fca5a5;
+}
+
+/* Fullscreen Secure Login Overlay Screen */
+.login-overlay-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle at 50% 30%, rgba(30, 27, 75, 0.85), rgba(15, 23, 42, 0.96)),
+                url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%236366f1" fill-opacity="0.05"><path d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/></g></g></svg>');
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem;
+}
+
+.login-glass-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(24px);
+    border: 1px solid #ffffff;
+    border-radius: 24px;
+    width: 100%;
+    max-width: 460px;
+    padding: 2.5rem 2rem;
+    box-shadow: 0 30px 70px rgba(15, 23, 42, 0.35);
+    animation: loginModalSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes loginModalSlide {
+    from { opacity: 0; transform: translateY(30px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login-logo-img {
+    height: 52px;
+    margin-bottom: 0.75rem;
+    object-fit: contain;
+}
+
+.login-header h2 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 0.4rem;
+}
+
+.login-badge {
+    display: inline-block;
+    background: rgba(37, 99, 235, 0.1);
+    border: 1px solid rgba(37, 99, 235, 0.3);
+    color: #1d4ed8;
+    padding: 0.25rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.login-form label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 0.5rem;
+}
+
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-with-icon span.material-symbols-outlined {
+    position: absolute;
+    left: 1rem;
+    color: #64748b;
+    font-size: 1.25rem;
+}
+
+.input-with-icon input {
+    width: 100%;
+    padding: 0.85rem 1rem 0.85rem 2.75rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #0f172a;
+    background: #f8fafc;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 12px;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.input-with-icon input:focus {
+    border-color: #2563eb;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+}
+
+.login-error-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #991b1b;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-top: 1rem;
+    line-height: 1.4;
+}
+
+.login-error-banner span.material-symbols-outlined {
+    color: #dc2626;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.btn-login-submit {
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 0.9rem 1.25rem;
+    background: linear-gradient(135deg, #2563eb, #4f46e5);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+    transition: all 0.2s ease;
+}
+
+.btn-login-submit:hover {
+    background: linear-gradient(135deg, #1d4ed8, #4338ca);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+}
+
+.login-footer {
+    margin-top: 1.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+    text-align: center;
+}
+
+.login-footer p {
+    font-size: 0.75rem;
+    color: #64748b;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* Admin Telemetry Dashboard Modal */
+.modal-dialog-lg {
+    max-width: 1100px;
+}
+
+.admin-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+.admin-stat-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 1.1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.admin-stat-card.stat-alert {
+    background: #fef2f2;
+    border-color: #fca5a5;
+}
+
+.admin-stat-card .stat-icon {
+    font-size: 2rem;
+    color: #2563eb;
+    background: rgba(37, 99, 235, 0.1);
+    padding: 0.6rem;
+    border-radius: 12px;
+}
+
+.admin-stat-card.stat-alert .stat-icon {
+    color: #dc2626;
+    background: rgba(220, 38, 38, 0.1);
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.1;
+}
+
+.stat-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #64748b;
+    margin-top: 0.2rem;
+}
+
+.admin-table-container {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 1.25rem;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+}
+
+.admin-table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.admin-table-header h4 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+}
+
+.admin-search-input {
+    padding: 0.45rem 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    outline: none;
+    width: 260px;
+}
+
+.admin-search-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.table-scroll-wrap {
+    overflow-x: auto;
+}
+
+.telemetry-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    text-align: left;
+}
+
+.telemetry-table th {
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 700;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.telemetry-table td {
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.telemetry-table tr:hover {
+    background: rgba(241, 245, 249, 0.6);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.status-badge.status-active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-badge.status-flagged {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.status-badge.status-admin {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
 @media (max-width: 480px) {
     .header-tagline {
         display: none;
