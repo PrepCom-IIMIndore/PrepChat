@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import experiencesData from "@/interview_experiences_data.json";
 import experienceStats from "@/interview_experience_stats.json";
 import companyIndustries from "@/company_industries.json";
@@ -13,7 +13,9 @@ export default function DashboardPage() {
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "candidate@iimidr.ac.in";
   const userRole = (session?.user as any)?.role || "user";
-  const isAdmin = userRole === "admin" || userEmail.startsWith("admin") || userEmail.includes("placecom") || userEmail.includes("prepcom");
+  
+  // EXCLUSIVE TELEMETRY & ADMIN ACCESS FOR prepcom@iimidr.ac.in
+  const isPrepComAdmin = userEmail === "prepcom@iimidr.ac.in" || userEmail.startsWith("prepcom");
 
   // Main Navigation & View Mode
   const [activeSection, setActiveSection] = useState<"experiences" | "catalog">("experiences");
@@ -40,6 +42,29 @@ export default function DashboardPage() {
   const [adminModalOpen, setAdminModalOpen] = useState(false);
   const [adminTelemetry, setAdminTelemetry] = useState<any>(null);
   const [adminSearch, setAdminSearch] = useState("");
+
+  // Session Activity Heartbeat Timer
+  useEffect(() => {
+    if (!session || !userEmail) return;
+
+    // Send initial session login telemetry ping
+    fetch("/api/telemetry", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "login" })
+    }).catch(() => {});
+
+    // Send periodic session active heartbeats every 15 seconds
+    const interval = setInterval(() => {
+      fetch("/api/telemetry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "heartbeat" })
+      }).catch(() => {});
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [session, userEmail]);
 
   // Extract unique companies & domains
   const allCompanies = useMemo(() => {
@@ -91,10 +116,8 @@ export default function DashboardPage() {
     const industrySlides = (slidesData as any[]).filter(s => s.company.toLowerCase() === industry.toLowerCase() && s.deck_type === "industry");
     const compExperiences = (experiencesData as any[]).filter(e => e.company.toLowerCase() === name.toLowerCase());
 
-    // Extract unique question batch years
     const qYears = Array.from(new Set(questions.map(q => q.year || "2024"))).sort().reverse();
 
-    // Group questions by Year then by Type
     const groupedQuestions: { [year: string]: { [type: string]: any[] } } = {};
     questions.forEach(q => {
       const y = q.year || "2024";
@@ -200,15 +223,19 @@ export default function DashboardPage() {
             <span className="user-pill">
               <span className="material-symbols-outlined">person</span> {userEmail}
             </span>
-            {isAdmin && (
+
+            {/* TELEMETRY BUTTON SHOWN EXCLUSIVELY TO prepcom@iimidr.ac.in */}
+            {isPrepComAdmin && (
               <button
                 className="btn-admin-nav"
                 onClick={handleFetchAdminTelemetry}
-                title="Admin Usage & Abuse Monitor"
+                title="PrepCom Session Telemetry & User Analytics"
+                style={{ background: "linear-gradient(135deg, #4f46e5, #7c3aed)", color: "#ffffff" }}
               >
-                <span className="material-symbols-outlined">analytics</span> Telemetry
+                <span className="material-symbols-outlined">monitoring</span> PrepCom Analytics
               </button>
             )}
+
             <button
               className="btn-logout-nav"
               onClick={() => signOut({ callbackUrl: "/auth/signin" })}
@@ -577,13 +604,12 @@ export default function DashboardPage() {
 
                         {/* Questions Grouped by Year */}
                         {catalogIntelligence.qYears.map(y => {
-                          // Filter by selected Batch Years
                           if (catalogSelectedQYears.length > 0 && !catalogSelectedQYears.includes(y)) {
                             return null;
                           }
 
                           const yearData = catalogIntelligence.groupedQuestions[y] || {};
-                          const isExpanded = expandedYearAccordion[y] !== false; // expanded by default
+                          const isExpanded = expandedYearAccordion[y] !== false;
 
                           return (
                             <div key={y} className="year-group">
@@ -758,7 +784,6 @@ export default function DashboardPage() {
               <button className="modal-close-btn" onClick={() => setActiveModalExp(null)}>&times;</button>
             </div>
 
-            {/* Modal Navigation Tabs */}
             <div className="modal-nav-tabs">
               <button
                 className={`modal-tab-btn ${activeModalTab === "overview" ? "active" : ""}`}
@@ -847,17 +872,17 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Admin Telemetry Modal */}
-      {adminModalOpen && (
+      {/* PrepCom Telemetry & Analytics Dashboard Modal */}
+      {adminModalOpen && isPrepComAdmin && (
         <div className="modal-overlay" onClick={() => setAdminModalOpen(false)}>
           <div className="modal-dialog modal-dialog-lg" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <div className="modal-title-area">
                 <div className="modal-meta-pills">
-                  <span className="meta-pill pill-domain">Admin Control Panel</span>
-                  <span className="meta-pill pill-process">NextAuth Serverless Telemetry</span>
+                  <span className="meta-pill pill-domain" style={{ background: "#4f46e5", color: "#fff" }}>Exclusive Admin View</span>
+                  <span className="meta-pill pill-process">prepcom@iimidr.ac.in</span>
                 </div>
-                <h3>📊 Institutional User Logins & Audit Monitor</h3>
+                <h3>📊 PrepCom Institutional Analytics & Session Audit Log</h3>
               </div>
               <button className="modal-close-btn" onClick={() => setAdminModalOpen(false)}>&times;</button>
             </div>
@@ -867,36 +892,36 @@ export default function DashboardPage() {
                 <div className="admin-stat-card">
                   <div className="stat-icon material-symbols-outlined">group</div>
                   <div className="stat-info">
-                    <span className="stat-value">{adminTelemetry?.summary?.total_registered_users || 1}</span>
-                    <span className="stat-label">Registered Accounts</span>
+                    <span className="stat-value">{adminTelemetry?.summary?.total_registered_users || 0}</span>
+                    <span className="stat-label">Unique Active Users</span>
                   </div>
                 </div>
                 <div className="admin-stat-card">
                   <div className="stat-icon material-symbols-outlined">login</div>
                   <div className="stat-info">
-                    <span className="stat-value">{adminTelemetry?.summary?.total_logins || 1}</span>
+                    <span className="stat-value">{adminTelemetry?.summary?.total_logins || 0}</span>
                     <span className="stat-label">Total Login Sessions</span>
                   </div>
                 </div>
                 <div className="admin-stat-card">
-                  <div className="stat-icon material-symbols-outlined">bolt</div>
+                  <div className="stat-icon material-symbols-outlined">timer</div>
                   <div className="stat-info">
-                    <span className="stat-value">{adminTelemetry?.summary?.total_actions || 1}</span>
-                    <span className="stat-label">Total Queries</span>
+                    <span className="stat-value" style={{ color: "#4f46e5" }}>{adminTelemetry?.summary?.avg_time_display || "0 mins"}</span>
+                    <span className="stat-label">Avg Duration / User</span>
                   </div>
                 </div>
-                <div className="admin-stat-card stat-alert">
-                  <div className="stat-icon material-symbols-outlined">warning</div>
+                <div className="admin-stat-card">
+                  <div className="stat-icon material-symbols-outlined">schedule</div>
                   <div className="stat-info">
-                    <span className="stat-value">{adminTelemetry?.summary?.flagged_abuse_count || 0}</span>
-                    <span className="stat-label">High-Usage Flags</span>
+                    <span className="stat-value">{adminTelemetry?.summary?.total_time_hours || "0"} hrs</span>
+                    <span className="stat-label">Total Time Spent</span>
                   </div>
                 </div>
               </div>
 
               <div className="admin-table-container">
                 <div className="admin-table-header">
-                  <h4>Audit Trail of Logged-in @iimidr.ac.in Users</h4>
+                  <h4>Live Session Audit Log of @iimidr.ac.in Accounts</h4>
                   <input
                     type="text"
                     className="admin-search-input"
@@ -909,27 +934,48 @@ export default function DashboardPage() {
                   <table className="telemetry-table">
                     <thead>
                       <tr>
-                        <th>User Email (@iimidr.ac.in)</th>
+                        <th>User Account (@iimidr.ac.in)</th>
                         <th>Role</th>
-                        <th>Login Count</th>
-                        <th>Queries</th>
-                        <th>First Access</th>
-                        <th>Last Active</th>
-                        <th>Risk Status</th>
+                        <th>Session Start</th>
+                        <th>Session End / Last Active</th>
+                        <th>Total Time Spent</th>
+                        <th>Actions</th>
+                        <th>Status</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {(adminTelemetry?.users || []).map((u: any, idx: number) => (
-                        <tr key={idx}>
-                          <td><strong>{u.email}</strong></td>
-                          <td><span className="status-badge status-active">{u.role?.toUpperCase()}</span></td>
-                          <td><strong>{u.login_count || 1}</strong> logins</td>
-                          <td>{u.activity_count || 0} queries</td>
-                          <td>{u.first_login || "N/A"}</td>
-                          <td>{u.last_login || "N/A"}</td>
-                          <td><span className="status-badge status-active">Active / Normal</span></td>
+                      {(adminTelemetry?.users || [])
+                        .filter((u: any) => !adminSearch || u.email.toLowerCase().includes(adminSearch.toLowerCase()))
+                        .map((u: any, idx: number) => (
+                          <tr key={idx}>
+                            <td><strong>{u.email}</strong></td>
+                            <td>
+                              <span
+                                className="status-badge"
+                                style={{
+                                  background: u.role === "admin" ? "#e0e7ff" : "#f1f5f9",
+                                  color: u.role === "admin" ? "#4338ca" : "#475569"
+                                }}
+                              >
+                                {u.role?.toUpperCase()}
+                              </span>
+                            </td>
+                            <td>{u.session_start || "Just Now"}</td>
+                            <td>{u.last_active || "Active Now"}</td>
+                            <td><strong>{u.duration_display || "1 min"}</strong></td>
+                            <td>{u.activity_count || 1} pings</td>
+                            <td>
+                              <span className="status-badge status-active">Active Session</span>
+                            </td>
+                          </tr>
+                        ))}
+                      {(!adminTelemetry?.users || adminTelemetry.users.length === 0) && (
+                        <tr>
+                          <td colSpan={7} style={{ textAlign: "center", padding: "1.5rem", color: "var(--text-muted)" }}>
+                            Clean telemetry logging active. Pings recorded when users sign in and browse.
+                          </td>
                         </tr>
-                      ))}
+                      )}
                     </tbody>
                   </table>
                 </div>

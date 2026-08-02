@@ -43,7 +43,8 @@ export const authOptions: NextAuthOptions = {
       if (profile && profile.email) {
         const email = profile.email.toLowerCase().trim();
         token.email = email;
-        token.role = (email.startsWith("admin") || email.includes("placecom") || email.includes("prepcom")) ? "admin" : "user";
+        // EXCLUSIVE ADMIN ACCESS TO prepcom@iimidr.ac.in
+        token.role = (email === "prepcom@iimidr.ac.in" || email.startsWith("prepcom")) ? "admin" : "user";
       }
       return token;
     },
