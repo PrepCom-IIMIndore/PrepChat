@@ -68,6 +68,16 @@ export default function DashboardPage() {
     return () => clearInterval(interval);
   }, [session, userEmail]);
 
+  // Track Company Visit
+  const trackCompanyVisit = (companyName: string) => {
+    if (!companyName || !session) return;
+    fetch("/api/telemetry", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "company_visit", company: companyName })
+    }).catch(() => {});
+  };
+
   // Extract unique companies & domains
   const allCompanies = useMemo(() => {
     const set = new Set<string>();
@@ -252,6 +262,19 @@ export default function DashboardPage() {
     setExpandedYearAccordion(prev => ({ ...prev, [year]: !prev[year] }));
   };
 
+  // Max value calculation for bar chart scaling
+  const maxAvgTime = useMemo(() => {
+    const daily = adminTelemetry?.dailyAnalytics || [];
+    const maxVal = Math.max(...daily.map((d: any) => d.avg_user_time_mins || 0), 10);
+    return maxVal;
+  }, [adminTelemetry]);
+
+  const maxAvgCompanies = useMemo(() => {
+    const daily = adminTelemetry?.dailyAnalytics || [];
+    const maxVal = Math.max(...daily.map((d: any) => d.avg_companies_visited || 0), 5);
+    return maxVal;
+  }, [adminTelemetry]);
+
   return (
     <div className="app-wrapper">
       {/* App Header */}
@@ -292,10 +315,10 @@ export default function DashboardPage() {
               <button
                 className="btn-admin-nav"
                 onClick={handleFetchAdminTelemetry}
-                title="PrepCom Session Telemetry & User Access Control"
+                title="PrepCom Session Telemetry & Graphical Analytics"
                 style={{ background: "linear-gradient(135deg, #4f46e5, #7c3aed)", color: "#ffffff" }}
               >
-                <span className="material-symbols-outlined">shield_person</span> PrepCom Control Panel
+                <span className="material-symbols-outlined">insert_chart</span> PrepCom Analytics & Graphs
               </button>
             )}
 
@@ -445,6 +468,7 @@ export default function DashboardPage() {
                   onClick={() => {
                     setActiveModalExp(exp);
                     setActiveModalTab("overview");
+                    trackCompanyVisit(exp.company);
                   }}
                 >
                   <div>
@@ -490,7 +514,10 @@ export default function DashboardPage() {
                 <label style={{ fontSize: "1.1rem", fontWeight: 800 }}>🏢 Select Company from Institutional Intelligence Catalog</label>
                 <select
                   value={catalogCompany}
-                  onChange={(e) => setCatalogCompany(e.target.value)}
+                  onChange={(e) => {
+                    setCatalogCompany(e.target.value);
+                    trackCompanyVisit(e.target.value);
+                  }}
                   style={{ marginTop: "0.5rem" }}
                 >
                   {allCompanies.map(c => (
@@ -802,6 +829,7 @@ export default function DashboardPage() {
                           onClick={() => {
                             setActiveModalExp(exp);
                             setActiveModalTab("overview");
+                            trackCompanyVisit(exp.company);
                           }}
                         >
                           <div>
@@ -935,7 +963,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* PrepCom Telemetry & Security Control Panel Modal */}
+      {/* PrepCom Telemetry & Graphical Analytics Control Panel Modal */}
       {adminModalOpen && isPrepComAdmin && (
         <div className="modal-overlay" onClick={() => setAdminModalOpen(false)}>
           <div className="modal-dialog modal-dialog-lg" onClick={e => e.stopPropagation()}>
@@ -945,7 +973,7 @@ export default function DashboardPage() {
                   <span className="meta-pill pill-domain" style={{ background: "#4f46e5", color: "#fff" }}>Exclusive Admin Control</span>
                   <span className="meta-pill pill-process">prepcom@iimidr.ac.in</span>
                 </div>
-                <h3>🛡️ PrepCom Security Control & Session Telemetry</h3>
+                <h3>📊 PrepCom Graphical Analytics & User Activity Dashboard</h3>
               </div>
               <button className="modal-close-btn" onClick={() => setAdminModalOpen(false)}>&times;</button>
             </div>
@@ -957,30 +985,98 @@ export default function DashboardPage() {
                   <div className="stat-icon material-symbols-outlined">group</div>
                   <div className="stat-info">
                     <span className="stat-value">{adminTelemetry?.summary?.total_registered_users || 0}</span>
-                    <span className="stat-label">Active Student Sessions</span>
+                    <span className="stat-label">Active Users</span>
                   </div>
                 </div>
                 <div className="admin-stat-card">
                   <div className="stat-icon material-symbols-outlined">timer</div>
                   <div className="stat-info">
                     <span className="stat-value" style={{ color: "#4f46e5" }}>{adminTelemetry?.summary?.avg_time_display || "0 mins"}</span>
-                    <span className="stat-label">Avg Time / User</span>
+                    <span className="stat-label">Avg Time / Day</span>
                   </div>
                 </div>
                 <div className="admin-stat-card">
-                  <div className="stat-icon material-symbols-outlined">block</div>
+                  <div className="stat-icon material-symbols-outlined">travel_explore</div>
                   <div className="stat-info">
-                    <span className="stat-value" style={{ color: "#dc2626" }}>{(adminTelemetry?.accessControl?.blockedEmails || []).length}</span>
-                    <span className="stat-label">Blocked Emails</span>
+                    <span className="stat-value" style={{ color: "#059669" }}>{adminTelemetry?.summary?.avg_companies_per_user || "0.0"}</span>
+                    <span className="stat-label">Avg Companies / User</span>
                   </div>
                 </div>
                 <div className="admin-stat-card">
-                  <div className="stat-icon material-symbols-outlined">verified_user</div>
+                  <div className="stat-icon material-symbols-outlined">domain</div>
                   <div className="stat-info">
-                    <span className="stat-value" style={{ color: "#059669" }}>
-                      {adminTelemetry?.accessControl?.isWhitelistMode ? "RESTRICTED (ALLOWED ONLY)" : "OPEN (@iimidr.ac.in)"}
-                    </span>
-                    <span className="stat-label">Access Restriction Mode</span>
+                    <span className="stat-value" style={{ color: "#7c3aed" }}>{adminTelemetry?.summary?.total_unique_companies_explored || 0}</span>
+                    <span className="stat-label">Companies Explored</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* GRAPHICAL CHARTS SECTION */}
+              <div className="search-card mb-4" style={{ background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "14px", padding: "1.5rem" }}>
+                <h4 style={{ fontSize: "1.1rem", fontWeight: 800, marginBottom: "1.25rem", color: "#0f172a", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  <span className="material-symbols-outlined" style={{ color: "#2563eb" }}>bar_chart</span>
+                  Graphical Trends: Daily Users, Avg Time, and Companies Explored
+                </h4>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+                  {/* GRAPHICAL CHART 1: Avg Time & Daily Active Users */}
+                  <div style={{ background: "#f8fafc", padding: "1.25rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                      <strong style={{ fontSize: "0.9rem", color: "#1e293b" }}>📈 Avg User Time per Day (Minutes)</strong>
+                      <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "#2563eb", background: "#eff6ff", padding: "2px 8px", borderRadius: "8px" }}>Daily Trend</span>
+                    </div>
+
+                    <div style={{ display: "flex", alignItems: "flex-end", height: "160px", gap: "0.75rem", paddingBottom: "1.5rem", borderBottom: "2px solid #e2e8f0" }}>
+                      {(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
+                        const heightPct = Math.min(100, Math.max(12, ((d.avg_user_time_mins || 0) / maxAvgTime) * 100));
+                        return (
+                          <div key={idx} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", height: "100%", justifyContent: "flex-end" }}>
+                            <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "#2563eb", marginBottom: "4px" }}>{d.avg_user_time_mins}m</span>
+                            <div
+                              title={`${d.label}: ${d.avg_user_time_mins} mins avg time (${d.active_users} active users)`}
+                              style={{
+                                width: "100%",
+                                height: `${heightPct}%`,
+                                background: "linear-gradient(180deg, #2563eb 0%, #4f46e5 100%)",
+                                borderRadius: "6px 6px 0 0",
+                                transition: "height 0.3s ease"
+                              }}
+                            />
+                            <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b", marginTop: "6px" }}>{d.label}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* GRAPHICAL CHART 2: Avg Companies Visited per User per Day */}
+                  <div style={{ background: "#f8fafc", padding: "1.25rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                      <strong style={{ fontSize: "0.9rem", color: "#1e293b" }}>📊 Avg Companies Visited per User per Day</strong>
+                      <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "#059669", background: "#ecfdf5", padding: "2px 8px", borderRadius: "8px" }}>Company Exploration</span>
+                    </div>
+
+                    <div style={{ display: "flex", alignItems: "flex-end", height: "160px", gap: "0.75rem", paddingBottom: "1.5rem", borderBottom: "2px solid #e2e8f0" }}>
+                      {(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
+                        const heightPct = Math.min(100, Math.max(12, ((d.avg_companies_visited || 0) / maxAvgCompanies) * 100));
+                        return (
+                          <div key={idx} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", height: "100%", justifyContent: "flex-end" }}>
+                            <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "#059669", marginBottom: "4px" }}>{d.avg_companies_visited}</span>
+                            <div
+                              title={`${d.label}: ${d.avg_companies_visited} avg companies visited per user`}
+                              style={{
+                                width: "100%",
+                                height: `${heightPct}%`,
+                                background: "linear-gradient(180deg, #059669 0%, #10b981 100%)",
+                                borderRadius: "6px 6px 0 0",
+                                transition: "height 0.3s ease"
+                              }}
+                            />
+                            <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b", marginTop: "6px" }}>{d.label}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1091,10 +1187,10 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* LIVE SESSION AUDIT TABLE */}
+              {/* LIVE SESSION & COMPANY TRACKER AUDIT TABLE */}
               <div className="admin-table-container">
                 <div className="admin-table-header">
-                  <h4>Live Session Audit Log & Quick Block Action</h4>
+                  <h4>Live Session Audit Log & Companies Explored per User</h4>
                   <input
                     type="text"
                     className="admin-search-input"
@@ -1110,8 +1206,9 @@ export default function DashboardPage() {
                         <th>User Account (@iimidr.ac.in)</th>
                         <th>Role</th>
                         <th>Session Start</th>
-                        <th>Session End / Last Active</th>
-                        <th>Total Duration</th>
+                        <th>Last Active</th>
+                        <th>Time Spent</th>
+                        <th>Unique Companies Explored</th>
                         <th>Status</th>
                         <th>Admin Action</th>
                       </tr>
@@ -1136,6 +1233,16 @@ export default function DashboardPage() {
                             <td>{u.session_start || "Just Now"}</td>
                             <td>{u.last_active || "Active Now"}</td>
                             <td><strong>{u.duration_display || "1 min"}</strong></td>
+                            <td>
+                              <span className="status-badge" style={{ background: "#eff6ff", color: "#1d4ed8", fontWeight: 700 }}>
+                                🏢 {u.companies_visited_count || 0} Companies
+                              </span>
+                              {u.companies_visited_list && (
+                                <div style={{ fontSize: "0.72rem", color: "#64748b", marginTop: "2px" }}>
+                                  {u.companies_visited_list}
+                                </div>
+                              )}
+                            </td>
                             <td>
                               <span className={`status-badge ${u.is_blocked ? "status-flagged" : "status-active"}`}>
                                 {u.is_blocked ? "BLOCKED" : "Active Session"}
@@ -1164,8 +1271,8 @@ export default function DashboardPage() {
                         ))}
                       {(!adminTelemetry?.users || adminTelemetry.users.length === 0) && (
                         <tr>
-                          <td colSpan={7} style={{ textAlign: "center", padding: "1.5rem", color: "var(--text-muted)" }}>
-                            Clean telemetry logging active. Pings recorded when users sign in and browse.
+                          <td colSpan={8} style={{ textAlign: "center", padding: "1.5rem", color: "var(--text-muted)" }}>
+                            Clean telemetry logging active. Pings recorded when users sign in and browse companies.
                           </td>
                         </tr>
                       )}
