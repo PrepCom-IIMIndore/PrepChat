@@ -200,28 +200,39 @@
                         <div id="adv-pane-questions" class="adv-pane active">
                             <!-- Multi-Select Question Type & Year Filter Control Bar -->
                             <div class="qtype-filter-card mb-3" id="qtype-filter-card">
-                                <div class="qtype-filter-header">
-                                    <div class="qtype-filter-title">
-                                        <span class="material-symbols-outlined">filter_list</span>
-                                        <span>Filter Questions:</span>
+                                <!-- Row 1: Batch Year Pills -->
+                                <div class="filter-row mb-3">
+                                    <div class="filter-row-header">
+                                        <div class="qtype-filter-title">
+                                            <span class="material-symbols-outlined">calendar_month</span>
+                                            <span>Batch Years (Multi-Select):</span>
+                                        </div>
+                                        <div class="qtype-filter-actions">
+                                            <button class="btn-qtype-select-all" id="btn-qyear-all">Select All Years</button>
+                                        </div>
                                     </div>
-                                    <div class="qyear-filter-group">
-                                        <label for="qtype-filter-year">📅 Batch Year:</label>
-                                        <select id="qtype-filter-year" class="qyear-select">
-                                            <option value="">All Batch Years</option>
-                                        </select>
-                                    </div>
-                                    <div class="qtype-filter-actions">
-                                        <button class="btn-qtype-select-all" id="btn-qtype-all">Select All Types</button>
-                                        <button class="btn-qtype-clear" id="btn-qtype-clear">Clear All</button>
-                                    </div>
+                                    <div class="qtype-pills-row" id="qyear-pills-container"></div>
                                 </div>
-                                <div class="qtype-pills-row" id="qtype-pills-container">
-                                    <button class="qtype-pill active" data-type="Domain">💼 Domain <span class="qtype-count-badge" id="qtype-count-Domain">0</span></button>
-                                    <button class="qtype-pill active" data-type="Technical">💻 Technical <span class="qtype-count-badge" id="qtype-count-Technical">0</span></button>
-                                    <button class="qtype-pill active" data-type="HR/Current Affairs">👥 HR / Current Affairs <span class="qtype-count-badge" id="qtype-count-HR">0</span></button>
-                                    <button class="qtype-pill active" data-type="Behavioural">🧠 Behavioural <span class="qtype-count-badge" id="qtype-count-Behavioural">0</span></button>
-                                    <button class="qtype-pill active" data-type="GD">🗣️ GD <span class="qtype-count-badge" id="qtype-count-GD">0</span></button>
+
+                                <!-- Row 2: Question Type Pills -->
+                                <div class="filter-row">
+                                    <div class="filter-row-header">
+                                        <div class="qtype-filter-title">
+                                            <span class="material-symbols-outlined">category</span>
+                                            <span>Question Types (Multi-Select):</span>
+                                        </div>
+                                        <div class="qtype-filter-actions">
+                                            <button class="btn-qtype-select-all" id="btn-qtype-all">Select All Types</button>
+                                            <button class="btn-qtype-clear" id="btn-qtype-clear">Clear All</button>
+                                        </div>
+                                    </div>
+                                    <div class="qtype-pills-row" id="qtype-pills-container">
+                                        <button class="qtype-pill active" data-type="Domain">💼 Domain <span class="qtype-count-badge" id="qtype-count-Domain">0</span></button>
+                                        <button class="qtype-pill active" data-type="Technical">💻 Technical <span class="qtype-count-badge" id="qtype-count-Technical">0</span></button>
+                                        <button class="qtype-pill active" data-type="HR/Current Affairs">👥 HR / Current Affairs <span class="qtype-count-badge" id="qtype-count-HR">0</span></button>
+                                        <button class="qtype-pill active" data-type="Behavioural">🧠 Behavioural <span class="qtype-count-badge" id="qtype-count-Behavioural">0</span></button>
+                                        <button class="qtype-pill active" data-type="GD">🗣️ GD <span class="qtype-count-badge" id="qtype-count-GD">0</span></button>
+                                    </div>
                                 </div>
                             </div>
 

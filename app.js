@@ -135,38 +135,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Multi-Select Question Type & Year Filter State
     let selectedQTypes = new Set(['Domain', 'Technical', 'HR/Current Affairs', 'Behavioural', 'GD']);
-    let selectedQYear = '';
+    let selectedQYears = new Set();
 
     function initQTypeFilterListeners() {
-        const btnAll = document.getElementById('btn-qtype-all');
-        const btnClear = document.getElementById('btn-qtype-clear');
-        const pills = document.querySelectorAll('.qtype-pill');
-        const yearSelect = document.getElementById('qtype-filter-year');
+        const btnAllTypes = document.getElementById('btn-qtype-all');
+        const btnClearTypes = document.getElementById('btn-qtype-clear');
+        const btnAllYears = document.getElementById('btn-qyear-all');
+        const typePills = document.querySelectorAll('#qtype-pills-container .qtype-pill');
 
-        if (yearSelect) {
-            yearSelect.addEventListener('change', (e) => {
-                selectedQYear = e.target.value;
-                if (currentCompanyData) renderAdvancedView();
-            });
-        }
-
-        if (btnAll) {
-            btnAll.addEventListener('click', () => {
+        if (btnAllTypes) {
+            btnAllTypes.addEventListener('click', () => {
                 selectedQTypes = new Set(['Domain', 'Technical', 'HR/Current Affairs', 'Behavioural', 'GD']);
                 updateQTypePillsUI();
                 if (currentCompanyData) renderAdvancedView();
             });
         }
 
-        if (btnClear) {
-            btnClear.addEventListener('click', () => {
+        if (btnClearTypes) {
+            btnClearTypes.addEventListener('click', () => {
                 selectedQTypes.clear();
                 updateQTypePillsUI();
                 if (currentCompanyData) renderAdvancedView();
             });
         }
 
-        pills.forEach(pill => {
+        if (btnAllYears) {
+            btnAllYears.addEventListener('click', () => {
+                const allQs = (currentCompanyData && currentCompanyData.questions) ? currentCompanyData.questions : [];
+                const cYears = Array.from(new Set(allQs.map(q => q.year)));
+                selectedQYears = new Set(cYears);
+                updateQYearPillsUI();
+                if (currentCompanyData) renderAdvancedView();
+            });
+        }
+
+        typePills.forEach(pill => {
             pill.addEventListener('click', () => {
                 const t = pill.getAttribute('data-type');
                 if (selectedQTypes.has(t)) {
@@ -181,9 +184,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateQTypePillsUI() {
-        document.querySelectorAll('.qtype-pill').forEach(pill => {
+        document.querySelectorAll('#qtype-pills-container .qtype-pill').forEach(pill => {
             const t = pill.getAttribute('data-type');
             if (selectedQTypes.has(t)) {
+                pill.classList.add('active');
+            } else {
+                pill.classList.remove('active');
+            }
+        });
+    }
+
+    function updateQYearPillsUI() {
+        document.querySelectorAll('#qyear-pills-container .qtype-pill').forEach(pill => {
+            const y = pill.getAttribute('data-year');
+            if (selectedQYears.has(y)) {
                 pill.classList.add('active');
             } else {
                 pill.classList.remove('active');
@@ -584,15 +598,32 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderAdvancedView() {
         const allQuestions = (currentCompanyData && currentCompanyData.questions) ? currentCompanyData.questions : [];
         
-        // 1. Populate Batch Year filter dropdown options for this company
-        const yearSelect = document.getElementById('qtype-filter-year');
-        if (yearSelect) {
-            const companyYears = Array.from(new Set(allQuestions.map(q => q.year))).sort().reverse();
-            let optsHtml = '<option value="">All Batch Years</option>';
+        // 1. Populate Batch Year multi-select pills for this company
+        const companyYears = Array.from(new Set(allQuestions.map(q => q.year))).sort().reverse();
+        if (selectedQYears.size === 0 && companyYears.length > 0) {
+            selectedQYears = new Set(companyYears);
+        }
+
+        const qyearContainer = document.getElementById('qyear-pills-container');
+        if (qyearContainer) {
+            qyearContainer.innerHTML = '';
             companyYears.forEach(y => {
-                optsHtml += `<option value="${y}" ${selectedQYear === y ? 'selected' : ''}>Batch Year ${y}</option>`;
+                const count = allQuestions.filter(q => q.year === y).length;
+                const btn = document.createElement('button');
+                btn.className = `qtype-pill ${selectedQYears.has(y) ? 'active' : ''}`;
+                btn.setAttribute('data-year', y);
+                btn.innerHTML = `📅 Batch ${y} <span class="qtype-count-badge">${count}</span>`;
+                btn.addEventListener('click', () => {
+                    if (selectedQYears.has(y)) {
+                        selectedQYears.delete(y);
+                    } else {
+                        selectedQYears.add(y);
+                    }
+                    updateQYearPillsUI();
+                    renderAdvancedView();
+                });
+                qyearContainer.appendChild(btn);
             });
-            yearSelect.innerHTML = optsHtml;
         }
 
         // 2. Calculate question type breakdown counts for current company & update badges
@@ -619,10 +650,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (badgeBehav) badgeBehav.textContent = counts['Behavioural'];
         if (badgeGD) badgeGD.textContent = counts['GD'];
 
-        // 3. Filter questions based on selectedQTypes AND selectedQYear
+        // 3. Filter questions based on selectedQTypes AND selectedQYears
         const filteredQuestions = allQuestions.filter(q => {
             if (!selectedQTypes.has(q.question_type)) return false;
-            if (selectedQYear && q.year !== selectedQYear) return false;
+            if (selectedQYears.size > 0 && !selectedQYears.has(q.year)) return false;
             return true;
         });
 
@@ -633,7 +664,7 @@ document.addEventListener('DOMContentLoaded', () => {
             questionsContainer.innerHTML = `
                 <div class="format-card" style="text-align: center; padding: 2.5rem;">
                     <h4>No questions match your selected year and question type filters.</h4>
-                    <p style="color: var(--text-muted); margin-top: 0.5rem;">Try selecting "All Batch Years" or clicking "Select All Types" above.</p>
+                    <p style="color: var(--text-muted); margin-top: 0.5rem;">Click "Select All Years" or "Select All Types" above to view questions.</p>
                 </div>
             `;
         } else {
@@ -690,9 +721,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         subTitle.innerHTML = `<span>${iconMap[qType] || qType} (${qSubList.length})</span>`;
                         subGroup.appendChild(subTitle);
 
-                        qSubList.forEach(q => {
+                        // Show 2 questions per sub-section initially
+                        qSubList.forEach((q, qIdx) => {
                             const qCard = document.createElement('div');
-                            qCard.className = 'question-card mb-2';
+                            const isHidden = qIdx >= 2;
+                            qCard.className = `question-card mb-2 ${isHidden ? 'qcard-extra hidden' : ''}`;
                             qCard.innerHTML = `
                                 <div class="question-meta">
                                     <span class="tag-base tag-${getCategoryTagClass(q.question_type)}">${q.question_type}</span>
@@ -702,6 +735,30 @@ document.addEventListener('DOMContentLoaded', () => {
                             `;
                             subGroup.appendChild(qCard);
                         });
+
+                        // Show More / Show Less Toggle Button if > 2 questions
+                        if (qSubList.length > 2) {
+                            const remainingCount = qSubList.length - 2;
+                            const showMoreBtn = document.createElement('button');
+                            showMoreBtn.className = 'btn-show-more-q';
+                            showMoreBtn.setAttribute('data-expanded', 'false');
+                            showMoreBtn.innerHTML = `<span class="material-symbols-outlined">expand_more</span> Show ${remainingCount} More Question${remainingCount > 1 ? 's' : ''}`;
+                            
+                            showMoreBtn.addEventListener('click', () => {
+                                const isExp = showMoreBtn.getAttribute('data-expanded') === 'true';
+                                const extraCards = subGroup.querySelectorAll('.qcard-extra');
+                                if (isExp) {
+                                    extraCards.forEach(c => c.classList.add('hidden'));
+                                    showMoreBtn.setAttribute('data-expanded', 'false');
+                                    showMoreBtn.innerHTML = `<span class="material-symbols-outlined">expand_more</span> Show ${remainingCount} More Question${remainingCount > 1 ? 's' : ''}`;
+                                } else {
+                                    extraCards.forEach(c => c.classList.remove('hidden'));
+                                    showMoreBtn.setAttribute('data-expanded', 'true');
+                                    showMoreBtn.innerHTML = `<span class="material-symbols-outlined">expand_less</span> Show Less`;
+                                }
+                            });
+                            subGroup.appendChild(showMoreBtn);
+                        }
 
                         qList.appendChild(subGroup);
                     }

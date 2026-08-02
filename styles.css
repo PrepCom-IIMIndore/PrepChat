@@ -554,13 +554,42 @@ body::after {
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
 }
 
-.qtype-filter-header {
+.filter-row-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
     flex-wrap: wrap;
     gap: 0.5rem;
+}
+
+.btn-show-more-q {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.45rem 1rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #2563eb;
+    background: rgba(239, 246, 255, 0.8);
+    border: 1px dashed #bfdbfe;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-show-more-q:hover {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-color: #93c5fd;
+    transform: translateY(-1px);
+}
+
+.btn-show-more-q span.material-symbols-outlined {
+    font-size: 1.1rem;
 }
 
 .qtype-filter-title {
