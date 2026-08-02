@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession, signOut } from "next-auth/react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import experiencesData from "@/interview_experiences_data.json";
 import experienceStats from "@/interview_experience_stats.json";
 import companyIndustries from "@/company_industries.json";
@@ -25,8 +25,6 @@ export default function DashboardPage() {
   const [selectedYears, setSelectedYears] = useState<string[]>([]);
   const [selectedProcess, setSelectedProcess] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedQTypes, setSelectedQTypes] = useState<string[]>([]);
-  const [showMoreSection, setShowMoreSection] = useState<{ [key: string]: boolean }>({});
 
   // Modal State
   const [activeModalExp, setActiveModalExp] = useState<any | null>(null);
@@ -37,7 +35,6 @@ export default function DashboardPage() {
 
   // Catalog Section State
   const [catalogCompany, setCatalogCompany] = useState<string>("");
-  const [catalogData, setCatalogData] = useState<any | null>(null);
 
   // Extract unique companies & domains
   const allCompanies = useMemo(() => {
@@ -110,12 +107,6 @@ export default function DashboardPage() {
     );
   };
 
-  const toggleQType = (qtype: string) => {
-    setSelectedQTypes(prev => 
-      prev.includes(qtype) ? prev.filter(q => q !== qtype) : [...prev, qtype]
-    );
-  };
-
   return (
     <div className="app-wrapper">
       {/* App Header */}
@@ -125,7 +116,7 @@ export default function DashboardPage() {
             <img src="/logo.png" alt="IIM Indore PrepCom Logo" className="app-logo-img" />
             <div className="logo-text">
               <h1>PrepChat</h1>
-              <span className="badge-proxy">NextAuth.js Serverless Vercel</span>
+              <span className="badge-proxy">Vercel NextAuth Serverless</span>
             </div>
           </div>
 
@@ -175,7 +166,7 @@ export default function DashboardPage() {
             className={`main-nav-btn ${activeSection === "experiences" ? "active" : ""}`}
             onClick={() => setActiveSection("experiences")}
           >
-            <span className="material-symbols-outlined nav-btn-icon">work_history</span> Interview Experiences <span className="nav-badge">1,200+</span>
+            <span className="material-symbols-outlined nav-btn-icon">work_history</span> Interview Experiences <span className="nav-badge">1,202</span>
           </button>
           <button
             className={`main-nav-btn ${activeSection === "catalog" ? "active" : ""}`}
@@ -190,30 +181,31 @@ export default function DashboardPage() {
       <main className="main-container">
         {activeSection === "experiences" && (
           <div id="section-experiences" className="app-section">
-            {/* Filter Bar */}
-            <div className="exp-filters-card mb-4">
-              <div className="filter-header-bar">
-                <h3><span className="material-symbols-outlined">filter_list</span> Multi-Domain Placement Filters</h3>
+            {/* Search & Filter Card */}
+            <div className="search-card mb-4">
+              <div className="filter-row-header mb-3">
+                <div className="qtype-filter-title">
+                  <span className="material-symbols-outlined">filter_list</span>
+                  <span>Multi-Domain Placement Filters</span>
+                </div>
                 <button
-                  className="btn-reset-filters"
+                  className="btn-qtype-clear"
                   onClick={() => {
                     setSelectedCompany("");
                     setSelectedDomains([]);
                     setSelectedYears([]);
                     setSelectedProcess("");
                     setSearchQuery("");
-                    setSelectedQTypes([]);
                   }}
                 >
-                  <span className="material-symbols-outlined">refresh</span> Reset Filters
+                  Reset All Filters
                 </button>
               </div>
 
-              <div className="exp-filters-grid">
-                <div className="filter-group">
+              <div className="search-grid">
+                <div className="exp-filter-group">
                   <label>Company Filter</label>
                   <select
-                    className="filter-select"
                     value={selectedCompany}
                     onChange={(e) => setSelectedCompany(e.target.value)}
                   >
@@ -224,11 +216,10 @@ export default function DashboardPage() {
                   </select>
                 </div>
 
-                <div className="filter-group">
+                <div className="exp-filter-group">
                   <label>Keyword Search</label>
                   <input
                     type="text"
-                    className="filter-input"
                     placeholder="Search roles, GDs, technical questions..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -237,19 +228,22 @@ export default function DashboardPage() {
               </div>
 
               {/* Multi-Select Domain Pills */}
-              <div className="domain-pills-row mt-3">
-                <span className="pills-label">Domain Selection:</span>
-                <div className="pills-scroll-container">
+              <div className="mt-3">
+                <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-primary)", display: "block", marginBottom: "0.5rem" }}>
+                  Domain Selection:
+                </label>
+                <div className="qtype-pills-row">
                   {allDomains.map(d => {
                     const isSelected = selectedDomains.includes(d);
                     const count = (experiencesData as any[]).filter(e => e.domain === d).length;
                     return (
                       <button
                         key={d}
-                        className={`domain-pill-btn ${isSelected ? "active" : ""}`}
+                        className={`qtype-pill ${isSelected ? "active" : ""}`}
                         onClick={() => toggleDomain(d)}
                       >
-                        {d} <span className="pill-badge">{count}</span>
+                        <span>{d}</span>
+                        <span className="qtype-count-badge">{count}</span>
                       </button>
                     );
                   })}
@@ -257,24 +251,26 @@ export default function DashboardPage() {
               </div>
 
               {/* Multi-Select Year Pills */}
-              <div className="year-pills-row mt-2">
-                <span className="pills-label">Batch Year:</span>
-                <div className="pills-scroll-container">
+              <div className="mt-3">
+                <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-primary)", display: "block", marginBottom: "0.5rem" }}>
+                  Batch Year:
+                </label>
+                <div className="qtype-pills-row">
                   {allYears.map(y => {
                     const isSelected = selectedYears.includes(y);
                     return (
                       <button
                         key={y}
-                        className={`year-pill-btn ${isSelected ? "active" : ""}`}
+                        className={`qtype-pill ${isSelected ? "active" : ""}`}
                         onClick={() => toggleYear(y)}
                       >
-                        {y}
+                        <span>{y}</span>
                       </button>
                     );
                   })}
                   {selectedYears.length > 0 && (
                     <button
-                      className="btn-clear-years"
+                      className="btn-qtype-clear"
                       onClick={() => setSelectedYears([])}
                     >
                       Clear Years
@@ -285,34 +281,51 @@ export default function DashboardPage() {
             </div>
 
             {/* Results Count Banner */}
-            <div className="results-count-banner mb-3">
-              <span>Showing <strong>{filteredExperiences.length}</strong> placement experiences</span>
+            <div className="results-bar-header mb-3">
+              <span className="results-count-text">
+                Showing <strong>{filteredExperiences.length}</strong> placement experiences
+              </span>
             </div>
 
             {/* Experiences Cards Grid */}
-            <div className="exp-grid">
+            <div className="exp-cards-grid">
               {filteredExperiences.map((exp: any, idx: number) => (
                 <div
                   key={exp.id || idx}
-                  className="exp-card"
+                  className="experience-card"
                   onClick={() => {
                     setActiveModalExp(exp);
                     setActiveModalTab("overview");
                   }}
                 >
-                  <div className="exp-card-header">
-                    <div>
-                      <h4 className="exp-company-title">{exp.company}</h4>
-                      <span className="exp-domain-pill">{exp.domain}</span>
+                  <div>
+                    <div className="exp-card-header">
+                      <div>
+                        <div className="exp-card-company">{exp.company}</div>
+                      </div>
+                      <span className="badge-year-tag">{exp.year || "2024"}</span>
                     </div>
-                    <span className="exp-year-badge">{exp.year || "2024"}</span>
+
+                    <div className="meta-badges-row">
+                      <span className="badge-domain-tag">{exp.domain}</span>
+                      <span className="badge-process-tag">{exp.process_type || "Placement Process"}</span>
+                    </div>
+
+                    <p className="exp-card-snippet">
+                      {getCleanRoleTitle(exp)}
+                    </p>
+
+                    <div className="at-a-glance-bar">
+                      <span className="glance-pill pill-words">📝 {exp.word_count || 300} words</span>
+                      {exp.gd_topics_tips && <span className="glance-pill pill-gd-yes">GD Round</span>}
+                    </div>
                   </div>
 
-                  <p className="exp-role-offered">{getCleanRoleTitle(exp)}</p>
-
                   <div className="exp-card-footer">
-                    <span className="exp-word-count">📝 {exp.word_count || 300} words</span>
-                    <button className="btn-read-more">View Full Prep Guide &rarr;</button>
+                    <button className="btn-read-exp">
+                      <span>View Full Prep Guide</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>arrow_forward</span>
+                    </button>
                   </div>
                 </div>
               ))}
@@ -322,18 +335,20 @@ export default function DashboardPage() {
 
         {activeSection === "catalog" && (
           <div id="section-catalog" className="app-section">
-            <div className="exp-filters-card mb-4">
+            <div className="search-card mb-4">
               <h3>Company Catalog & Decks Search</h3>
-              <select
-                className="filter-select mt-2"
-                value={catalogCompany}
-                onChange={(e) => setCatalogCompany(e.target.value)}
-              >
-                <option value="">Select a Company</option>
-                {allCompanies.map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+              <div className="exp-filter-group mt-3">
+                <label>Select Company</label>
+                <select
+                  value={catalogCompany}
+                  onChange={(e) => setCatalogCompany(e.target.value)}
+                >
+                  <option value="">Select a Company</option>
+                  {allCompanies.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
         )}
@@ -354,7 +369,7 @@ export default function DashboardPage() {
               <button className="modal-close-btn" onClick={() => setActiveModalExp(null)}>&times;</button>
             </div>
 
-            {/* Modal Navigation Tabs (Equal 25% Width) */}
+            {/* Modal Navigation Tabs */}
             <div className="modal-nav-tabs">
               <button
                 className={`modal-tab-btn ${activeModalTab === "overview" ? "active" : ""}`}

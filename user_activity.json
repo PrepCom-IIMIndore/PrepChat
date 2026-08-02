@@ -34,5 +34,14 @@
     "login_count": 1,
     "activity_count": 0,
     "status": "Active"
+  },
+  "p22candidate@iimidr.ac.in": {
+    "email": "p22candidate@iimidr.ac.in",
+    "role": "user",
+    "first_login": "2026-08-02 18:07:59",
+    "last_login": "2026-08-02 18:07:59",
+    "login_count": 1,
+    "activity_count": 0,
+    "status": "Active"
   }
 }
