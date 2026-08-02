@@ -1,11 +1,21 @@
 // Access Control & Email Security Manager
 // Enforces Server-side Whitelist (Allowed List) and Blacklist (Blocked List)
+// Supports multi-email inputs separated by spaces, commas, semicolons, or newlines
 
 export const blockedEmails = new Set<string>();
 export const allowedEmails = new Set<string>([
   "prepcom@iimidr.ac.in"
 ]);
 export let isWhitelistMode = false;
+
+// Helper to parse multiple emails separated by space, comma, semicolon, or newline
+export function parseEmails(input: string): string[] {
+  if (!input) return [];
+  return input
+    .split(/[\s,;\n\r]+/)
+    .map(e => e.toLowerCase().trim())
+    .filter(e => e.length > 3 && e.includes("@"));
+}
 
 export function checkEmailAccess(email: string): { allowed: boolean; reason?: string } {
   const normalizedEmail = email.toLowerCase().trim();
@@ -36,24 +46,24 @@ export function checkEmailAccess(email: string): { allowed: boolean; reason?: st
   return { allowed: true };
 }
 
-export function blockEmail(email: string) {
-  const norm = email.toLowerCase().trim();
-  if (norm) blockedEmails.add(norm);
+export function blockEmail(input: string) {
+  const emails = parseEmails(input);
+  emails.forEach(e => blockedEmails.add(e));
 }
 
-export function unblockEmail(email: string) {
-  const norm = email.toLowerCase().trim();
-  if (norm) blockedEmails.delete(norm);
+export function unblockEmail(input: string) {
+  const emails = parseEmails(input);
+  emails.forEach(e => blockedEmails.delete(e));
 }
 
-export function allowEmail(email: string) {
-  const norm = email.toLowerCase().trim();
-  if (norm) allowedEmails.add(norm);
+export function allowEmail(input: string) {
+  const emails = parseEmails(input);
+  emails.forEach(e => allowedEmails.add(e));
 }
 
-export function removeAllowedEmail(email: string) {
-  const norm = email.toLowerCase().trim();
-  if (norm) allowedEmails.delete(norm);
+export function removeAllowedEmail(input: string) {
+  const emails = parseEmails(input);
+  emails.forEach(e => allowedEmails.delete(e));
 }
 
 export function setWhitelistMode(enabled: boolean) {

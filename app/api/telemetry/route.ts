@@ -9,7 +9,8 @@ import {
   unblockEmail,
   allowEmail,
   removeAllowedEmail,
-  setWhitelistMode
+  setWhitelistMode,
+  parseEmails
 } from "@/lib/accessControl";
 
 const telemetryDb: {
@@ -94,32 +95,36 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}));
     const action = body.action || "heartbeat";
 
-    // ADMIN MANAGEMENT ACTIONS (RESTRICED TO prepcom@iimidr.ac.in)
+    // ADMIN MANAGEMENT ACTIONS (RESTRICTED TO prepcom@iimidr.ac.in)
     if (role === "admin" || email.startsWith("prepcom")) {
       if (action === "block_email" && body.targetEmail) {
+        const parsed = parseEmails(body.targetEmail);
         blockEmail(body.targetEmail);
-        if (telemetryDb[body.targetEmail.toLowerCase()]) {
-          telemetryDb[body.targetEmail.toLowerCase()].status = "Blocked";
-        }
-        return NextResponse.json({ success: true, message: `Email ${body.targetEmail} has been blocked.` });
+        parsed.forEach(e => {
+          if (telemetryDb[e]) telemetryDb[e].status = "Blocked";
+        });
+        return NextResponse.json({ success: true, message: `Blocked ${parsed.length} email(s): ${parsed.join(", ")}` });
       }
 
       if (action === "unblock_email" && body.targetEmail) {
+        const parsed = parseEmails(body.targetEmail);
         unblockEmail(body.targetEmail);
-        if (telemetryDb[body.targetEmail.toLowerCase()]) {
-          telemetryDb[body.targetEmail.toLowerCase()].status = "Active";
-        }
-        return NextResponse.json({ success: true, message: `Email ${body.targetEmail} unblocked.` });
+        parsed.forEach(e => {
+          if (telemetryDb[e]) telemetryDb[e].status = "Active";
+        });
+        return NextResponse.json({ success: true, message: `Unblocked ${parsed.length} email(s)` });
       }
 
       if (action === "allow_email" && body.targetEmail) {
+        const parsed = parseEmails(body.targetEmail);
         allowEmail(body.targetEmail);
-        return NextResponse.json({ success: true, message: `Email ${body.targetEmail} added to allowed list.` });
+        return NextResponse.json({ success: true, message: `Added ${parsed.length} email(s) to allowed list` });
       }
 
       if (action === "remove_allowed_email" && body.targetEmail) {
+        const parsed = parseEmails(body.targetEmail);
         removeAllowedEmail(body.targetEmail);
-        return NextResponse.json({ success: true, message: `Email ${body.targetEmail} removed from allowed list.` });
+        return NextResponse.json({ success: true, message: `Removed ${parsed.length} email(s) from allowed list` });
       }
 
       if (action === "toggle_whitelist") {

@@ -1020,11 +1020,11 @@ export default function DashboardPage() {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
                   {/* Blocklist Management Box */}
                   <div style={{ background: "#fff", padding: "1rem", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
-                    <strong style={{ fontSize: "0.88rem", color: "#dc2626" }}>🚫 Block Email Address (Instant Server Lockout)</strong>
+                    <strong style={{ fontSize: "0.88rem", color: "#dc2626" }}>🚫 Block Email Address(es) (Space/Comma Separated)</strong>
                     <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
                       <input
-                        type="email"
-                        placeholder="e.g. abuser@iimidr.ac.in"
+                        type="text"
+                        placeholder="e.g. user1@iimidr.ac.in user2@iimidr.ac.in"
                         value={blockInputEmail}
                         onChange={(e) => setBlockInputEmail(e.target.value)}
                         style={{ flex: 1, padding: "0.45rem 0.75rem", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "0.85rem" }}
@@ -1034,7 +1034,7 @@ export default function DashboardPage() {
                         onClick={() => handleBlockEmail(blockInputEmail)}
                         style={{ background: "#dc2626", color: "#fff", border: "none", padding: "0.45rem 0.9rem", borderRadius: "8px", fontWeight: 700, cursor: "pointer", fontSize: "0.85rem" }}
                       >
-                        Block ID
+                        Block ID(s)
                       </button>
                     </div>
 
@@ -1056,11 +1056,11 @@ export default function DashboardPage() {
 
                   {/* Allowed List Management Box */}
                   <div style={{ background: "#fff", padding: "1rem", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
-                    <strong style={{ fontSize: "0.88rem", color: "#059669" }}>✅ Allowed Email Whitelist</strong>
+                    <strong style={{ fontSize: "0.88rem", color: "#059669" }}>✅ Allowed Email Whitelist (Space/Comma Separated)</strong>
                     <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
                       <input
-                        type="email"
-                        placeholder="e.g. student@iimidr.ac.in"
+                        type="text"
+                        placeholder="e.g. user1@iimidr.ac.in user2@iimidr.ac.in"
                         value={allowInputEmail}
                         onChange={(e) => setAllowInputEmail(e.target.value)}
                         style={{ flex: 1, padding: "0.45rem 0.75rem", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "0.85rem" }}
@@ -1070,7 +1070,7 @@ export default function DashboardPage() {
                         onClick={() => handleAllowEmail(allowInputEmail)}
                         style={{ background: "#059669", color: "#fff", border: "none", padding: "0.45rem 0.9rem", borderRadius: "8px", fontWeight: 700, cursor: "pointer", fontSize: "0.85rem" }}
                       >
-                        Allow ID
+                        Allow ID(s)
                       </button>
                     </div>
 
