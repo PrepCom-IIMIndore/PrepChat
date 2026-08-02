@@ -284,7 +284,9 @@ export default function DashboardPage() {
             <img src="/logo.png" alt="IIM Indore PrepCom Logo" className="app-logo-img" />
             <div className="logo-text">
               <h1>PrepChat</h1>
-              <span className="badge-proxy">Vercel NextAuth Serverless</span>
+              <span className="badge-proxy" title="Authenticated via Google OAuth restricted to @iimidr.ac.in accounts">
+                Vercel NextAuth Serverless
+              </span>
             </div>
           </div>
 
@@ -293,12 +295,14 @@ export default function DashboardPage() {
             <button
               className={`view-btn ${viewMode === "basic" ? "active" : ""}`}
               onClick={() => setViewMode("basic")}
+              title="Basic View: Simplified overview cards and executive summaries"
             >
               <span className="material-symbols-outlined btn-icon">grid_view</span> Basic View
             </button>
             <button
               className={`view-btn ${viewMode === "advanced" ? "active" : ""}`}
               onClick={() => setViewMode("advanced")}
+              title="Advanced View: In-depth company intelligence, question archives, and PPT decks"
             >
               <span className="material-symbols-outlined btn-icon">analytics</span> Advanced View
             </button>
@@ -306,7 +310,7 @@ export default function DashboardPage() {
 
           {/* User Profile & Logout Flow */}
           <div className="header-user-area">
-            <span className="user-pill">
+            <span className="user-pill" title="Currently authenticated Google Workspace account">
               <span className="material-symbols-outlined">person</span> {userEmail}
             </span>
 
@@ -315,7 +319,7 @@ export default function DashboardPage() {
               <button
                 className="btn-admin-nav"
                 onClick={handleFetchAdminTelemetry}
-                title="PrepCom Session Telemetry & Graphical Analytics"
+                title="Exclusive PrepCom Control Panel: Access security controls, user session telemetry, and graphical trends"
                 style={{ background: "linear-gradient(135deg, #4f46e5, #7c3aed)", color: "#ffffff" }}
               >
                 <span className="material-symbols-outlined">insert_chart</span> PrepCom Analytics & Graphs
@@ -325,7 +329,7 @@ export default function DashboardPage() {
             <button
               className="btn-logout-nav"
               onClick={() => signOut({ callbackUrl: "/auth/signin" })}
-              title="Sign out"
+              title="Sign out of PrepChat"
             >
               <span className="material-symbols-outlined">logout</span> Sign Out
             </button>
@@ -337,12 +341,14 @@ export default function DashboardPage() {
           <button
             className={`main-nav-btn ${activeSection === "experiences" ? "active" : ""}`}
             onClick={() => setActiveSection("experiences")}
+            title="Browse 1,200+ detailed candidate placement interview experiences submitted by seniors"
           >
             <span className="material-symbols-outlined nav-btn-icon">work_history</span> Interview Experiences <span className="nav-badge">1,202</span>
           </button>
           <button
             className={`main-nav-btn ${activeSection === "catalog" ? "active" : ""}`}
             onClick={() => setActiveSection("catalog")}
+            title="Explore company intelligence catalog, round structures, presentation decks, and past questions"
           >
             <span className="material-symbols-outlined nav-btn-icon">menu_book</span> Company Catalog & Decks
           </button>
@@ -369,10 +375,15 @@ export default function DashboardPage() {
                     setSelectedProcess("");
                     setSearchQuery("");
                   }}
+                  title="Reset all active search filters back to default"
                 >
                   Reset All Filters
                 </button>
               </div>
+
+              <p style={{ fontSize: "0.82rem", color: "#64748b", margin: "-0.5rem 0 1rem 0" }}>
+                Filter 1,200+ interview experiences by recruiting firm, domain specialization, graduating batch year, or keyword.
+              </p>
 
               <div className="search-grid">
                 <div className="exp-filter-group">
@@ -381,7 +392,7 @@ export default function DashboardPage() {
                     value={selectedCompany}
                     onChange={(e) => setSelectedCompany(e.target.value)}
                   >
-                    <option value="">All Companies (180+)</option>
+                    <option value="">All Companies (180+ firms)</option>
                     {allCompanies.map(c => (
                       <option key={c} value={c}>{c}</option>
                     ))}
@@ -401,9 +412,12 @@ export default function DashboardPage() {
 
               {/* Multi-Select Domain Pills */}
               <div className="mt-3">
-                <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-primary)", display: "block", marginBottom: "0.5rem" }}>
-                  Domain Selection:
+                <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-primary)", display: "block", marginBottom: "0.25rem" }}>
+                  Domain Specialization (Multi-Select):
                 </label>
+                <span style={{ fontSize: "0.78rem", color: "#64748b", display: "block", marginBottom: "0.5rem" }}>
+                  Select one or more domain areas to filter student interview experience guides.
+                </span>
                 <div className="qtype-pills-row">
                   {allDomains.map(d => {
                     const isSelected = selectedDomains.includes(d);
@@ -413,6 +427,7 @@ export default function DashboardPage() {
                         key={d}
                         className={`qtype-pill ${isSelected ? "active" : ""}`}
                         onClick={() => toggleDomain(d)}
+                        title={`Filter by ${d} domain (${count} experiences available)`}
                       >
                         <span>{d}</span>
                         <span className="qtype-count-badge">{count}</span>
@@ -424,9 +439,12 @@ export default function DashboardPage() {
 
               {/* Multi-Select Year Pills */}
               <div className="mt-3">
-                <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-primary)", display: "block", marginBottom: "0.5rem" }}>
-                  Batch Year:
+                <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-primary)", display: "block", marginBottom: "0.25rem" }}>
+                  Batch Year (Multi-Select):
                 </label>
+                <span style={{ fontSize: "0.78rem", color: "#64748b", display: "block", marginBottom: "0.5rem" }}>
+                  Filter experiences by graduating batch year.
+                </span>
                 <div className="qtype-pills-row">
                   {allYears.map(y => {
                     const isSelected = selectedYears.includes(y);
@@ -435,6 +453,7 @@ export default function DashboardPage() {
                         key={y}
                         className={`qtype-pill ${isSelected ? "active" : ""}`}
                         onClick={() => toggleYear(y)}
+                        title={`Filter experiences from batch year ${y}`}
                       >
                         <span>{y}</span>
                       </button>
@@ -455,7 +474,7 @@ export default function DashboardPage() {
             {/* Results Count Banner */}
             <div className="results-bar-header mb-3">
               <span className="results-count-text">
-                Showing <strong>{filteredExperiences.length}</strong> placement experiences
+                Showing <strong>{filteredExperiences.length}</strong> candidate placement experiences matching selected criteria
               </span>
             </div>
 
@@ -476,12 +495,12 @@ export default function DashboardPage() {
                       <div>
                         <div className="exp-card-company">{exp.company}</div>
                       </div>
-                      <span className="badge-year-tag">{exp.year || "2024"}</span>
+                      <span className="badge-year-tag" title="Graduating Batch Year">{exp.year || "2024"}</span>
                     </div>
 
                     <div className="meta-badges-row">
-                      <span className="badge-domain-tag">{exp.domain}</span>
-                      <span className="badge-process-tag">{exp.process_type || "Placement Process"}</span>
+                      <span className="badge-domain-tag" title="Domain Specialization">{exp.domain}</span>
+                      <span className="badge-process-tag" title="Process Type">{exp.process_type || "Placement Process"}</span>
                     </div>
 
                     <p className="exp-card-snippet">
@@ -489,8 +508,8 @@ export default function DashboardPage() {
                     </p>
 
                     <div className="at-a-glance-bar">
-                      <span className="glance-pill pill-words">📝 {exp.word_count || 300} words</span>
-                      {exp.gd_topics_tips && <span className="glance-pill pill-gd-yes">GD Round</span>}
+                      <span className="glance-pill pill-words" title="Total word count & detail level of guide">📝 {exp.word_count || 300} words</span>
+                      {exp.gd_topics_tips && <span className="glance-pill pill-gd-yes" title="Includes Group Discussion round details">GD Round</span>}
                     </div>
                   </div>
 
@@ -512,6 +531,9 @@ export default function DashboardPage() {
             <div className="search-card mb-4">
               <div className="exp-filter-group">
                 <label style={{ fontSize: "1.1rem", fontWeight: 800 }}>🏢 Select Company from Institutional Intelligence Catalog</label>
+                <p style={{ fontSize: "0.82rem", color: "#64748b", margin: "0.25rem 0 0.5rem 0" }}>
+                  Access company overview, historical interview questions, selection round formats, and extracted presentation slides.
+                </p>
                 <select
                   value={catalogCompany}
                   onChange={(e) => {
@@ -535,7 +557,9 @@ export default function DashboardPage() {
                     <h2>{catalogIntelligence.name}</h2>
                     <span className="company-sector-badge">Sector: {catalogIntelligence.industry}</span>
                   </div>
-                  <span className="view-indicator-pill">Mode: {viewMode === "basic" ? "Basic Overview" : "Advanced Intelligence"}</span>
+                  <span className="view-indicator-pill">
+                    Mode: {viewMode === "basic" ? "Basic Overview (Executive Summaries)" : "Advanced Intelligence (Deep Question Banks & Slides)"}
+                  </span>
                 </div>
 
                 {/* BASIC VIEW FOR CATALOG */}
@@ -544,25 +568,25 @@ export default function DashboardPage() {
                     <div className="bento-card">
                       <span className="material-symbols-outlined bento-icon">help_center</span>
                       <div className="bento-num">{catalogIntelligence.questions.length}</div>
-                      <div className="bento-label">Questions Recorded</div>
+                      <div className="bento-label" title="Total interview questions archived for this firm">Questions Recorded</div>
                     </div>
 
                     <div className="bento-card">
                       <span className="material-symbols-outlined bento-icon">format_list_bulleted</span>
                       <div className="bento-num">{catalogIntelligence.formatText ? "Available" : "N/A"}</div>
-                      <div className="bento-label">Process Overview</div>
+                      <div className="bento-label" title="Availability of round-by-round selection process note">Process Overview</div>
                     </div>
 
                     <div className="bento-card">
                       <span className="material-symbols-outlined bento-icon">slideshow</span>
                       <div className="bento-num">{catalogIntelligence.companySlides.length}</div>
-                      <div className="bento-label">Company Decks</div>
+                      <div className="bento-label" title="Extracted PowerPoint slides from official company presentations">Company Decks</div>
                     </div>
 
                     <div className="bento-card">
                       <span className="material-symbols-outlined bento-icon">view_carousel</span>
                       <div className="bento-num">{catalogIntelligence.industrySlides.length}</div>
-                      <div className="bento-label">Sector Decks</div>
+                      <div className="bento-label" title="Industry sector overview and market analysis slides">Sector Decks</div>
                     </div>
                   </div>
                 )}
@@ -574,6 +598,9 @@ export default function DashboardPage() {
                       <span className="material-symbols-outlined">summarize</span>
                       <h3>Executive Process Overview</h3>
                     </div>
+                    <p style={{ fontSize: "0.8rem", color: "#64748b", margin: "0.25rem 1.25rem 0 1.25rem" }}>
+                      Selection structure, round outline, and panel evaluation expectations for {catalogIntelligence.name}.
+                    </p>
                     <div className="academic-card-body" style={{ whiteSpace: "pre-wrap", lineHeight: 1.7, fontSize: "0.95rem" }}>
                       {catalogIntelligence.formatText}
                     </div>
@@ -588,18 +615,21 @@ export default function DashboardPage() {
                       <button
                         className={`adv-tab-btn ${catalogAdvTab === "questions" ? "active" : ""}`}
                         onClick={() => setCatalogAdvTab("questions")}
+                        title="Archived questions asked by interview panels grouped by batch year and question type"
                       >
                         <span className="material-symbols-outlined">quiz</span> Previous Questions ({catalogIntelligence.questions.length})
                       </button>
                       <button
                         className={`adv-tab-btn ${catalogAdvTab === "format" ? "active" : ""}`}
                         onClick={() => setCatalogAdvTab("format")}
+                        title="Detailed selection process structure, GD topics, and interview guidelines"
                       >
                         <span className="material-symbols-outlined">description</span> Interview Format Details
                       </button>
                       <button
                         className={`adv-tab-btn ${catalogAdvTab === "slides" ? "active" : ""}`}
                         onClick={() => setCatalogAdvTab("slides")}
+                        title="Presentation slides extracted from company PPTs and sector analysis decks"
                       >
                         <span className="material-symbols-outlined">present_to_all</span> Company & Sector Decks ({catalogIntelligence.companySlides.length + catalogIntelligence.industrySlides.length})
                       </button>
@@ -642,6 +672,7 @@ export default function DashboardPage() {
                                     key={y}
                                     className={`qtype-pill ${isSel ? "active" : ""}`}
                                     onClick={() => toggleCatalogQYear(y)}
+                                    title={`Filter questions from batch year ${y} (${qCount} questions)`}
                                   >
                                     <span>{y}</span>
                                     <span className="qtype-count-badge">{qCount}</span>
@@ -682,6 +713,7 @@ export default function DashboardPage() {
                                     key={t}
                                     className={`qtype-pill ${isSel ? "active" : ""}`}
                                     onClick={() => toggleCatalogQType(t)}
+                                    title={`Filter by ${t} question type (${count} questions)`}
                                   >
                                     <span>{t}</span>
                                     <span className="qtype-count-badge">{count}</span>
@@ -767,12 +799,14 @@ export default function DashboardPage() {
                           <button
                             className={`deck-tab-btn ${catalogDeckTab === "company" ? "active" : ""}`}
                             onClick={() => setCatalogDeckTab("company")}
+                            title="View official presentation slides for this firm"
                           >
                             🏢 Company Presentation Slides ({catalogIntelligence.companySlides.length})
                           </button>
                           <button
                             className={`deck-tab-btn ${catalogDeckTab === "industry" ? "active" : ""}`}
                             onClick={() => setCatalogDeckTab("industry")}
+                            title="View industry sector analysis slides"
                           >
                             📈 Industry Sector Slides ({catalogIntelligence.industrySlides.length})
                           </button>
@@ -820,6 +854,9 @@ export default function DashboardPage() {
                     <span className="material-symbols-outlined">record_voice_over</span>
                     <h3>Candidate Interview Experiences for {catalogIntelligence.name} ({catalogIntelligence.compExperiences.length})</h3>
                   </div>
+                  <p style={{ fontSize: "0.8rem", color: "#64748b", margin: "0.25rem 1.25rem 0 1.25rem" }}>
+                    Read real candidate interview submissions for {catalogIntelligence.name}.
+                  </p>
                   <div className="academic-card-body">
                     <div className="exp-cards-grid">
                       {catalogIntelligence.compExperiences.map((exp: any, idx: number) => (
@@ -907,10 +944,16 @@ export default function DashboardPage() {
                 <div className="modal-pane">
                   <div className="modal-section-box mb-3">
                     <h4>Pre-Process Preparation</h4>
+                    <p style={{ fontSize: "0.78rem", color: "#64748b", marginTop: "-0.2rem", marginBottom: "0.5rem" }}>
+                      Candidate background preparation, resume tweaks, and preliminary research strategy.
+                    </p>
                     <p>{activeModalExp.pre_process_tips || "No pre-process notes provided."}</p>
                   </div>
                   <div className="modal-section-box">
                     <h4>Role Details & Position Description</h4>
+                    <p style={{ fontSize: "0.78rem", color: "#64748b", marginTop: "-0.2rem", marginBottom: "0.5rem" }}>
+                      Specific job title, team placement, and candidate profile context.
+                    </p>
                     <p>{activeModalExp.role_offered || "Standard Placement Role."}</p>
                   </div>
                 </div>
@@ -920,10 +963,16 @@ export default function DashboardPage() {
                 <div className="modal-pane">
                   <div className="modal-section-box mb-3">
                     <h4>GD Topics & Discussion Notes</h4>
+                    <p style={{ fontSize: "0.78rem", color: "#64748b", marginTop: "-0.2rem", marginBottom: "0.5rem" }}>
+                      Group discussion topic statement, group size, and key points presented during the round.
+                    </p>
                     <p>{activeModalExp.gd_topics_tips || "No GD topics recorded."}</p>
                   </div>
                   <div className="modal-section-box">
                     <h4>Interview Outline & Structure</h4>
+                    <p style={{ fontSize: "0.78rem", color: "#64748b", marginTop: "-0.2rem", marginBottom: "0.5rem" }}>
+                      Round sequence, duration per candidate, and panel structure.
+                    </p>
                     <p>{activeModalExp.interview_outline || "Standard multi-round technical and HR interview."}</p>
                   </div>
                 </div>
@@ -933,14 +982,23 @@ export default function DashboardPage() {
                 <div className="modal-pane">
                   <div className="modal-section-box mb-3">
                     <h4>Technical & Domain Specific Questions</h4>
+                    <p style={{ fontSize: "0.78rem", color: "#64748b", marginTop: "-0.2rem", marginBottom: "0.5rem" }}>
+                      Exact technical, case framework, financial modeling, or domain questions asked by panelists.
+                    </p>
                     <p>{activeModalExp.domain_questions || "Refer to general domain questions."}</p>
                   </div>
                   <div className="modal-section-box mb-3">
                     <h4>HR & Behavioral Questions</h4>
+                    <p style={{ fontSize: "0.78rem", color: "#64748b", marginTop: "-0.2rem", marginBottom: "0.5rem" }}>
+                      CV walkthrough, conflict resolution, situational ethics, and cultural fit questions.
+                    </p>
                     <p>{activeModalExp.hr_gk_questions || "Standard behavioral questions."}</p>
                   </div>
                   <div className="modal-section-box">
                     <h4>Technical Skills & Competencies Tested</h4>
+                    <p style={{ fontSize: "0.78rem", color: "#64748b", marginTop: "-0.2rem", marginBottom: "0.5rem" }}>
+                      Core analytical tools, domain frameworks, and skills evaluated.
+                    </p>
                     <p>{activeModalExp.tech_skills || "Financial modeling, analytics, consulting frameworks."}</p>
                   </div>
                 </div>
@@ -950,10 +1008,16 @@ export default function DashboardPage() {
                 <div className="modal-pane">
                   <div className="modal-section-box mb-3">
                     <h4>Do's and Don'ts / Critical Tips</h4>
+                    <p style={{ fontSize: "0.78rem", color: "#64748b", marginTop: "-0.2rem", marginBottom: "0.5rem" }}>
+                      Key mistakes to avoid and advice shared by senior candidate.
+                    </p>
                     <p>{activeModalExp.dos_and_donts || "Be crisp, confident, and well-versed with your resume."}</p>
                   </div>
                   <div className="modal-section-box">
                     <h4>Preparation Resources & References</h4>
+                    <p style={{ fontSize: "0.78rem", color: "#64748b", marginTop: "-0.2rem", marginBottom: "0.5rem" }}>
+                      Books, casebooks, modeling courses, and study materials recommended.
+                    </p>
                     <p>{activeModalExp.prep_resources || "IIM Indore Placement Decks, Wall Street Prep, Case in Point."}</p>
                   </div>
                 </div>
@@ -973,12 +1037,16 @@ export default function DashboardPage() {
                   <span className="meta-pill pill-domain" style={{ background: "#4f46e5", color: "#fff" }}>Exclusive Admin Control</span>
                   <span className="meta-pill pill-process">prepcom@iimidr.ac.in</span>
                 </div>
-                <h3>📊 PrepCom Graphical Analytics & User Activity Dashboard</h3>
+                <h3>📊 PrepCom Graphical Analytics & Security Control Center</h3>
               </div>
               <button className="modal-close-btn" onClick={() => setAdminModalOpen(false)}>&times;</button>
             </div>
 
             <div className="modal-body">
+              <p style={{ fontSize: "0.85rem", color: "#64748b", marginBottom: "1.25rem" }}>
+                Real-time usage metrics, daily trend graphs, company visit statistics, and server-side email access control for PrepCom admins.
+              </p>
+
               {/* Analytics Summary Stats Grid */}
               <div className="admin-stats-grid mb-4">
                 <div className="admin-stat-card">
@@ -986,45 +1054,66 @@ export default function DashboardPage() {
                   <div className="stat-info">
                     <span className="stat-value">{adminTelemetry?.summary?.total_registered_users || 0}</span>
                     <span className="stat-label">Active Users</span>
+                    <span style={{ fontSize: "0.72rem", color: "#64748b", marginTop: "2px" }}>
+                      Unique student accounts logged in telemetry database.
+                    </span>
                   </div>
                 </div>
+
                 <div className="admin-stat-card">
                   <div className="stat-icon material-symbols-outlined">timer</div>
                   <div className="stat-info">
                     <span className="stat-value" style={{ color: "#4f46e5" }}>{adminTelemetry?.summary?.avg_time_display || "0 mins"}</span>
                     <span className="stat-label">Avg Time / Day</span>
+                    <span style={{ fontSize: "0.72rem", color: "#64748b", marginTop: "2px" }}>
+                      Calculated from active 15s session heartbeats per student per day.
+                    </span>
                   </div>
                 </div>
+
                 <div className="admin-stat-card">
                   <div className="stat-icon material-symbols-outlined">travel_explore</div>
                   <div className="stat-info">
                     <span className="stat-value" style={{ color: "#059669" }}>{adminTelemetry?.summary?.avg_companies_per_user || "0.0"}</span>
                     <span className="stat-label">Avg Companies / User</span>
+                    <span style={{ fontSize: "0.72rem", color: "#64748b", marginTop: "2px" }}>
+                      Average unique company catalog pages visited per student.
+                    </span>
                   </div>
                 </div>
+
                 <div className="admin-stat-card">
                   <div className="stat-icon material-symbols-outlined">domain</div>
                   <div className="stat-info">
                     <span className="stat-value" style={{ color: "#7c3aed" }}>{adminTelemetry?.summary?.total_unique_companies_explored || 0}</span>
                     <span className="stat-label">Companies Explored</span>
+                    <span style={{ fontSize: "0.72rem", color: "#64748b", marginTop: "2px" }}>
+                      Total unique recruiting firms researched across all sessions.
+                    </span>
                   </div>
                 </div>
               </div>
 
               {/* GRAPHICAL CHARTS SECTION */}
               <div className="search-card mb-4" style={{ background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "14px", padding: "1.5rem" }}>
-                <h4 style={{ fontSize: "1.1rem", fontWeight: 800, marginBottom: "1.25rem", color: "#0f172a", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <h4 style={{ fontSize: "1.1rem", fontWeight: 800, marginBottom: "0.25rem", color: "#0f172a", display: "flex", alignItems: "center", gap: "0.5rem" }}>
                   <span className="material-symbols-outlined" style={{ color: "#2563eb" }}>bar_chart</span>
                   Graphical Trends: Daily Users, Avg Time, and Companies Explored
                 </h4>
+                <p style={{ fontSize: "0.82rem", color: "#64748b", marginBottom: "1.25rem" }}>
+                  Visual bar charts showing daily breakdown over the past 7 days. Hover or inspect bars for detailed daily metrics.
+                </p>
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
                   {/* GRAPHICAL CHART 1: Avg Time & Daily Active Users */}
                   <div style={{ background: "#f8fafc", padding: "1.25rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
                       <strong style={{ fontSize: "0.9rem", color: "#1e293b" }}>📈 Avg User Time per Day (Minutes)</strong>
                       <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "#2563eb", background: "#eff6ff", padding: "2px 8px", borderRadius: "8px" }}>Daily Trend</span>
                     </div>
+                    <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "1rem" }}>
+                      Average active duration spent per student on each day.
+                    </p>
 
                     <div style={{ display: "flex", alignItems: "flex-end", height: "160px", gap: "0.75rem", paddingBottom: "1.5rem", borderBottom: "2px solid #e2e8f0" }}>
                       {(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
@@ -1051,10 +1140,13 @@ export default function DashboardPage() {
 
                   {/* GRAPHICAL CHART 2: Avg Companies Visited per User per Day */}
                   <div style={{ background: "#f8fafc", padding: "1.25rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
                       <strong style={{ fontSize: "0.9rem", color: "#1e293b" }}>📊 Avg Companies Visited per User per Day</strong>
                       <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "#059669", background: "#ecfdf5", padding: "2px 8px", borderRadius: "8px" }}>Company Exploration</span>
                     </div>
+                    <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "1rem" }}>
+                      Average count of unique firm pages explored per active student on each day.
+                    </p>
 
                     <div style={{ display: "flex", alignItems: "flex-end", height: "160px", gap: "0.75rem", paddingBottom: "1.5rem", borderBottom: "2px solid #e2e8f0" }}>
                       {(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
@@ -1083,10 +1175,13 @@ export default function DashboardPage() {
 
               {/* SECURITY CONTROL PANEL: BLOCKLIST & ALLOWED LIST */}
               <div className="search-card mb-4" style={{ background: "#f8fafc", border: "1px solid #cbd5e1" }}>
-                <h4 style={{ fontSize: "1.05rem", fontWeight: 800, marginBottom: "0.75rem", color: "#0f172a", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                <h4 style={{ fontSize: "1.05rem", fontWeight: 800, marginBottom: "0.25rem", color: "#0f172a", display: "flex", alignItems: "center", gap: "0.4rem" }}>
                   <span className="material-symbols-outlined" style={{ color: "#dc2626" }}>lock</span>
                   Email Access Control Settings (Block & Restrict Email IDs)
                 </h4>
+                <p style={{ fontSize: "0.82rem", color: "#64748b", marginBottom: "1rem" }}>
+                  Enforced server-side in NextAuth.js callback before a session is ever created.
+                </p>
 
                 {/* Whitelist Toggle */}
                 <div className="mb-3" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#ffffff", padding: "0.85rem 1.1rem", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
@@ -1117,6 +1212,9 @@ export default function DashboardPage() {
                   {/* Blocklist Management Box */}
                   <div style={{ background: "#fff", padding: "1rem", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
                     <strong style={{ fontSize: "0.88rem", color: "#dc2626" }}>🚫 Block Email Address(es) (Space/Comma Separated)</strong>
+                    <p style={{ fontSize: "0.75rem", color: "#64748b", margin: "2px 0 6px 0" }}>
+                      Enter one or more email IDs separated by spaces to block instantly.
+                    </p>
                     <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
                       <input
                         type="text"
@@ -1153,6 +1251,9 @@ export default function DashboardPage() {
                   {/* Allowed List Management Box */}
                   <div style={{ background: "#fff", padding: "1rem", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
                     <strong style={{ fontSize: "0.88rem", color: "#059669" }}>✅ Allowed Email Whitelist (Space/Comma Separated)</strong>
+                    <p style={{ fontSize: "0.75rem", color: "#64748b", margin: "2px 0 6px 0" }}>
+                      List of email IDs permitted to log in when Whitelist Mode is active.
+                    </p>
                     <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
                       <input
                         type="text"
@@ -1190,7 +1291,12 @@ export default function DashboardPage() {
               {/* LIVE SESSION & COMPANY TRACKER AUDIT TABLE */}
               <div className="admin-table-container">
                 <div className="admin-table-header">
-                  <h4>Live Session Audit Log & Companies Explored per User</h4>
+                  <div>
+                    <h4>Live Session Audit Log & Companies Explored per User</h4>
+                    <p style={{ fontSize: "0.78rem", color: "#64748b", margin: "2px 0 0 0" }}>
+                      Detailed audit log tracking session start/end timestamps, duration, and specific companies explored per student.
+                    </p>
+                  </div>
                   <input
                     type="text"
                     className="admin-search-input"
@@ -1203,14 +1309,14 @@ export default function DashboardPage() {
                   <table className="telemetry-table">
                     <thead>
                       <tr>
-                        <th>User Account (@iimidr.ac.in)</th>
-                        <th>Role</th>
-                        <th>Session Start</th>
-                        <th>Last Active</th>
-                        <th>Time Spent</th>
-                        <th>Unique Companies Explored</th>
-                        <th>Status</th>
-                        <th>Admin Action</th>
+                        <th title="Authenticated Google Workspace account email">User Account (@iimidr.ac.in)</th>
+                        <th title="Role level (ADMIN for prepcom@iimidr.ac.in, USER for students)">Role</th>
+                        <th title="Timestamp when user initiated sign-in">Session Start</th>
+                        <th title="Timestamp of latest active background heartbeat ping (every 15s)">Last Active</th>
+                        <th title="Total active session duration accumulated during browsing">Time Spent</th>
+                        <th title="Count and preview of recruiting firm catalog pages visited by this user">Unique Companies Explored</th>
+                        <th title="Current access status (Active Session or BLOCKED)">Status</th>
+                        <th title="1-click admin block/unblock controls">Admin Action</th>
                       </tr>
                     </thead>
                     <tbody>
