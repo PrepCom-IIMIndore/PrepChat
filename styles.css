@@ -1551,23 +1551,28 @@ body::after {
 
 .modal-nav-tabs {
     display: flex;
-    background: rgba(248, 250, 252, 0.9);
+    width: 100%;
+    background: rgba(248, 250, 252, 0.95);
     border-bottom: 1px solid var(--border-color);
-    overflow-x: auto;
+    overflow-x: hidden;
 }
 
 .modal-tab-btn {
+    flex: 1 1 0%;
+    min-width: 0;
     background: transparent;
     border: none;
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: 0.82rem;
     font-weight: 700;
-    padding: 0.8rem 1.3rem;
+    padding: 0.75rem 0.35rem;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    justify-content: center;
+    gap: 0.35rem;
     white-space: nowrap;
+    text-align: center;
     border-bottom: 2px solid transparent;
     transition: all 0.2s;
 }

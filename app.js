@@ -141,6 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnAllTypes = document.getElementById('btn-qtype-all');
         const btnClearTypes = document.getElementById('btn-qtype-clear');
         const btnAllYears = document.getElementById('btn-qyear-all');
+        const btnClearYears = document.getElementById('btn-qyear-clear');
         const typePills = document.querySelectorAll('#qtype-pills-container .qtype-pill');
 
         if (btnAllTypes) {
@@ -164,6 +165,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const allQs = (currentCompanyData && currentCompanyData.questions) ? currentCompanyData.questions : [];
                 const cYears = Array.from(new Set(allQs.map(q => q.year)));
                 selectedQYears = new Set(cYears);
+                updateQYearPillsUI();
+                if (currentCompanyData) renderAdvancedView();
+            });
+        }
+
+        if (btnClearYears) {
+            btnClearYears.addEventListener('click', () => {
+                selectedQYears.clear();
                 updateQYearPillsUI();
                 if (currentCompanyData) renderAdvancedView();
             });
@@ -598,17 +607,24 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderAdvancedView() {
         const allQuestions = (currentCompanyData && currentCompanyData.questions) ? currentCompanyData.questions : [];
         
-        // 1. Populate Batch Year multi-select pills for this company
+        // Subset of questions matching currently active Question Types
+        const typeFilteredQs = (selectedQTypes.size > 0)
+            ? allQuestions.filter(q => selectedQTypes.has(q.question_type))
+            : allQuestions;
+
+        // Subset of questions matching currently active Batch Years
+        const yearFilteredQs = (selectedQYears.size > 0)
+            ? allQuestions.filter(q => selectedQYears.has(q.year))
+            : allQuestions;
+
+        // 1. Populate Batch Year multi-select pills & dynamic counts (based on active Question Types)
         const companyYears = Array.from(new Set(allQuestions.map(q => q.year))).sort().reverse();
-        if (selectedQYears.size === 0 && companyYears.length > 0) {
-            selectedQYears = new Set(companyYears);
-        }
 
         const qyearContainer = document.getElementById('qyear-pills-container');
         if (qyearContainer) {
             qyearContainer.innerHTML = '';
             companyYears.forEach(y => {
-                const count = allQuestions.filter(q => q.year === y).length;
+                const count = typeFilteredQs.filter(q => q.year === y).length;
                 const btn = document.createElement('button');
                 btn.className = `qtype-pill ${selectedQYears.has(y) ? 'active' : ''}`;
                 btn.setAttribute('data-year', y);
@@ -626,7 +642,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // 2. Calculate question type breakdown counts for current company & update badges
+        // 2. Calculate question type breakdown counts (based on active Batch Years) & update badges
         const counts = {
             'Domain': 0,
             'Technical': 0,
@@ -634,7 +650,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'Behavioural': 0,
             'GD': 0
         };
-        allQuestions.forEach(q => {
+        yearFilteredQs.forEach(q => {
             if (counts[q.question_type] !== undefined) counts[q.question_type]++;
         });
 
