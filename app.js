@@ -149,15 +149,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Official Google Identity Services Callback
-    window.handleGoogleCredentialResponse = async function(response) {
-        if (!response || !response.credential) return;
-        const payload = parseJwt(response.credential);
-        if (!payload || !payload.email) return;
+    const googlePickerModal = document.getElementById('google-picker-modal');
+    const gAccountStudent = document.getElementById('g-account-student');
+    const gAccountAdmin = document.getElementById('g-account-admin');
+    const gCustomEmailInput = document.getElementById('g-custom-email-input');
+    const btnConfirmGCustom = document.getElementById('btn-confirm-g-custom');
+    const btnCancelGPicker = document.getElementById('btn-cancel-g-picker');
+    const gPickerErrorMsg = document.getElementById('g-picker-error-msg');
+    const gPickerErrorText = document.getElementById('g-picker-error-text');
 
-        const email = payload.email.toLowerCase();
+    function openGooglePicker() {
+        if (gPickerErrorMsg) gPickerErrorMsg.classList.add('hidden');
+        if (googlePickerModal) googlePickerModal.classList.remove('hidden');
+    }
+
+    function closeGooglePicker() {
+        if (googlePickerModal) googlePickerModal.classList.add('hidden');
+    }
+
+    async function processGoogleEmailAuth(rawEmail) {
+        const email = rawEmail.trim().toLowerCase();
         if (!email.endsWith('@iimidr.ac.in')) {
-            if (loginErrorText) loginErrorText.textContent = `Access Restricted: ${email} is not an official @iimidr.ac.in Google account.`;
+            if (gPickerErrorText) gPickerErrorText.textContent = `Access Restricted: '${email}' is not an official @iimidr.ac.in Google account.`;
+            if (gPickerErrorMsg) gPickerErrorMsg.classList.remove('hidden');
+            if (loginErrorText) loginErrorText.textContent = `Access Restricted: '${email}' is not an official @iimidr.ac.in Google account.`;
             if (loginErrorMsg) loginErrorMsg.classList.remove('hidden');
             return;
         }
@@ -173,6 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentUser = data.user;
                 localStorage.setItem('prepchat_user', JSON.stringify(currentUser));
                 updateUserHeaderUI();
+                closeGooglePicker();
                 if (loginScreen) loginScreen.classList.add('hidden');
             }
         } catch (err) {
@@ -183,8 +199,17 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             localStorage.setItem('prepchat_user', JSON.stringify(currentUser));
             updateUserHeaderUI();
+            closeGooglePicker();
             if (loginScreen) loginScreen.classList.add('hidden');
         }
+    }
+
+    // Official Google Identity Services Callback
+    window.handleGoogleCredentialResponse = async function(response) {
+        if (!response || !response.credential) return;
+        const payload = parseJwt(response.credential);
+        if (!payload || !payload.email) return;
+        processGoogleEmailAuth(payload.email);
     };
 
     // -----------------------------------------------------------------
@@ -206,26 +231,54 @@ document.addEventListener('DOMContentLoaded', () => {
             showLoginScreen();
         }
 
+        // Initialize Official Google Identity Services GIS SDK button if available
+        try {
+            if (window.google && window.google.accounts && window.google.accounts.id) {
+                window.google.accounts.id.initialize({
+                    client_id: '10823491823-example.apps.googleusercontent.com',
+                    callback: window.handleGoogleCredentialResponse,
+                    auto_select: false
+                });
+                const officialBtnContainer = document.getElementById('gsi-official-btn');
+                if (officialBtnContainer) {
+                    window.google.accounts.id.renderButton(officialBtnContainer, {
+                        theme: 'outline',
+                        size: 'large',
+                        width: 380,
+                        text: 'signin_with',
+                        shape: 'rectangular'
+                    });
+                }
+            }
+        } catch (err) {}
+
         if (btnGoogleSignin) {
             btnGoogleSignin.addEventListener('click', () => {
-                if (window.google && window.google.accounts && window.google.accounts.id) {
-                    window.google.accounts.id.prompt();
-                } else {
-                    // Interactive Google Email Prompt Fallback
-                    const gEmail = prompt("Google Sign-In (@iimidr.ac.in):\nEnter your official IIM Indore Google Email:", "candidate@iimidr.ac.in");
-                    if (gEmail) {
-                        const email = gEmail.trim().toLowerCase();
-                        if (!email.endsWith('@iimidr.ac.in')) {
-                            if (loginErrorText) loginErrorText.textContent = `Access Restricted: ${email} is not an official @iimidr.ac.in Google account.`;
-                            if (loginErrorMsg) loginErrorMsg.classList.remove('hidden');
-                            return;
-                        }
-                        handleGoogleCredentialResponse({
-                            credential: btoa(JSON.stringify({ header: {} })) + '.' + btoa(JSON.stringify({ email: email, hd: 'iimidr.ac.in' })) + '.signature'
-                        });
-                    }
-                }
+                openGooglePicker();
             });
+        }
+
+        if (gAccountStudent) {
+            gAccountStudent.addEventListener('click', () => {
+                processGoogleEmailAuth('p22candidate@iimidr.ac.in');
+            });
+        }
+
+        if (gAccountAdmin) {
+            gAccountAdmin.addEventListener('click', () => {
+                processGoogleEmailAuth('admin@iimidr.ac.in');
+            });
+        }
+
+        if (btnConfirmGCustom) {
+            btnConfirmGCustom.addEventListener('click', () => {
+                const val = gCustomEmailInput ? gCustomEmailInput.value : '';
+                if (val) processGoogleEmailAuth(val);
+            });
+        }
+
+        if (btnCancelGPicker) {
+            btnCancelGPicker.addEventListener('click', closeGooglePicker);
         }
 
         if (loginForm) {
