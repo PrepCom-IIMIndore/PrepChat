@@ -156,6 +156,12 @@ export default function DashboardPage() {
     );
   };
 
+  const toggleCatalogQYear = (year: string) => {
+    setCatalogSelectedQYears(prev =>
+      prev.includes(year) ? prev.filter(y => y !== year) : [...prev, year]
+    );
+  };
+
   const toggleAccordion = (year: string) => {
     setExpandedYearAccordion(prev => ({ ...prev, [year]: !prev[year] }));
   };
@@ -485,8 +491,50 @@ export default function DashboardPage() {
                     {/* ADVANCED PANE 1: QUESTIONS ACCORDION */}
                     {catalogAdvTab === "questions" && (
                       <div className="adv-pane">
-                        {/* Question Type Filter Card */}
+                        {/* Question Type & Year Filter Card */}
                         <div className="qtype-filter-card mb-3">
+
+                          {/* ROW 1: BATCH YEARS MULTI-SELECT */}
+                          <div className="filter-row mb-3">
+                            <div className="filter-row-header">
+                              <div className="qtype-filter-title">
+                                <span className="material-symbols-outlined">calendar_month</span>
+                                <span>Batch Years (Multi-Select):</span>
+                              </div>
+                              <div className="qtype-filter-actions">
+                                <button
+                                  className="btn-qtype-select-all"
+                                  onClick={() => setCatalogSelectedQYears(catalogIntelligence.qYears)}
+                                >
+                                  Select All Years
+                                </button>
+                                <button
+                                  className="btn-qtype-clear"
+                                  onClick={() => setCatalogSelectedQYears([])}
+                                >
+                                  Clear All
+                                </button>
+                              </div>
+                            </div>
+                            <div className="qtype-pills-row">
+                              {catalogIntelligence.qYears.map(y => {
+                                const isSel = catalogSelectedQYears.includes(y);
+                                const qCount = (catalogIntelligence.groupedQuestions[y] ? Object.values(catalogIntelligence.groupedQuestions[y]).flat().length : 0);
+                                return (
+                                  <button
+                                    key={y}
+                                    className={`qtype-pill ${isSel ? "active" : ""}`}
+                                    onClick={() => toggleCatalogQYear(y)}
+                                  >
+                                    <span>{y}</span>
+                                    <span className="qtype-count-badge">{qCount}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* ROW 2: QUESTION TYPES MULTI-SELECT */}
                           <div className="filter-row">
                             <div className="filter-row-header">
                               <div className="qtype-filter-title">
@@ -529,6 +577,11 @@ export default function DashboardPage() {
 
                         {/* Questions Grouped by Year */}
                         {catalogIntelligence.qYears.map(y => {
+                          // Filter by selected Batch Years
+                          if (catalogSelectedQYears.length > 0 && !catalogSelectedQYears.includes(y)) {
+                            return null;
+                          }
+
                           const yearData = catalogIntelligence.groupedQuestions[y] || {};
                           const isExpanded = expandedYearAccordion[y] !== false; // expanded by default
 
