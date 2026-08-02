@@ -149,31 +149,33 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const googlePickerModal = document.getElementById('google-picker-modal');
+    const googleSigninMainView = document.getElementById('google-signin-main-view');
+    const googleAccountChooser = document.getElementById('google-account-chooser');
+    const btnBackToGMain = document.getElementById('btn-back-to-g-main');
     const gAccountStudent = document.getElementById('g-account-student');
     const gAccountAdmin = document.getElementById('g-account-admin');
     const gCustomEmailInput = document.getElementById('g-custom-email-input');
     const btnConfirmGCustom = document.getElementById('btn-confirm-g-custom');
-    const btnCancelGPicker = document.getElementById('btn-cancel-g-picker');
-    const gPickerErrorMsg = document.getElementById('g-picker-error-msg');
-    const gPickerErrorText = document.getElementById('g-picker-error-text');
 
-    function openGooglePicker() {
-        if (gPickerErrorMsg) gPickerErrorMsg.classList.add('hidden');
-        if (googlePickerModal) googlePickerModal.classList.remove('hidden');
+    function showGoogleChooser() {
+        if (loginErrorMsg) loginErrorMsg.classList.add('hidden');
+        if (googleSigninMainView) googleSigninMainView.classList.add('hidden');
+        if (googleAccountChooser) googleAccountChooser.classList.remove('hidden');
     }
 
-    function closeGooglePicker() {
-        if (googlePickerModal) googlePickerModal.classList.add('hidden');
+    function showGoogleMain() {
+        if (googleAccountChooser) googleAccountChooser.classList.add('hidden');
+        if (googleSigninMainView) googleSigninMainView.classList.remove('hidden');
     }
 
     async function processGoogleEmailAuth(rawEmail) {
         const email = rawEmail.trim().toLowerCase();
+        if (loginErrorMsg) loginErrorMsg.classList.add('hidden');
+
         if (!email.endsWith('@iimidr.ac.in')) {
-            if (gPickerErrorText) gPickerErrorText.textContent = `Access Restricted: '${email}' is not an official @iimidr.ac.in Google account.`;
-            if (gPickerErrorMsg) gPickerErrorMsg.classList.remove('hidden');
             if (loginErrorText) loginErrorText.textContent = `Access Restricted: '${email}' is not an official @iimidr.ac.in Google account.`;
             if (loginErrorMsg) loginErrorMsg.classList.remove('hidden');
+            showGoogleMain();
             return;
         }
 
@@ -188,7 +190,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentUser = data.user;
                 localStorage.setItem('prepchat_user', JSON.stringify(currentUser));
                 updateUserHeaderUI();
-                closeGooglePicker();
                 if (loginScreen) loginScreen.classList.add('hidden');
             }
         } catch (err) {
@@ -199,7 +200,6 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             localStorage.setItem('prepchat_user', JSON.stringify(currentUser));
             updateUserHeaderUI();
-            closeGooglePicker();
             if (loginScreen) loginScreen.classList.add('hidden');
         }
     }
@@ -254,7 +254,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (btnGoogleSignin) {
             btnGoogleSignin.addEventListener('click', () => {
-                openGooglePicker();
+                if (window.google && window.google.accounts && window.google.accounts.id) {
+                    window.google.accounts.id.prompt();
+                }
+                showGoogleChooser();
             });
         }
 
@@ -277,8 +280,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        if (btnCancelGPicker) {
-            btnCancelGPicker.addEventListener('click', closeGooglePicker);
+        if (btnBackToGMain) {
+            btnBackToGMain.addEventListener('click', showGoogleMain);
         }
 
         if (loginForm) {

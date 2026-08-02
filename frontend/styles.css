@@ -2112,6 +2112,39 @@ body::after {
     transform: translateY(-1px);
 }
 
+.google-signin-subtitle {
+    font-size: 0.85rem;
+    color: #64748b;
+    text-align: center;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+
+.google-account-chooser {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.25rem;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+}
+
+.chooser-header {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.chooser-header h4 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 0.2rem;
+}
+
+.chooser-header span {
+    font-size: 0.78rem;
+    color: #64748b;
+}
+
 .login-divider {
     display: flex;
     align-items: center;

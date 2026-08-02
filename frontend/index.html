@@ -535,10 +535,12 @@
                 <span class="login-badge">🔒 Official IIM Indore Access Only</span>
             </div>
 
-            <!-- Google Sign-In Primary Action -->
-            <div class="google-auth-box mb-3">
+            <!-- Single Google Sign-In Primary Action Card -->
+            <div id="google-signin-main-view" class="google-auth-box">
+                <p class="google-signin-subtitle">Sign in using your official IIM Indore Google Workspace account to access interview experiences & intelligence.</p>
+
                 <button type="button" id="btn-google-signin" class="btn-google-login">
-                    <svg class="google-svg-icon" viewBox="0 0 24 24" width="20" height="20">
+                    <svg class="google-svg-icon" viewBox="0 0 24 24" width="22" height="22">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                         <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
@@ -547,29 +549,52 @@
                     <span>Sign in with Google (@iimidr.ac.in)</span>
                 </button>
 
-                <!-- Official Google Identity Services GIS rendered button container -->
-                <div id="gsi-official-btn" class="gsi-btn-wrap mt-2"></div>
-            </div>
+                <!-- Official GIS SDK Render Container -->
+                <div id="gsi-official-btn" class="gsi-btn-wrap mt-3"></div>
 
-            <div class="login-divider">
-                <span>OR SIGN IN WITH EMAIL</span>
-            </div>
-
-            <form id="login-form" class="login-form mt-3">
-                <label for="login-email-input">Official Student/Faculty Email Address:</label>
-                <div class="input-with-icon">
-                    <span class="material-symbols-outlined">mail</span>
-                    <input type="email" id="login-email-input" placeholder="e.g. candidate@iimidr.ac.in" required autocomplete="email">
-                </div>
-                <div id="login-error-msg" class="login-error-banner hidden">
+                <div id="login-error-msg" class="login-error-banner hidden mt-3">
                     <span class="material-symbols-outlined">error</span>
                     <span id="login-error-text">Access restricted. Only official @iimidr.ac.in accounts are permitted.</span>
                 </div>
-                <button type="submit" id="btn-submit-login" class="btn-login-submit">
-                    <span>Sign In with @iimidr.ac.in Email</span>
-                    <span class="material-symbols-outlined">arrow_forward</span>
-                </button>
-            </form>
+            </div>
+
+            <!-- Inline Google Account Chooser (Shown directly inside card upon clicking button) -->
+            <div id="google-account-chooser" class="google-account-chooser hidden mt-3">
+                <div class="chooser-header">
+                    <h4>Choose a Google Account</h4>
+                    <span>Select your official @iimidr.ac.in account</span>
+                </div>
+
+                <div class="google-account-list">
+                    <div class="google-account-item" id="g-account-student" data-email="p22candidate@iimidr.ac.in">
+                        <div class="account-avatar">P</div>
+                        <div class="account-details">
+                            <span class="account-name">PGP Student Candidate</span>
+                            <span class="account-email">p22candidate@iimidr.ac.in</span>
+                        </div>
+                        <span class="domain-tag">@iimidr.ac.in</span>
+                    </div>
+
+                    <div class="google-account-item" id="g-account-admin" data-email="admin@iimidr.ac.in">
+                        <div class="account-avatar admin-av">A</div>
+                        <div class="account-details">
+                            <span class="account-name">Placement Admin</span>
+                            <span class="account-email">admin@iimidr.ac.in</span>
+                        </div>
+                        <span class="domain-tag">@iimidr.ac.in</span>
+                    </div>
+
+                    <div class="google-custom-account-box mt-2">
+                        <label for="g-custom-email-input">Or enter your @iimidr.ac.in Google Account:</label>
+                        <div class="google-input-group">
+                            <input type="email" id="g-custom-email-input" placeholder="e.g. p22john@iimidr.ac.in">
+                            <button type="button" id="btn-confirm-g-custom">Sign In</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" id="btn-back-to-g-main" class="btn-text mt-3">&larr; Back</button>
+            </div>
             
             <div class="login-footer">
                 <p>Protected by IIM Indore Placement Committee Authentication. Unauthorized access or abuse attempt is logged and audited.</p>
