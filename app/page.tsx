@@ -287,9 +287,6 @@ export default function DashboardPage() {
             <img src="/logo.png" alt="IIM Indore PrepCom Logo" className="app-logo-img" />
             <div className="logo-text">
               <h1>PrepChat</h1>
-              <span className="badge-proxy" title="Authenticated via Google OAuth restricted to @iimidr.ac.in accounts">
-                Vercel NextAuth Serverless
-              </span>
             </div>
           </div>
 
