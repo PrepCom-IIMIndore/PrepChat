@@ -24,6 +24,8 @@ export default function DashboardPage() {
 
   // Experiences Filtering State
   const [selectedCompany, setSelectedCompany] = useState<string>("");
+  const [companySearchInput, setCompanySearchInput] = useState<string>("");
+  const [isCompanyDropdownOpen, setIsCompanyDropdownOpen] = useState<boolean>(false);
   const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
   const [selectedYears, setSelectedYears] = useState<string[]>([]);
   const [selectedProcess, setSelectedProcess] = useState<string>("");
@@ -94,6 +96,13 @@ export default function DashboardPage() {
     (questionsData as any[]).forEach(q => set.add(q.company));
     return Array.from(set).sort();
   }, [experiencesWithNormalizedDomain]);
+
+  // Autocomplete options filtered by text typed in Company Filter input box
+  const companyAutocompleteOptions = useMemo(() => {
+    if (!companySearchInput) return allCompanies;
+    const q = companySearchInput.toLowerCase().trim();
+    return allCompanies.filter(c => c.toLowerCase().includes(q));
+  }, [allCompanies, companySearchInput]);
 
   const allYears = useMemo(() => {
     const set = new Set<string>();
@@ -370,6 +379,8 @@ export default function DashboardPage() {
                   className="btn-qtype-clear"
                   onClick={() => {
                     setSelectedCompany("");
+                    setCompanySearchInput("");
+                    setIsCompanyDropdownOpen(false);
                     setSelectedDomains([]);
                     setSelectedYears([]);
                     setSelectedProcess("");
@@ -386,17 +397,120 @@ export default function DashboardPage() {
               </p>
 
               <div className="search-grid">
-                <div className="exp-filter-group">
-                  <label>Company Filter</label>
-                  <select
-                    value={selectedCompany}
-                    onChange={(e) => setSelectedCompany(e.target.value)}
-                  >
-                    <option value="">All Companies (180+ firms)</option>
-                    {allCompanies.map(c => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
+                {/* Searchable Text Box Company Filter */}
+                <div className="exp-filter-group" style={{ position: "relative" }}>
+                  <label>Company Filter (Type to Search)</label>
+                  <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                    <input
+                      type="text"
+                      placeholder="Type company name (e.g. McKinsey, ICICI, BCG)..."
+                      value={companySearchInput}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setCompanySearchInput(val);
+                        setSelectedCompany(val);
+                        setIsCompanyDropdownOpen(true);
+                      }}
+                      onFocus={() => setIsCompanyDropdownOpen(true)}
+                      style={{
+                        width: "100%",
+                        padding: "0.6rem 2.2rem 0.6rem 0.85rem",
+                        borderRadius: "8px",
+                        border: "1px solid #cbd5e1",
+                        fontSize: "0.9rem",
+                        fontWeight: 600
+                      }}
+                    />
+                    {companySearchInput && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCompanySearchInput("");
+                          setSelectedCompany("");
+                          setIsCompanyDropdownOpen(false);
+                        }}
+                        style={{
+                          position: "absolute",
+                          right: "0.75rem",
+                          background: "none",
+                          border: "none",
+                          color: "#94a3b8",
+                          fontSize: "1.1rem",
+                          cursor: "pointer",
+                          fontWeight: 800
+                        }}
+                        title="Clear company search"
+                      >
+                        &times;
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Autocomplete Dropdown Panel */}
+                  {isCompanyDropdownOpen && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "100%",
+                        left: 0,
+                        right: 0,
+                        zIndex: 50,
+                        background: "#ffffff",
+                        border: "1px solid #cbd5e1",
+                        borderRadius: "0 0 10px 10px",
+                        boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)",
+                        maxHeight: "220px",
+                        overflowY: "auto",
+                        marginTop: "4px"
+                      }}
+                    >
+                      <div
+                        onClick={() => {
+                          setSelectedCompany("");
+                          setCompanySearchInput("");
+                          setIsCompanyDropdownOpen(false);
+                        }}
+                        style={{
+                          padding: "0.55rem 0.85rem",
+                          cursor: "pointer",
+                          fontSize: "0.85rem",
+                          fontWeight: 700,
+                          color: "#4f46e5",
+                          background: "#f8fafc",
+                          borderBottom: "1px solid #e2e8f0"
+                        }}
+                      >
+                        All Companies (180+ firms)
+                      </div>
+                      {companyAutocompleteOptions.map(c => (
+                        <div
+                          key={c}
+                          onClick={() => {
+                            setSelectedCompany(c);
+                            setCompanySearchInput(c);
+                            setIsCompanyDropdownOpen(false);
+                          }}
+                          style={{
+                            padding: "0.55rem 0.85rem",
+                            cursor: "pointer",
+                            fontSize: "0.85rem",
+                            color: "#1e293b",
+                            transition: "background 0.15s ease",
+                            borderBottom: "1px solid #f1f5f9"
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = "#eff6ff")}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = "#ffffff")}
+                        >
+                          {c}
+                        </div>
+                      ))}
+                      {companyAutocompleteOptions.length === 0 && (
+                        <div style={{ padding: "0.75rem 0.85rem", fontSize: "0.82rem", color: "#94a3b8", textAlign: "center" }}>
+                          No matching company found in catalog. Filtering by typed keyword.
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="exp-filter-group">
