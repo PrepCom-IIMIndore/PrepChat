@@ -133,6 +133,55 @@ document.addEventListener('DOMContentLoaded', () => {
     let displayedCardCount = 20;
     let isExperiencesLoaded = false;
 
+    // Multi-Select Question Type Filter State
+    let selectedQTypes = new Set(['Domain', 'Technical', 'HR/Current Affairs', 'Behavioural', 'GD']);
+
+    function initQTypeFilterListeners() {
+        const btnAll = document.getElementById('btn-qtype-all');
+        const btnClear = document.getElementById('btn-qtype-clear');
+        const pills = document.querySelectorAll('.qtype-pill');
+
+        if (btnAll) {
+            btnAll.addEventListener('click', () => {
+                selectedQTypes = new Set(['Domain', 'Technical', 'HR/Current Affairs', 'Behavioural', 'GD']);
+                updateQTypePillsUI();
+                if (currentCompanyData) renderAdvancedView();
+            });
+        }
+
+        if (btnClear) {
+            btnClear.addEventListener('click', () => {
+                selectedQTypes.clear();
+                updateQTypePillsUI();
+                if (currentCompanyData) renderAdvancedView();
+            });
+        }
+
+        pills.forEach(pill => {
+            pill.addEventListener('click', () => {
+                const t = pill.getAttribute('data-type');
+                if (selectedQTypes.has(t)) {
+                    selectedQTypes.delete(t);
+                } else {
+                    selectedQTypes.add(t);
+                }
+                updateQTypePillsUI();
+                if (currentCompanyData) renderAdvancedView();
+            });
+        });
+    }
+
+    function updateQTypePillsUI() {
+        document.querySelectorAll('.qtype-pill').forEach(pill => {
+            const t = pill.getAttribute('data-type');
+            if (selectedQTypes.has(t)) {
+                pill.classList.add('active');
+            } else {
+                pill.classList.remove('active');
+            }
+        });
+    }
+
     // 1. Primary App Section Navigation
     navBtnCatalog.addEventListener('click', () => switchAppSection('catalog'));
     navBtnExperiences.addEventListener('click', () => switchAppSection('experiences'));
@@ -524,37 +573,114 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderAdvancedView() {
-        // Questions Tab
+        const allQuestions = (currentCompanyData && currentCompanyData.questions) ? currentCompanyData.questions : [];
+        
+        // 1. Calculate question type breakdown counts for current company & update badges
+        const counts = {
+            'Domain': 0,
+            'Technical': 0,
+            'HR/Current Affairs': 0,
+            'Behavioural': 0,
+            'GD': 0
+        };
+        allQuestions.forEach(q => {
+            if (counts[q.question_type] !== undefined) counts[q.question_type]++;
+        });
+
+        const badgeDomain = document.getElementById('qtype-count-Domain');
+        const badgeTech = document.getElementById('qtype-count-Technical');
+        const badgeHR = document.getElementById('qtype-count-HR');
+        const badgeBehav = document.getElementById('qtype-count-Behavioural');
+        const badgeGD = document.getElementById('qtype-count-GD');
+
+        if (badgeDomain) badgeDomain.textContent = counts['Domain'];
+        if (badgeTech) badgeTech.textContent = counts['Technical'];
+        if (badgeHR) badgeHR.textContent = counts['HR/Current Affairs'];
+        if (badgeBehav) badgeBehav.textContent = counts['Behavioural'];
+        if (badgeGD) badgeGD.textContent = counts['GD'];
+
+        // 2. Filter questions based on selectedQTypes
+        const filteredQuestions = allQuestions.filter(q => selectedQTypes.has(q.question_type));
+
         questionsContainer.innerHTML = '';
-        if (currentCompanyData.questions && currentCompanyData.questions.length > 0) {
+        if (allQuestions.length === 0) {
+            questionsContainer.innerHTML = '<div class="format-card">No interview questions recorded for this company yet.</div>';
+        } else if (filteredQuestions.length === 0) {
+            questionsContainer.innerHTML = `
+                <div class="format-card" style="text-align: center; padding: 2.5rem;">
+                    <h4>No questions match your multi-selected question type filters.</h4>
+                    <p style="color: var(--text-muted); margin-top: 0.5rem;">Click "Select All" above to view all question types.</p>
+                </div>
+            `;
+        } else {
+            // Group filtered questions by Batch Year
             const byYear = {};
-            currentCompanyData.questions.forEach(q => {
+            filteredQuestions.forEach(q => {
                 if (!byYear[q.year]) byYear[q.year] = [];
                 byYear[q.year].push(q);
             });
 
             Object.keys(byYear).sort().reverse().forEach(year => {
+                const yearQuestions = byYear[year];
                 const group = document.createElement('div');
                 group.className = 'year-group';
                 
                 const header = document.createElement('div');
                 header.className = 'year-header';
-                header.innerHTML = `<span>📅 Batch Year: ${year}</span> <span>${byYear[year].length} questions ▼</span>`;
+                header.innerHTML = `<span>📅 Batch Year: ${year}</span> <span>${yearQuestions.length} questions ▼</span>`;
                 
                 const qList = document.createElement('div');
                 qList.className = 'year-questions-list';
                 
-                byYear[year].forEach(q => {
-                    const qCard = document.createElement('div');
-                    qCard.className = 'question-card';
-                    qCard.innerHTML = `
-                        <div class="question-meta">
-                            <span class="tag-base tag-${getCategoryTagClass(q.question_type)}">${q.question_type}</span>
-                            <span class="question-domain">${q.domain}</span>
-                        </div>
-                        <div class="question-text">${escapeHtml(q.question)}</div>
-                    `;
-                    qList.appendChild(qCard);
+                // Group yearQuestions by Question Type
+                const byType = {};
+                yearQuestions.forEach(q => {
+                    if (!byType[q.question_type]) byType[q.question_type] = [];
+                    byType[q.question_type].push(q);
+                });
+
+                const typeOrder = ['Domain', 'Technical', 'HR/Current Affairs', 'Behavioural', 'GD'];
+                const iconMap = {
+                    'Domain': '💼 Domain Questions',
+                    'Technical': '💻 Technical Questions',
+                    'HR/Current Affairs': '👥 HR & Current Affairs Questions',
+                    'Behavioural': '🧠 Behavioural Questions',
+                    'GD': '🗣️ GD / Group Discussion Questions'
+                };
+                const classMap = {
+                    'Domain': 'type-domain',
+                    'Technical': 'type-technical',
+                    'HR/Current Affairs': 'type-hr',
+                    'Behavioural': 'type-behavioural',
+                    'GD': 'type-gd'
+                };
+
+                typeOrder.forEach(qType => {
+                    const qSubList = byType[qType];
+                    if (qSubList && qSubList.length > 0) {
+                        const subGroup = document.createElement('div');
+                        subGroup.className = 'qtype-subgroup';
+
+                        const subTitle = document.createElement('div');
+                        subTitle.className = `qtype-subgroup-title ${classMap[qType] || ''}`;
+                        subTitle.innerHTML = `<span>${iconMap[qType] || qType} (${qSubList.length})</span>`;
+                        subGroup.appendChild(subTitle);
+
+                        qSubList.forEach(q => {
+                            const qCard = document.createElement('div');
+                            qCard.className = 'question-card mb-2';
+                            qCard.innerHTML = `
+                                <div class="question-meta">
+                                    <span class="tag-base tag-${getCategoryTagClass(q.question_type)}">${q.question_type}</span>
+                                    <span class="question-domain">${q.domain}</span>
+                                </div>
+                                <div class="question-text">${escapeHtml(q.question)}</div>
+                            `;
+                            subGroup.appendChild(qCard);
+                        });
+
+                        qList.appendChild(subGroup);
+                    }
                 });
 
                 header.addEventListener('click', () => qList.classList.toggle('hidden'));
@@ -563,7 +689,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 group.appendChild(qList);
                 questionsContainer.appendChild(group);
             });
-        } else {
+        }
             questionsContainer.innerHTML = '<div class="format-card">No interview questions recorded for this company yet.</div>';
         }
 
@@ -658,6 +784,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         isExperiencesLoaded = true;
 
+        renderExperiencesHeroAnalytics();
         populateExperienceFilters();
         applyExperienceFilters();
     }
@@ -1152,6 +1279,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 continue;
             }
 
+            if (inTable) {
+                htmlResult += flushTable();
+            }
+
+            if (!line) {
+                continue;
+            }
+
             if (line.includes('|')) {
                 line = line.replace(/\|/g, ' - ').replace(/\s{2,}/g, ' ');
             }
@@ -1286,6 +1421,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Initial Kickoff
+    initQTypeFilterListeners();
     loadCatalog();
     loadExperiencesData();
 });

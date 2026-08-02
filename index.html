@@ -198,6 +198,27 @@
                     <div class="adv-tab-panes">
                         <!-- Advanced Pane: Questions -->
                         <div id="adv-pane-questions" class="adv-pane active">
+                            <!-- Multi-Select Question Type Filter Control Bar -->
+                            <div class="qtype-filter-card mb-3" id="qtype-filter-card">
+                                <div class="qtype-filter-header">
+                                    <div class="qtype-filter-title">
+                                        <span class="material-symbols-outlined">filter_list</span>
+                                        <span>Filter Question Types (Multi-Select):</span>
+                                    </div>
+                                    <div class="qtype-filter-actions">
+                                        <button class="btn-qtype-select-all" id="btn-qtype-all">Select All</button>
+                                        <button class="btn-qtype-clear" id="btn-qtype-clear">Clear All</button>
+                                    </div>
+                                </div>
+                                <div class="qtype-pills-row" id="qtype-pills-container">
+                                    <button class="qtype-pill active" data-type="Domain">💼 Domain <span class="qtype-count-badge" id="qtype-count-Domain">0</span></button>
+                                    <button class="qtype-pill active" data-type="Technical">💻 Technical <span class="qtype-count-badge" id="qtype-count-Technical">0</span></button>
+                                    <button class="qtype-pill active" data-type="HR/Current Affairs">👥 HR / Current Affairs <span class="qtype-count-badge" id="qtype-count-HR">0</span></button>
+                                    <button class="qtype-pill active" data-type="Behavioural">🧠 Behavioural <span class="qtype-count-badge" id="qtype-count-Behavioural">0</span></button>
+                                    <button class="qtype-pill active" data-type="GD">🗣️ GD <span class="qtype-count-badge" id="qtype-count-GD">0</span></button>
+                                </div>
+                            </div>
+
                             <div id="questions-container" class="questions-container"></div>
                         </div>
 

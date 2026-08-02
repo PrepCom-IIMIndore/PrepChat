@@ -187,32 +187,57 @@
                             <span class="material-symbols-outlined">description</span> Interview Format Details
                         </button>
                         <button class="adv-tab-btn" id="adv-btn-slides" data-target="adv-pane-slides">
-                            <span class="material-symbols-outlined">slideshow</span> Presentation Decks
+                            <span class="material-symbols-outlined">present_to_all</span> Company & Sector Decks
                         </button>
                     </div>
 
-                    <!-- Pane A: Questions List -->
-                    <div id="adv-pane-questions" class="adv-pane">
-                        <div id="questions-container"></div>
-                    </div>
+                    <div class="adv-tab-panes">
+                        <!-- Advanced Pane: Questions -->
+                        <div id="adv-pane-questions" class="adv-pane active">
+                            <!-- Multi-Select Question Type Filter Control Bar -->
+                            <div class="qtype-filter-card mb-3" id="qtype-filter-card">
+                                <div class="qtype-filter-header">
+                                    <div class="qtype-filter-title">
+                                        <span class="material-symbols-outlined">filter_list</span>
+                                        <span>Filter Question Types (Multi-Select):</span>
+                                    </div>
+                                    <div class="qtype-filter-actions">
+                                        <button class="btn-qtype-select-all" id="btn-qtype-all">Select All</button>
+                                        <button class="btn-qtype-clear" id="btn-qtype-clear">Clear All</button>
+                                    </div>
+                                </div>
+                                <div class="qtype-pills-row" id="qtype-pills-container">
+                                    <button class="qtype-pill active" data-type="Domain">💼 Domain <span class="qtype-count-badge" id="qtype-count-Domain">0</span></button>
+                                    <button class="qtype-pill active" data-type="Technical">💻 Technical <span class="qtype-count-badge" id="qtype-count-Technical">0</span></button>
+                                    <button class="qtype-pill active" data-type="HR/Current Affairs">👥 HR / Current Affairs <span class="qtype-count-badge" id="qtype-count-HR">0</span></button>
+                                    <button class="qtype-pill active" data-type="Behavioural">🧠 Behavioural <span class="qtype-count-badge" id="qtype-count-Behavioural">0</span></button>
+                                    <button class="qtype-pill active" data-type="GD">🗣️ GD <span class="qtype-count-badge" id="qtype-count-GD">0</span></button>
+                                </div>
+                            </div>
 
-                    <!-- Pane B: Format Details -->
-                    <div id="adv-pane-format" class="adv-pane hidden">
-                        <div id="format-container" class="format-card"></div>
-                    </div>
+                            <div id="questions-container" class="questions-container"></div>
+                        </div>
 
-                    <!-- Pane C: Deck Slides -->
-                    <div id="adv-pane-slides" class="adv-pane hidden">
-                        <div class="deck-tabs-header">
-                            <button class="deck-tab-btn active" id="tab-btn-company">Company Deck</button>
-                            <button class="deck-tab-btn" id="tab-btn-industry">Industry Deck</button>
+                        <!-- Advanced Pane: Format Details -->
+                        <div id="adv-pane-format" class="adv-pane hidden">
+                            <div id="format-container" class="format-container format-card"></div>
                         </div>
-                        
-                        <div id="company-slides-pane" class="tab-pane">
-                            <div id="company-slides-container"></div>
-                        </div>
-                        <div id="industry-slides-pane" class="tab-pane hidden">
-                            <div id="industry-slides-container"></div>
+
+                        <!-- Advanced Pane: Decks -->
+                        <div id="adv-pane-slides" class="adv-pane hidden">
+                            <div class="deck-tabs-header">
+                                <button class="deck-tab-btn active" id="tab-btn-company" data-tab="company-slides-pane">🏢 Company Presentation Slides</button>
+                                <button class="deck-tab-btn" id="tab-btn-industry" data-tab="industry-slides-pane">📈 Industry Sector Slides</button>
+                            </div>
+
+                            <div class="deck-tabs-content">
+                                <div id="company-slides-pane" class="tab-pane active">
+                                    <div id="company-slides-container"></div>
+                                </div>
+                                <div id="industry-slides-pane" class="tab-pane hidden">
+                                    <div id="industry-slides-container"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
