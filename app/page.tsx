@@ -15,16 +15,24 @@ export default function DashboardPage() {
   const userRole = (session?.user as any)?.role || "user";
   const isAdmin = userRole === "admin" || userEmail.startsWith("admin") || userEmail.includes("placecom") || userEmail.includes("prepcom");
 
-  // Navigation & View States
+  // Main Navigation & View Mode
   const [activeSection, setActiveSection] = useState<"experiences" | "catalog">("experiences");
   const [viewMode, setViewMode] = useState<"basic" | "advanced">("basic");
 
-  // Experiences Filtering
+  // Experiences Filtering State
   const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
   const [selectedYears, setSelectedYears] = useState<string[]>([]);
   const [selectedProcess, setSelectedProcess] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
+
+  // Catalog Section State
+  const [catalogCompany, setCatalogCompany] = useState<string>("Accenture");
+  const [catalogAdvTab, setCatalogAdvTab] = useState<"questions" | "format" | "slides">("questions");
+  const [catalogDeckTab, setCatalogDeckTab] = useState<"company" | "industry">("company");
+  const [catalogSelectedQYears, setCatalogSelectedQYears] = useState<string[]>([]);
+  const [catalogSelectedQTypes, setCatalogSelectedQTypes] = useState<string[]>(["Domain", "Technical", "HR/Current Affairs", "Behavioural", "GD"]);
+  const [expandedYearAccordion, setExpandedYearAccordion] = useState<{ [year: string]: boolean }>({});
 
   // Modal State
   const [activeModalExp, setActiveModalExp] = useState<any | null>(null);
@@ -33,13 +41,11 @@ export default function DashboardPage() {
   const [adminTelemetry, setAdminTelemetry] = useState<any>(null);
   const [adminSearch, setAdminSearch] = useState("");
 
-  // Catalog Section State
-  const [catalogCompany, setCatalogCompany] = useState<string>("");
-
   // Extract unique companies & domains
   const allCompanies = useMemo(() => {
     const set = new Set<string>();
     (experiencesData as any[]).forEach(e => set.add(e.company));
+    (questionsData as any[]).forEach(q => set.add(q.company));
     return Array.from(set).sort();
   }, []);
 
@@ -74,7 +80,44 @@ export default function DashboardPage() {
     }).sort((a, b) => (b.word_count || 0) - (a.word_count || 0));
   }, [selectedCompany, selectedDomains, selectedYears, selectedProcess, searchQuery]);
 
-  // Clean role title
+  // Catalog Company Intelligence Data
+  const catalogIntelligence = useMemo(() => {
+    if (!catalogCompany) return null;
+    const name = catalogCompany;
+    const questions = (questionsData as any[]).filter(q => q.company.toLowerCase() === name.toLowerCase());
+    const formatText = (formatsData as any)[name] || null;
+    const industry = (companyIndustries as any)[name] || (questions[0]?.industry || "Consulting");
+    const companySlides = (slidesData as any[]).filter(s => s.company.toLowerCase() === name.toLowerCase() && s.deck_type === "company");
+    const industrySlides = (slidesData as any[]).filter(s => s.company.toLowerCase() === industry.toLowerCase() && s.deck_type === "industry");
+    const compExperiences = (experiencesData as any[]).filter(e => e.company.toLowerCase() === name.toLowerCase());
+
+    // Extract unique question batch years
+    const qYears = Array.from(new Set(questions.map(q => q.year || "2024"))).sort().reverse();
+
+    // Group questions by Year then by Type
+    const groupedQuestions: { [year: string]: { [type: string]: any[] } } = {};
+    questions.forEach(q => {
+      const y = q.year || "2024";
+      const t = q.type || "Domain";
+      if (!groupedQuestions[y]) groupedQuestions[y] = {};
+      if (!groupedQuestions[y][t]) groupedQuestions[y][t] = [];
+      groupedQuestions[y][t].push(q);
+    });
+
+    return {
+      name,
+      industry,
+      questions,
+      formatText,
+      companySlides,
+      industrySlides,
+      compExperiences,
+      qYears,
+      groupedQuestions
+    };
+  }, [catalogCompany]);
+
+  // Clean role title helper
   const getCleanRoleTitle = (exp: any) => {
     if (!exp) return "Interview Experience";
     let role = exp.role_offered || "";
@@ -105,6 +148,16 @@ export default function DashboardPage() {
     setSelectedYears(prev => 
       prev.includes(year) ? prev.filter(y => y !== year) : [...prev, year]
     );
+  };
+
+  const toggleCatalogQType = (type: string) => {
+    setCatalogSelectedQTypes(prev => 
+      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+    );
+  };
+
+  const toggleAccordion = (year: string) => {
+    setExpandedYearAccordion(prev => ({ ...prev, [year]: !prev[year] }));
   };
 
   return (
@@ -333,23 +386,306 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* SECTION 2: COMPANY CATALOG & INTELLIGENCE */}
         {activeSection === "catalog" && (
           <div id="section-catalog" className="app-section">
             <div className="search-card mb-4">
-              <h3>Company Catalog & Decks Search</h3>
-              <div className="exp-filter-group mt-3">
-                <label>Select Company</label>
+              <div className="exp-filter-group">
+                <label style={{ fontSize: "1.1rem", fontWeight: 800 }}>🏢 Select Company from Institutional Intelligence Catalog</label>
                 <select
                   value={catalogCompany}
                   onChange={(e) => setCatalogCompany(e.target.value)}
+                  style={{ marginTop: "0.5rem" }}
                 >
-                  <option value="">Select a Company</option>
                   {allCompanies.map(c => (
                     <option key={c} value={c}>{c}</option>
                   ))}
                 </select>
               </div>
             </div>
+
+            {catalogIntelligence && (
+              <div>
+                {/* Company Header Banner */}
+                <div className="company-header-banner">
+                  <div>
+                    <h2>{catalogIntelligence.name}</h2>
+                    <span className="company-sector-badge">Sector: {catalogIntelligence.industry}</span>
+                  </div>
+                  <span className="view-indicator-pill">Mode: {viewMode === "basic" ? "Basic Overview" : "Advanced Intelligence"}</span>
+                </div>
+
+                {/* BASIC VIEW FOR CATALOG */}
+                {viewMode === "basic" && (
+                  <div className="bento-metrics-grid mb-4">
+                    <div className="bento-card">
+                      <span className="material-symbols-outlined bento-icon">help_center</span>
+                      <div className="bento-num">{catalogIntelligence.questions.length}</div>
+                      <div className="bento-label">Questions Recorded</div>
+                    </div>
+
+                    <div className="bento-card">
+                      <span className="material-symbols-outlined bento-icon">format_list_bulleted</span>
+                      <div className="bento-num">{catalogIntelligence.formatText ? "Available" : "N/A"}</div>
+                      <div className="bento-label">Process Overview</div>
+                    </div>
+
+                    <div className="bento-card">
+                      <span className="material-symbols-outlined bento-icon">slideshow</span>
+                      <div className="bento-num">{catalogIntelligence.companySlides.length}</div>
+                      <div className="bento-label">Company Decks</div>
+                    </div>
+
+                    <div className="bento-card">
+                      <span className="material-symbols-outlined bento-icon">view_carousel</span>
+                      <div className="bento-num">{catalogIntelligence.industrySlides.length}</div>
+                      <div className="bento-label">Sector Decks</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* BASIC VIEW: PROCESS OVERVIEW */}
+                {viewMode === "basic" && catalogIntelligence.formatText && (
+                  <div className="academic-card mb-4">
+                    <div className="academic-card-header">
+                      <span className="material-symbols-outlined">summarize</span>
+                      <h3>Executive Process Overview</h3>
+                    </div>
+                    <div className="academic-card-body" style={{ whiteSpace: "pre-wrap", lineHeight: 1.7, fontSize: "0.95rem" }}>
+                      {catalogIntelligence.formatText}
+                    </div>
+                  </div>
+                )}
+
+                {/* ADVANCED VIEW FOR CATALOG */}
+                {viewMode === "advanced" && (
+                  <div>
+                    {/* Advanced Navigation Sub-tabs */}
+                    <div className="advanced-nav-tabs mb-4">
+                      <button
+                        className={`adv-tab-btn ${catalogAdvTab === "questions" ? "active" : ""}`}
+                        onClick={() => setCatalogAdvTab("questions")}
+                      >
+                        <span className="material-symbols-outlined">quiz</span> Previous Questions ({catalogIntelligence.questions.length})
+                      </button>
+                      <button
+                        className={`adv-tab-btn ${catalogAdvTab === "format" ? "active" : ""}`}
+                        onClick={() => setCatalogAdvTab("format")}
+                      >
+                        <span className="material-symbols-outlined">description</span> Interview Format Details
+                      </button>
+                      <button
+                        className={`adv-tab-btn ${catalogAdvTab === "slides" ? "active" : ""}`}
+                        onClick={() => setCatalogAdvTab("slides")}
+                      >
+                        <span className="material-symbols-outlined">present_to_all</span> Company & Sector Decks ({catalogIntelligence.companySlides.length + catalogIntelligence.industrySlides.length})
+                      </button>
+                    </div>
+
+                    {/* ADVANCED PANE 1: QUESTIONS ACCORDION */}
+                    {catalogAdvTab === "questions" && (
+                      <div className="adv-pane">
+                        {/* Question Type Filter Card */}
+                        <div className="qtype-filter-card mb-3">
+                          <div className="filter-row">
+                            <div className="filter-row-header">
+                              <div className="qtype-filter-title">
+                                <span className="material-symbols-outlined">category</span>
+                                <span>Question Types (Multi-Select):</span>
+                              </div>
+                              <div className="qtype-filter-actions">
+                                <button
+                                  className="btn-qtype-select-all"
+                                  onClick={() => setCatalogSelectedQTypes(["Domain", "Technical", "HR/Current Affairs", "Behavioural", "GD"])}
+                                >
+                                  Select All
+                                </button>
+                                <button
+                                  className="btn-qtype-clear"
+                                  onClick={() => setCatalogSelectedQTypes([])}
+                                >
+                                  Clear All
+                                </button>
+                              </div>
+                            </div>
+                            <div className="qtype-pills-row">
+                              {["Domain", "Technical", "HR/Current Affairs", "Behavioural", "GD"].map(t => {
+                                const isSel = catalogSelectedQTypes.includes(t);
+                                const count = catalogIntelligence.questions.filter(q => (q.type || "Domain").toLowerCase() === t.toLowerCase()).length;
+                                return (
+                                  <button
+                                    key={t}
+                                    className={`qtype-pill ${isSel ? "active" : ""}`}
+                                    onClick={() => toggleCatalogQType(t)}
+                                  >
+                                    <span>{t}</span>
+                                    <span className="qtype-count-badge">{count}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Questions Grouped by Year */}
+                        {catalogIntelligence.qYears.map(y => {
+                          const yearData = catalogIntelligence.groupedQuestions[y] || {};
+                          const isExpanded = expandedYearAccordion[y] !== false; // expanded by default
+
+                          return (
+                            <div key={y} className="year-group">
+                              <div className="year-header" onClick={() => toggleAccordion(y)}>
+                                <span>📅 Batch Year: {y}</span>
+                                <span className="material-symbols-outlined">
+                                  {isExpanded ? "expand_less" : "expand_more"}
+                                </span>
+                              </div>
+
+                              {isExpanded && (
+                                <div className="year-questions-list">
+                                  {Object.keys(yearData).map(typeKey => {
+                                    if (catalogSelectedQTypes.length > 0 && !catalogSelectedQTypes.some(st => st.toLowerCase() === typeKey.toLowerCase())) {
+                                      return null;
+                                    }
+                                    const qList = yearData[typeKey] || [];
+
+                                    return (
+                                      <div key={typeKey} className="qtype-subgroup">
+                                        <div className={`qtype-subgroup-title type-${typeKey.toLowerCase().replace(/[^a-z]/g, "")}`}>
+                                          <span>{typeKey} Questions</span>
+                                          <span className="qtype-count-badge">{qList.length}</span>
+                                        </div>
+
+                                        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                                          {qList.map((qItem: any, qIdx: number) => (
+                                            <div key={qIdx} className="question-card">
+                                              <div className="question-meta">
+                                                <span className="tag-base tag-domain">{qItem.domain || "Placement"}</span>
+                                                <span className="question-domain">{qItem.role || "Candidate"}</span>
+                                              </div>
+                                              <div className="question-text">{qItem.question}</div>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* ADVANCED PANE 2: FORMAT DETAILS */}
+                    {catalogAdvTab === "format" && (
+                      <div className="format-card">
+                        {catalogIntelligence.formatText ? (
+                          <div style={{ whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
+                            {catalogIntelligence.formatText}
+                          </div>
+                        ) : (
+                          <p style={{ color: "var(--text-muted)" }}>No detailed format note recorded for {catalogIntelligence.name}.</p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* ADVANCED PANE 3: SLIDES & DECKS */}
+                    {catalogAdvTab === "slides" && (
+                      <div>
+                        <div className="deck-tabs-header">
+                          <button
+                            className={`deck-tab-btn ${catalogDeckTab === "company" ? "active" : ""}`}
+                            onClick={() => setCatalogDeckTab("company")}
+                          >
+                            🏢 Company Presentation Slides ({catalogIntelligence.companySlides.length})
+                          </button>
+                          <button
+                            className={`deck-tab-btn ${catalogDeckTab === "industry" ? "active" : ""}`}
+                            onClick={() => setCatalogDeckTab("industry")}
+                          >
+                            📈 Industry Sector Slides ({catalogIntelligence.industrySlides.length})
+                          </button>
+                        </div>
+
+                        <div className="tab-pane">
+                          {catalogDeckTab === "company" && (
+                            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                              {catalogIntelligence.companySlides.length > 0 ? (
+                                catalogIntelligence.companySlides.map((slide: any, sIdx: number) => (
+                                  <div key={sIdx} className="slide-card">
+                                    <div className="slide-header">Slide #{slide.slide_number}: {slide.slide_title || "Company Overview"}</div>
+                                    <div className="slide-text">{slide.slide_content}</div>
+                                  </div>
+                                ))
+                              ) : (
+                                <p style={{ color: "var(--text-muted)", padding: "1.5rem" }}>No PPT slides extracted for {catalogIntelligence.name}.</p>
+                              )}
+                            </div>
+                          )}
+
+                          {catalogDeckTab === "industry" && (
+                            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                              {catalogIntelligence.industrySlides.length > 0 ? (
+                                catalogIntelligence.industrySlides.map((slide: any, sIdx: number) => (
+                                  <div key={sIdx} className="slide-card">
+                                    <div className="slide-header">{slide.company} Sector - Slide #{slide.slide_number}: {slide.slide_title}</div>
+                                    <div className="slide-text">{slide.slide_content}</div>
+                                  </div>
+                                ))
+                              ) : (
+                                <p style={{ color: "var(--text-muted)", padding: "1.5rem" }}>No industry sector slides extracted for {catalogIntelligence.industry}.</p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Candidate Interview Experiences inside Company Catalog */}
+                <div className="academic-card mt-4">
+                  <div className="academic-card-header">
+                    <span className="material-symbols-outlined">record_voice_over</span>
+                    <h3>Candidate Interview Experiences for {catalogIntelligence.name} ({catalogIntelligence.compExperiences.length})</h3>
+                  </div>
+                  <div className="academic-card-body">
+                    <div className="exp-cards-grid">
+                      {catalogIntelligence.compExperiences.map((exp: any, idx: number) => (
+                        <div
+                          key={exp.id || idx}
+                          className="experience-card"
+                          onClick={() => {
+                            setActiveModalExp(exp);
+                            setActiveModalTab("overview");
+                          }}
+                        >
+                          <div>
+                            <div className="exp-card-header">
+                              <div className="exp-card-company">{exp.company}</div>
+                              <span className="badge-year-tag">{exp.year || "2024"}</span>
+                            </div>
+                            <div className="meta-badges-row">
+                              <span className="badge-domain-tag">{exp.domain}</span>
+                              <span className="badge-process-tag">{exp.process_type || "Placement Process"}</span>
+                            </div>
+                            <p className="exp-card-snippet">{getCleanRoleTitle(exp)}</p>
+                          </div>
+                          <div className="exp-card-footer">
+                            <button className="btn-read-exp">
+                              <span>View Prep Guide</span>
+                              <span className="material-symbols-outlined" style={{ fontSize: "1rem" }}>arrow_forward</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </main>
