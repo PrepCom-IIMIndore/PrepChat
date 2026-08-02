@@ -8,6 +8,7 @@ import companyIndustries from "@/company_industries.json";
 import questionsData from "@/questions_data.json";
 import formatsData from "@/interview_formats_data.json";
 import slidesData from "@/slides_data.json";
+import { ALL_NORMALIZED_DOMAINS, normalizeDomain } from "@/lib/domainUtils";
 
 export default function DashboardPage() {
   const { data: session } = useSession();
@@ -78,44 +79,46 @@ export default function DashboardPage() {
     }).catch(() => {});
   };
 
-  // Extract unique companies & domains
-  const allCompanies = useMemo(() => {
-    const set = new Set<string>();
-    (experiencesData as any[]).forEach(e => set.add(e.company));
-    (questionsData as any[]).forEach(q => set.add(q.company));
-    return Array.from(set).sort();
+  // Pre-normalize all experiences with clean 7 domain mapping
+  const experiencesWithNormalizedDomain = useMemo(() => {
+    return (experiencesData as any[]).map(exp => ({
+      ...exp,
+      normalizedDomain: normalizeDomain(exp.domain)
+    }));
   }, []);
 
-  const allDomains = useMemo(() => {
+  // Extract unique companies
+  const allCompanies = useMemo(() => {
     const set = new Set<string>();
-    (experiencesData as any[]).forEach(e => set.add(e.domain));
+    experiencesWithNormalizedDomain.forEach(e => set.add(e.company));
+    (questionsData as any[]).forEach(q => set.add(q.company));
     return Array.from(set).sort();
-  }, []);
+  }, [experiencesWithNormalizedDomain]);
 
   const allYears = useMemo(() => {
     const set = new Set<string>();
-    (experiencesData as any[]).forEach(e => {
+    experiencesWithNormalizedDomain.forEach(e => {
       if (e.year) set.add(e.year);
     });
     return Array.from(set).sort().reverse();
-  }, []);
+  }, [experiencesWithNormalizedDomain]);
 
-  // Filter experiences
+  // Filter experiences using normalized domains
   const filteredExperiences = useMemo(() => {
-    return (experiencesData as any[]).filter(exp => {
+    return experiencesWithNormalizedDomain.filter(exp => {
       if (selectedCompany && exp.company.toLowerCase() !== selectedCompany.toLowerCase()) return false;
-      if (selectedDomains.length > 0 && !selectedDomains.includes(exp.domain)) return false;
+      if (selectedDomains.length > 0 && !selectedDomains.includes(exp.normalizedDomain)) return false;
       if (selectedYears.length > 0 && !selectedYears.includes(exp.year)) return false;
       if (selectedProcess && exp.process_type.toLowerCase() !== selectedProcess.toLowerCase()) return false;
 
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
-        const searchable = `${exp.company} ${exp.domain} ${exp.role_offered} ${exp.pre_process_tips} ${exp.gd_topics_tips} ${exp.interview_outline} ${exp.domain_questions} ${exp.hr_gk_questions} ${exp.prep_resources} ${exp.tips} ${exp.tech_skills} ${exp.dos_and_donts}`.toLowerCase();
+        const searchable = `${exp.company} ${exp.domain} ${exp.normalizedDomain} ${exp.role_offered} ${exp.pre_process_tips} ${exp.gd_topics_tips} ${exp.interview_outline} ${exp.domain_questions} ${exp.hr_gk_questions} ${exp.prep_resources} ${exp.tips} ${exp.tech_skills} ${exp.dos_and_donts}`.toLowerCase();
         if (!searchable.includes(q)) return false;
       }
       return true;
     }).sort((a, b) => (b.word_count || 0) - (a.word_count || 0));
-  }, [selectedCompany, selectedDomains, selectedYears, selectedProcess, searchQuery]);
+  }, [experiencesWithNormalizedDomain, selectedCompany, selectedDomains, selectedYears, selectedProcess, searchQuery]);
 
   // Catalog Company Intelligence Data
   const catalogIntelligence = useMemo(() => {
@@ -126,7 +129,7 @@ export default function DashboardPage() {
     const industry = (companyIndustries as any)[name] || (questions[0]?.industry || "Consulting");
     const companySlides = (slidesData as any[]).filter(s => s.company.toLowerCase() === name.toLowerCase() && s.deck_type === "company");
     const industrySlides = (slidesData as any[]).filter(s => s.company.toLowerCase() === industry.toLowerCase() && s.deck_type === "industry");
-    const compExperiences = (experiencesData as any[]).filter(e => e.company.toLowerCase() === name.toLowerCase());
+    const compExperiences = experiencesWithNormalizedDomain.filter(e => e.company.toLowerCase() === name.toLowerCase());
 
     const qYears = Array.from(new Set(questions.map(q => q.year || "2024"))).sort().reverse();
 
@@ -150,14 +153,14 @@ export default function DashboardPage() {
       qYears,
       groupedQuestions
     };
-  }, [catalogCompany]);
+  }, [catalogCompany, experiencesWithNormalizedDomain]);
 
   // Clean role title helper
   const getCleanRoleTitle = (exp: any) => {
     if (!exp) return "Interview Experience";
     let role = exp.role_offered || "";
     if (role.toLowerCase().startsWith("as a part of") || role.length > 50) {
-      role = `${exp.company} - ${exp.domain} Candidate`;
+      role = `${exp.company} - ${exp.normalizedDomain} Candidate`;
     }
     return role;
   };
@@ -382,7 +385,7 @@ export default function DashboardPage() {
               </div>
 
               <p style={{ fontSize: "0.82rem", color: "#64748b", margin: "-0.5rem 0 1rem 0" }}>
-                Filter 1,200+ interview experiences by recruiting firm, domain specialization, graduating batch year, or keyword.
+                Filter 1,200+ interview experiences by recruiting firm, normalized domain specialization, graduating batch year, or keyword.
               </p>
 
               <div className="search-grid">
@@ -410,18 +413,18 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Multi-Select Domain Pills */}
+              {/* Multi-Select Domain Pills (Normalized into 7 Categories) */}
               <div className="mt-3">
                 <label style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-primary)", display: "block", marginBottom: "0.25rem" }}>
-                  Domain Specialization (Multi-Select):
+                  Domain Specialization (Normalized into 7 Standard Categories):
                 </label>
                 <span style={{ fontSize: "0.78rem", color: "#64748b", display: "block", marginBottom: "0.5rem" }}>
-                  Select one or more domain areas to filter student interview experience guides.
+                  Select one or more standardized domain categories to filter student experience guides.
                 </span>
                 <div className="qtype-pills-row">
-                  {allDomains.map(d => {
+                  {ALL_NORMALIZED_DOMAINS.map(d => {
                     const isSelected = selectedDomains.includes(d);
-                    const count = (experiencesData as any[]).filter(e => e.domain === d).length;
+                    const count = experiencesWithNormalizedDomain.filter(e => e.normalizedDomain === d).length;
                     return (
                       <button
                         key={d}
@@ -499,7 +502,7 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="meta-badges-row">
-                      <span className="badge-domain-tag" title="Domain Specialization">{exp.domain}</span>
+                      <span className="badge-domain-tag" title="Normalized Domain Specialization">{exp.normalizedDomain}</span>
                       <span className="badge-process-tag" title="Process Type">{exp.process_type || "Placement Process"}</span>
                     </div>
 
@@ -761,7 +764,7 @@ export default function DashboardPage() {
                                           {qList.map((qItem: any, qIdx: number) => (
                                             <div key={qIdx} className="question-card">
                                               <div className="question-meta">
-                                                <span className="tag-base tag-domain">{qItem.domain || "Placement"}</span>
+                                                <span className="tag-base tag-domain">{normalizeDomain(qItem.domain)}</span>
                                                 <span className="question-domain">{qItem.role || "Candidate"}</span>
                                               </div>
                                               <div className="question-text">{qItem.question}</div>
@@ -875,7 +878,7 @@ export default function DashboardPage() {
                               <span className="badge-year-tag">{exp.year || "2024"}</span>
                             </div>
                             <div className="meta-badges-row">
-                              <span className="badge-domain-tag">{exp.domain}</span>
+                              <span className="badge-domain-tag">{exp.normalizedDomain}</span>
                               <span className="badge-process-tag">{exp.process_type || "Placement Process"}</span>
                             </div>
                             <p className="exp-card-snippet">{getCleanRoleTitle(exp)}</p>
@@ -904,7 +907,7 @@ export default function DashboardPage() {
             <div className="modal-header">
               <div className="modal-title-area">
                 <div className="modal-meta-pills">
-                  <span className="meta-pill pill-domain">{activeModalExp.domain}</span>
+                  <span className="meta-pill pill-domain">{normalizeDomain(activeModalExp.domain)}</span>
                   <span className="meta-pill pill-process">{activeModalExp.process_type || "Placement Process"}</span>
                 </div>
                 <h3>{activeModalExp.company} - {getCleanRoleTitle(activeModalExp)}</h3>
