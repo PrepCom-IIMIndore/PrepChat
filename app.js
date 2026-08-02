@@ -1229,13 +1229,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function getCleanRoleTitle(exp) {
+        let role = exp.role_offered || exp.profile_offered || '';
+        if (!role || role.trim().length === 0) {
+            return `${exp.domain || exp.company} Interview Experience #${exp.id}`;
+        }
+        role = role.trim();
+        if (role.length > 60) {
+            const firstSentence = role.split(/[.\n]/)[0].trim();
+            if (firstSentence.length > 5 && firstSentence.length <= 60) {
+                return firstSentence;
+            }
+            return `${exp.domain || exp.company} Role Profile`;
+        }
+        return role;
+    }
+
     // 7. Drill-Down Experience Modal Controller
     function openExperienceModal(exp) {
         modalExpCompany.textContent = exp.company;
         modalExpDomain.textContent = exp.domain;
         modalExpYear.textContent = exp.year;
         modalExpProcess.textContent = exp.process_type;
-        modalExpTitle.textContent = exp.role_offered || `Interview Experience #${exp.id}`;
+        
+        // Clean title to prevent massive bold paragraph overflow in modal header
+        modalExpTitle.textContent = getCleanRoleTitle(exp);
 
         if (exp.converted) {
             modalExpConverted.classList.remove('hidden');
@@ -1263,8 +1281,13 @@ document.addEventListener('DOMContentLoaded', () => {
             modalCompanySummaryBox.classList.add('hidden');
         }
 
-        // Fill modal section contents
-        setModalSectionText(modalExpPreProcess, 'box-pre-process', exp.pre_process_tips);
+        // Fill modal section contents & include full role description if long
+        let preProcessText = exp.pre_process_tips || '';
+        const rawRole = exp.role_offered || exp.profile_offered || '';
+        if (rawRole && rawRole.trim().length > 60) {
+            preProcessText = `Role Overview & Position Description:\n${rawRole.trim()}\n\n${preProcessText}`.trim();
+        }
+        setModalSectionText(modalExpPreProcess, 'box-pre-process', preProcessText);
         setModalSectionText(modalExpUg, 'box-ug', exp.ug_background);
         setModalSectionText(modalExpCertifications, 'box-certifications', exp.certifications);
         setModalSectionText(modalExpGdTopics, 'box-gd-details', exp.gd_topics_tips ? `GD Conducted: ${exp.gd_conducted}\nGD Duration: ${exp.gd_duration || 'N/A'}\n\n${exp.gd_topics_tips}` : null);
