@@ -277,9 +277,6 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
             user_list.sort(key=lambda u: u.get('last_login', ''), reverse=True)
             
             total_logins = sum(u.get('login_count', 0) for u in user_list)
-            total_actions = sum(u.get('activity_count', 0) for u in user_list)
-            flagged_users = [u for u in user_list if u.get('login_count', 0) > 15 or u.get('activity_count', 0) > 100]
-            
             self._send_json({
                 "summary": {
                     "total_registered_users": len(user_list),
@@ -290,6 +287,37 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
                 "users": user_list
             })
             return
+
+        # -------------------------------------------------------------
+        # Static Asset Proxy (Frontend & Root Support)
+        # -------------------------------------------------------------
+        def resolve_static_path(file_name):
+            root_file = Path(file_name)
+            if root_file.exists():
+                return root_file
+            return Path("frontend") / file_name
+
+        if path == '/' or path == '/index.html':
+            target_file = resolve_static_path("index.html")
+            self._send_file(target_file, 'text/html; charset=utf-8')
+        elif path == '/styles.css':
+            target_file = resolve_static_path("styles.css")
+            self._send_file(target_file, 'text/css; charset=utf-8')
+        elif path == '/app.js':
+            target_file = resolve_static_path("app.js")
+            self._send_file(target_file, 'application/javascript; charset=utf-8')
+        else:
+            rel_path = path.lstrip('/')
+            target_file = resolve_static_path(rel_path)
+            if target_file.exists() and target_file.is_file():
+                content_type = 'text/plain'
+                if rel_path.endswith('.js'): content_type = 'application/javascript'
+                elif rel_path.endswith('.css'): content_type = 'text/css'
+                elif rel_path.endswith('.html'): content_type = 'text/html'
+                elif rel_path.endswith('.json'): content_type = 'application/json'
+                self._send_file(target_file, content_type)
+            else:
+                self.send_error(404, "File Not Found")
 
     def do_OPTIONS(self):
         self.send_response(200)
@@ -365,37 +393,6 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
             return
 
         self._send_json({"error": "Endpoint not found"}, status=404)
-
-        # -------------------------------------------------------------
-        # Static Asset Proxy (Frontend & Root Support)
-        # -------------------------------------------------------------
-        def resolve_static_path(file_name):
-            root_file = Path(file_name)
-            if root_file.exists():
-                return root_file
-            return Path("frontend") / file_name
-
-        if path == '/' or path == '/index.html':
-            target_file = resolve_static_path("index.html")
-            self._send_file(target_file, 'text/html; charset=utf-8')
-        elif path == '/styles.css':
-            target_file = resolve_static_path("styles.css")
-            self._send_file(target_file, 'text/css; charset=utf-8')
-        elif path == '/app.js':
-            target_file = resolve_static_path("app.js")
-            self._send_file(target_file, 'application/javascript; charset=utf-8')
-        else:
-            rel_path = path.lstrip('/')
-            target_file = resolve_static_path(rel_path)
-            if target_file.exists() and target_file.is_file():
-                content_type = 'text/plain'
-                if rel_path.endswith('.js'): content_type = 'application/javascript'
-                elif rel_path.endswith('.css'): content_type = 'text/css'
-                elif rel_path.endswith('.html'): content_type = 'text/html'
-                elif rel_path.endswith('.json'): content_type = 'application/json'
-                self._send_file(target_file, content_type)
-            else:
-                self.send_error(404, "File Not Found")
 
 def run_server(port=8000):
     load_data()
