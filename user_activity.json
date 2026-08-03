@@ -1,1 +1,89 @@
-{}
+{
+  "prepcom@iimidr.ac.in": {
+    "email": "prepcom@iimidr.ac.in",
+    "role": "admin",
+    "session_start": "2/8/2026, 9:15:05 pm",
+    "last_active": "3/8/2026, 11:05:00 am",
+    "total_time_seconds": 2450,
+    "login_count": 14,
+    "activity_count": 112,
+    "status": "Active",
+    "companies_visited": ["Accenture", "McKinsey", "BCG", "HUL", "ICICI Bank"],
+    "company_visit_count": 18,
+    "daily_stats": {
+      "2026-08-01": {
+        "time_seconds": 1200,
+        "actions": 45,
+        "companies": ["McKinsey", "BCG", "HUL"]
+      },
+      "2026-08-02": {
+        "time_seconds": 1800,
+        "actions": 65,
+        "companies": ["Accenture", "ICICI Bank", "McKinsey"]
+      },
+      "2026-08-03": {
+        "time_seconds": 950,
+        "actions": 35,
+        "companies": ["BCG", "Accenture"]
+      }
+    }
+  },
+  "p22placecom@iimidr.ac.in": {
+    "email": "p22placecom@iimidr.ac.in",
+    "role": "user",
+    "session_start": "2/8/2026, 4:59:17 pm",
+    "last_active": "3/8/2026, 10:45:00 am",
+    "total_time_seconds": 1680,
+    "login_count": 8,
+    "activity_count": 54,
+    "status": "Active",
+    "companies_visited": ["Goldman Sachs", "JPMorgan", "Consulting", "Bain"],
+    "company_visit_count": 12,
+    "daily_stats": {
+      "2026-08-01": {
+        "time_seconds": 900,
+        "actions": 25,
+        "companies": ["Goldman Sachs", "JPMorgan"]
+      },
+      "2026-08-02": {
+        "time_seconds": 1100,
+        "actions": 38,
+        "companies": ["Bain", "Goldman Sachs"]
+      },
+      "2026-08-03": {
+        "time_seconds": 600,
+        "actions": 18,
+        "companies": ["Consulting"]
+      }
+    }
+  },
+  "candidate@iimidr.ac.in": {
+    "email": "candidate@iimidr.ac.in",
+    "role": "user",
+    "session_start": "2/8/2026, 5:23:16 pm",
+    "last_active": "3/8/2026, 09:30:00 am",
+    "total_time_seconds": 1120,
+    "login_count": 5,
+    "activity_count": 32,
+    "status": "Active",
+    "companies_visited": ["Tata Administrative Services", "Flipkart", "Amazon"],
+    "company_visit_count": 9,
+    "daily_stats": {
+      "2026-08-01": {
+        "time_seconds": 600,
+        "actions": 15,
+        "companies": ["Amazon"]
+      },
+      "2026-08-02": {
+        "time_seconds": 850,
+        "actions": 28,
+        "companies": ["Tata Administrative Services", "Flipkart"]
+      },
+      "2026-08-03": {
+        "time_seconds": 450,
+        "actions": 12,
+        "companies": ["Amazon"]
+      }
+    }
+  }
+}

@@ -1,7 +1,10 @@
 {
   "blockedEmails": [],
   "allowedEmails": [
-    "prepcom@iimidr.ac.in"
+    "prepcom@iimidr.ac.in",
+    "p22placecom@iimidr.ac.in",
+    "placecom@iimidr.ac.in",
+    "candidate@iimidr.ac.in"
   ],
   "isWhitelistMode": false
 }

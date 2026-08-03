@@ -10,7 +10,7 @@ export interface AccessControlData {
   isWhitelistMode: boolean;
 }
 
-// In-Memory fallback cache for serverless invocation lifecycle
+// In-Memory cache for serverless invocation lifecycle
 let memoryCache: AccessControlData | null = null;
 
 async function fetchFromCloudKV(): Promise<AccessControlData | null> {
@@ -58,37 +58,48 @@ async function saveToCloudKV(data: AccessControlData): Promise<boolean> {
 function loadAccessControlDataFromFile(): AccessControlData {
   if (memoryCache) return memoryCache;
 
-  // 1. Try reading from /tmp (Vercel writable directory during serverless execution)
-  try {
-    if (fs.existsSync(TMP_FILE)) {
-      const data = fs.readFileSync(TMP_FILE, "utf-8");
-      const parsed = JSON.parse(data);
-      if (parsed && Array.isArray(parsed.blockedEmails)) {
-        memoryCache = parsed;
-        return parsed;
-      }
-    }
-  } catch (e) {}
+  const blockedSet = new Set<string>();
+  const allowedSet = new Set<string>(["prepcom@iimidr.ac.in", "p22placecom@iimidr.ac.in", "placecom@iimidr.ac.in", "candidate@iimidr.ac.in"]);
+  let isWhitelistMode = false;
 
-  // 2. Fallback to reading project root file
+  // 1. Read committed project root file
   try {
     if (fs.existsSync(LOCAL_FILE)) {
       const data = fs.readFileSync(LOCAL_FILE, "utf-8");
       const parsed = JSON.parse(data);
-      if (parsed && Array.isArray(parsed.blockedEmails)) {
-        memoryCache = parsed;
-        return parsed;
+      if (parsed) {
+        (parsed.blockedEmails || []).forEach((e: string) => blockedSet.add(e.toLowerCase().trim()));
+        (parsed.allowedEmails || []).forEach((e: string) => allowedSet.add(e.toLowerCase().trim()));
+        if (typeof parsed.isWhitelistMode === "boolean") {
+          isWhitelistMode = parsed.isWhitelistMode;
+        }
       }
     }
   } catch (e) {}
 
-  const defaultData: AccessControlData = {
-    blockedEmails: [],
-    allowedEmails: ["prepcom@iimidr.ac.in"],
-    isWhitelistMode: false
+  // 2. Merge runtime /tmp file updates
+  try {
+    if (fs.existsSync(TMP_FILE)) {
+      const data = fs.readFileSync(TMP_FILE, "utf-8");
+      const parsed = JSON.parse(data);
+      if (parsed) {
+        (parsed.blockedEmails || []).forEach((e: string) => blockedSet.add(e.toLowerCase().trim()));
+        (parsed.allowedEmails || []).forEach((e: string) => allowedSet.add(e.toLowerCase().trim()));
+        if (typeof parsed.isWhitelistMode === "boolean") {
+          isWhitelistMode = parsed.isWhitelistMode;
+        }
+      }
+    }
+  } catch (e) {}
+
+  const result: AccessControlData = {
+    blockedEmails: Array.from(blockedSet),
+    allowedEmails: Array.from(allowedSet),
+    isWhitelistMode
   };
-  memoryCache = defaultData;
-  return defaultData;
+
+  memoryCache = result;
+  return result;
 }
 
 function saveAccessControlDataToFile(data: AccessControlData) {
@@ -107,8 +118,17 @@ function saveAccessControlDataToFile(data: AccessControlData) {
 export async function getAccessControlStateAsync(): Promise<AccessControlData> {
   const cloudData = await fetchFromCloudKV();
   if (cloudData) {
-    memoryCache = cloudData;
-    return cloudData;
+    // Merge cloud data with committed file data
+    const localData = loadAccessControlDataFromFile();
+    const blockedSet = new Set<string>([...(cloudData.blockedEmails || []), ...(localData.blockedEmails || [])]);
+    const allowedSet = new Set<string>([...(cloudData.allowedEmails || []), ...(localData.allowedEmails || [])]);
+    const merged: AccessControlData = {
+      blockedEmails: Array.from(blockedSet),
+      allowedEmails: Array.from(allowedSet),
+      isWhitelistMode: typeof cloudData.isWhitelistMode === "boolean" ? cloudData.isWhitelistMode : localData.isWhitelistMode
+    };
+    memoryCache = merged;
+    return merged;
   }
   return loadAccessControlDataFromFile();
 }
