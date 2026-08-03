@@ -85,7 +85,6 @@ function loadTelemetryDbFromFile(): { [email: string]: TelemetryUser } {
 
   const merged: { [email: string]: TelemetryUser } = {};
 
-  // 1. Read project root file (committed historical data)
   try {
     if (fs.existsSync(LOCAL_USER_FILE)) {
       const data = fs.readFileSync(LOCAL_USER_FILE, "utf-8");
@@ -96,7 +95,6 @@ function loadTelemetryDbFromFile(): { [email: string]: TelemetryUser } {
     }
   } catch (e) {}
 
-  // 2. Merge runtime /tmp file updates
   try {
     if (fs.existsSync(TMP_USER_FILE)) {
       const data = fs.readFileSync(TMP_USER_FILE, "utf-8");
@@ -106,7 +104,6 @@ function loadTelemetryDbFromFile(): { [email: string]: TelemetryUser } {
           if (!merged[email]) {
             merged[email] = parsed[email];
           } else {
-            // Merge stats
             const existing = merged[email];
             const incoming = parsed[email];
             merged[email] = {
@@ -220,7 +217,6 @@ export async function GET() {
       hasExplicitDailyStats = true;
     }
 
-    // Fallback: if no explicit daily_stats, infer date from session_start or last_active
     if (!hasExplicitDailyStats) {
       const activeStr = u.last_active || u.session_start || "";
       let dateKey = today.toISOString().split("T")[0];
@@ -311,6 +307,16 @@ export async function POST(request: Request) {
 
     // ADMIN MANAGEMENT ACTIONS (RESTRICTED TO prepcom@iimidr.ac.in)
     if (role === "admin" || email.startsWith("prepcom")) {
+      if (action === "delete_user" && body.targetEmail) {
+        const target = body.targetEmail.toLowerCase().trim();
+        if (telemetryDb[target]) {
+          delete telemetryDb[target];
+          await persistTelemetryDb(telemetryDb);
+          return NextResponse.json({ success: true, message: `Removed telemetry record for ${target}` });
+        }
+        return NextResponse.json({ success: false, message: "Target user not found" });
+      }
+
       if (action === "block_email" && body.targetEmail) {
         const parsed = parseEmails(body.targetEmail);
         await blockEmail(body.targetEmail);

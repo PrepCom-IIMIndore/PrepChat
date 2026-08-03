@@ -185,6 +185,18 @@ export default function DashboardPage() {
     setAdminModalOpen(true);
   };
 
+  const handleDeleteUserLog = async (targetEmail: string) => {
+    if (!targetEmail || !confirm(`Are you sure you want to delete all telemetry logs for ${targetEmail}?`)) return;
+    try {
+      await fetch("/api/telemetry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete_user", targetEmail })
+      });
+      handleFetchAdminTelemetry();
+    } catch (e) {}
+  };
+
   const handleBlockEmail = async (emailToBlock: string) => {
     if (!emailToBlock) return;
     try {
@@ -274,7 +286,7 @@ export default function DashboardPage() {
     setExpandedYearAccordion(prev => ({ ...prev, [year]: !prev[year] }));
   };
 
-  // Max value calculation for bar chart scaling
+  // Max value calculation for primary bar chart scaling
   const maxAvgTime = useMemo(() => {
     const daily = adminTelemetry?.dailyAnalytics || [];
     const maxVal = Math.max(...daily.map((d: any) => d.avg_user_time_mins || 0), 10);
@@ -284,6 +296,13 @@ export default function DashboardPage() {
   const maxAvgCompanies = useMemo(() => {
     const daily = adminTelemetry?.dailyAnalytics || [];
     const maxVal = Math.max(...daily.map((d: any) => d.avg_companies_visited || 0), 5);
+    return maxVal;
+  }, [adminTelemetry]);
+
+  // Secondary Axis Max Value Calculation (Active Users per Day)
+  const maxActiveUsers = useMemo(() => {
+    const daily = adminTelemetry?.dailyAnalytics || [];
+    const maxVal = Math.max(...daily.map((d: any) => d.active_users || 0), 5);
     return maxVal;
   }, [adminTelemetry]);
 
@@ -1158,7 +1177,7 @@ export default function DashboardPage() {
 
             <div className="modal-body">
               <p style={{ fontSize: "0.85rem", color: "#64748b", marginBottom: "1.25rem" }}>
-                Real-time usage metrics, daily trend graphs, company visit statistics, and server-side email access control for PrepCom admins.
+                Real-time usage metrics, dual-axis trend graphs, company visit statistics, and server-side email access control for PrepCom admins.
               </p>
 
               {/* Analytics Summary Stats Grid */}
@@ -1208,80 +1227,150 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* GRAPHICAL CHARTS SECTION */}
+              {/* GRAPHICAL DUAL-AXIS CHARTS SECTION (Re-aligned Equal Heights) */}
               <div className="search-card mb-4" style={{ background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "14px", padding: "1.5rem" }}>
                 <h4 style={{ fontSize: "1.1rem", fontWeight: 800, marginBottom: "0.25rem", color: "#0f172a", display: "flex", alignItems: "center", gap: "0.5rem" }}>
                   <span className="material-symbols-outlined" style={{ color: "#2563eb" }}>bar_chart</span>
-                  Graphical Trends: Daily Users, Avg Time, and Companies Explored
+                  Dual-Axis Graphical Trends: Primary Metrics (Bars) & Secondary Axis (Line: Active Users / Day)
                 </h4>
                 <p style={{ fontSize: "0.82rem", color: "#64748b", marginBottom: "1.25rem" }}>
-                  Visual bar charts showing daily breakdown over the past 7 days. Hover or inspect bars for detailed daily metrics.
+                  Equal height aligned visual graphs. Bars represent primary metrics; orange line overlay represents secondary axis (Active Users per Day).
                 </p>
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
-                  {/* GRAPHICAL CHART 1: Avg Time & Daily Active Users */}
-                  <div style={{ background: "#f8fafc", padding: "1.25rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
-                      <strong style={{ fontSize: "0.9rem", color: "#1e293b" }}>📈 Avg User Time per Day (Minutes)</strong>
-                      <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "#2563eb", background: "#eff6ff", padding: "2px 8px", borderRadius: "8px" }}>Daily Trend</span>
+                  {/* GRAPHICAL CHART 1: Avg Time (Bars) + Active Users (Secondary Line) */}
+                  <div style={{ background: "#f8fafc", padding: "1.25rem", borderRadius: "12px", border: "1px solid #e2e8f0", height: "310px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                    <div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
+                        <strong style={{ fontSize: "0.88rem", color: "#1e293b" }}>📈 Avg User Time per Day (Minutes)</strong>
+                        <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#ea580c", background: "#ffedd5", padding: "2px 8px", borderRadius: "8px" }}>👥 Line: Active Users</span>
+                      </div>
+                      <p style={{ fontSize: "0.75rem", color: "#64748b", margin: 0 }}>
+                        Bars = Avg Minutes / User | Line = Active Users per Day
+                      </p>
                     </div>
-                    <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "1rem" }}>
-                      Average active duration spent per student on each day.
-                    </p>
 
-                    <div style={{ display: "flex", alignItems: "flex-end", height: "160px", gap: "0.75rem", paddingBottom: "1.5rem", borderBottom: "2px solid #e2e8f0" }}>
-                      {(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
-                        const heightPct = Math.min(100, Math.max(12, ((d.avg_user_time_mins || 0) / maxAvgTime) * 100));
-                        return (
-                          <div key={idx} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", height: "100%", justifyContent: "flex-end" }}>
-                            <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "#2563eb", marginBottom: "4px" }}>{d.avg_user_time_mins}m</span>
-                            <div
-                              title={`${d.label}: ${d.avg_user_time_mins} mins avg time (${d.active_users} active users)`}
-                              style={{
-                                width: "100%",
-                                height: `${heightPct}%`,
-                                background: "linear-gradient(180deg, #2563eb 0%, #4f46e5 100%)",
-                                borderRadius: "6px 6px 0 0",
-                                transition: "height 0.3s ease"
-                              }}
-                            />
-                            <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b", marginTop: "6px" }}>{d.label}</span>
-                          </div>
-                        );
-                      })}
+                    <div style={{ position: "relative", height: "180px", paddingTop: "20px" }}>
+                      {/* Secondary Axis Line Overlay SVG */}
+                      <svg style={{ position: "absolute", top: "20px", left: 0, width: "100%", height: "130px", pointerEvents: "none", zIndex: 10 }}>
+                        <polyline
+                          fill="none"
+                          stroke="#ea580c"
+                          strokeWidth="3"
+                          strokeDasharray="0"
+                          points={(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
+                            const total = (adminTelemetry?.dailyAnalytics || []).length || 1;
+                            const x = (idx + 0.5) * (100 / total);
+                            const y = 130 - Math.min(120, Math.max(10, ((d.active_users || 0) / maxActiveUsers) * 110));
+                            return `${x}%,${y}`;
+                          }).join(" ")}
+                        />
+                        {(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
+                          const total = (adminTelemetry?.dailyAnalytics || []).length || 1;
+                          const x = (idx + 0.5) * (100 / total);
+                          const y = 130 - Math.min(120, Math.max(10, ((d.active_users || 0) / maxActiveUsers) * 110));
+                          return (
+                            <g key={idx}>
+                              <circle cx={`${x}%`} cy={y} r="5" fill="#ea580c" stroke="#ffffff" strokeWidth="2" />
+                              <text x={`${x}%`} y={y - 8} fill="#c2410c" fontSize="10" fontWeight="800" textAnchor="middle">
+                                👥 {d.active_users}
+                              </text>
+                            </g>
+                          );
+                        })}
+                      </svg>
+
+                      {/* Primary Axis Bar Plot */}
+                      <div style={{ display: "flex", alignItems: "flex-end", height: "150px", gap: "0.75rem", borderBottom: "2px solid #cbd5e1" }}>
+                        {(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
+                          const heightPct = Math.min(100, Math.max(10, ((d.avg_user_time_mins || 0) / maxAvgTime) * 100));
+                          return (
+                            <div key={idx} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", height: "100%", justifyContent: "flex-end" }}>
+                              <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "#2563eb", marginBottom: "2px" }}>{d.avg_user_time_mins}m</span>
+                              <div
+                                title={`${d.label}: ${d.avg_user_time_mins} mins avg time (${d.active_users} active users)`}
+                                style={{
+                                  width: "100%",
+                                  height: `${heightPct}%`,
+                                  background: "linear-gradient(180deg, #2563eb 0%, #3b82f6 100%)",
+                                  borderRadius: "6px 6px 0 0",
+                                  opacity: 0.85,
+                                  transition: "height 0.3s ease"
+                                }}
+                              />
+                              <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b", marginTop: "6px" }}>{d.label}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
 
-                  {/* GRAPHICAL CHART 2: Avg Companies Visited per User per Day */}
-                  <div style={{ background: "#f8fafc", padding: "1.25rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
-                      <strong style={{ fontSize: "0.9rem", color: "#1e293b" }}>📊 Avg Companies Visited per User per Day</strong>
-                      <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "#059669", background: "#ecfdf5", padding: "2px 8px", borderRadius: "8px" }}>Company Exploration</span>
+                  {/* GRAPHICAL CHART 2: Avg Companies (Bars) + Active Users (Secondary Line) */}
+                  <div style={{ background: "#f8fafc", padding: "1.25rem", borderRadius: "12px", border: "1px solid #e2e8f0", height: "310px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                    <div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
+                        <strong style={{ fontSize: "0.88rem", color: "#1e293b" }}>📊 Avg Companies Visited per User per Day</strong>
+                        <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#ea580c", background: "#ffedd5", padding: "2px 8px", borderRadius: "8px" }}>👥 Line: Active Users</span>
+                      </div>
+                      <p style={{ fontSize: "0.75rem", color: "#64748b", margin: 0 }}>
+                        Bars = Avg Companies / User | Line = Active Users per Day
+                      </p>
                     </div>
-                    <p style={{ fontSize: "0.75rem", color: "#64748b", marginBottom: "1rem" }}>
-                      Average count of unique firm pages explored per active student on each day.
-                    </p>
 
-                    <div style={{ display: "flex", alignItems: "flex-end", height: "160px", gap: "0.75rem", paddingBottom: "1.5rem", borderBottom: "2px solid #e2e8f0" }}>
-                      {(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
-                        const heightPct = Math.min(100, Math.max(12, ((d.avg_companies_visited || 0) / maxAvgCompanies) * 100));
-                        return (
-                          <div key={idx} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", height: "100%", justifyContent: "flex-end" }}>
-                            <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "#059669", marginBottom: "4px" }}>{d.avg_companies_visited}</span>
-                            <div
-                              title={`${d.label}: ${d.avg_companies_visited} avg companies visited per user`}
-                              style={{
-                                width: "100%",
-                                height: `${heightPct}%`,
-                                background: "linear-gradient(180deg, #059669 0%, #10b981 100%)",
-                                borderRadius: "6px 6px 0 0",
-                                transition: "height 0.3s ease"
-                              }}
-                            />
-                            <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b", marginTop: "6px" }}>{d.label}</span>
-                          </div>
-                        );
-                      })}
+                    <div style={{ position: "relative", height: "180px", paddingTop: "20px" }}>
+                      {/* Secondary Axis Line Overlay SVG */}
+                      <svg style={{ position: "absolute", top: "20px", left: 0, width: "100%", height: "130px", pointerEvents: "none", zIndex: 10 }}>
+                        <polyline
+                          fill="none"
+                          stroke="#ea580c"
+                          strokeWidth="3"
+                          strokeDasharray="0"
+                          points={(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
+                            const total = (adminTelemetry?.dailyAnalytics || []).length || 1;
+                            const x = (idx + 0.5) * (100 / total);
+                            const y = 130 - Math.min(120, Math.max(10, ((d.active_users || 0) / maxActiveUsers) * 110));
+                            return `${x}%,${y}`;
+                          }).join(" ")}
+                        />
+                        {(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
+                          const total = (adminTelemetry?.dailyAnalytics || []).length || 1;
+                          const x = (idx + 0.5) * (100 / total);
+                          const y = 130 - Math.min(120, Math.max(10, ((d.active_users || 0) / maxActiveUsers) * 110));
+                          return (
+                            <g key={idx}>
+                              <circle cx={`${x}%`} cy={y} r="5" fill="#ea580c" stroke="#ffffff" strokeWidth="2" />
+                              <text x={`${x}%`} y={y - 8} fill="#c2410c" fontSize="10" fontWeight="800" textAnchor="middle">
+                                👥 {d.active_users}
+                              </text>
+                            </g>
+                          );
+                        })}
+                      </svg>
+
+                      {/* Primary Axis Bar Plot */}
+                      <div style={{ display: "flex", alignItems: "flex-end", height: "150px", gap: "0.75rem", borderBottom: "2px solid #cbd5e1" }}>
+                        {(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
+                          const heightPct = Math.min(100, Math.max(10, ((d.avg_companies_visited || 0) / maxAvgCompanies) * 100));
+                          return (
+                            <div key={idx} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", height: "100%", justifyContent: "flex-end" }}>
+                              <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "#059669", marginBottom: "2px" }}>{d.avg_companies_visited}</span>
+                              <div
+                                title={`${d.label}: ${d.avg_companies_visited} avg companies visited per user (${d.active_users} active users)`}
+                                style={{
+                                  width: "100%",
+                                  height: `${heightPct}%`,
+                                  background: "linear-gradient(180deg, #059669 0%, #10b981 100%)",
+                                  borderRadius: "6px 6px 0 0",
+                                  opacity: 0.85,
+                                  transition: "height 0.3s ease"
+                                }}
+                              />
+                              <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b", marginTop: "6px" }}>{d.label}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1430,7 +1519,7 @@ export default function DashboardPage() {
                         <th title="Total active session duration accumulated during browsing">Time Spent</th>
                         <th title="Count and preview of recruiting firm catalog pages visited by this user">Unique Companies Explored</th>
                         <th title="Current access status (Active Session or BLOCKED)">Status</th>
-                        <th title="1-click admin block/unblock controls">Admin Action</th>
+                        <th title="1-click admin block, unblock, or remove log controls">Admin Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1469,23 +1558,34 @@ export default function DashboardPage() {
                               </span>
                             </td>
                             <td>
-                              {u.email !== "prepcom@iimidr.ac.in" && (
-                                u.is_blocked ? (
+                              <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
+                                {u.email !== "prepcom@iimidr.ac.in" && (
+                                  u.is_blocked ? (
+                                    <button
+                                      onClick={() => handleUnblockEmail(u.email)}
+                                      style={{ background: "#d1fae5", color: "#047857", border: "1px solid #6ee7b7", padding: "2px 8px", borderRadius: "6px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}
+                                    >
+                                      Unblock
+                                    </button>
+                                  ) : (
+                                    <button
+                                      onClick={() => handleBlockEmail(u.email)}
+                                      style={{ background: "#fee2e2", color: "#dc2626", border: "1px solid #fca5a5", padding: "2px 8px", borderRadius: "6px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}
+                                    >
+                                      Block
+                                    </button>
+                                  )
+                                )}
+                                {u.email !== "prepcom@iimidr.ac.in" && (
                                   <button
-                                    onClick={() => handleUnblockEmail(u.email)}
-                                    style={{ background: "#d1fae5", color: "#047857", border: "1px solid #6ee7b7", padding: "2px 8px", borderRadius: "6px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}
+                                    onClick={() => handleDeleteUserLog(u.email)}
+                                    style={{ background: "#f1f5f9", color: "#64748b", border: "1px solid #cbd5e1", padding: "2px 8px", borderRadius: "6px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}
+                                    title={`Permanently remove ${u.email} telemetry log from analytics`}
                                   >
-                                    Unblock
+                                    🗑️ Remove Log
                                   </button>
-                                ) : (
-                                  <button
-                                    onClick={() => handleBlockEmail(u.email)}
-                                    style={{ background: "#fee2e2", color: "#dc2626", border: "1px solid #fca5a5", padding: "2px 8px", borderRadius: "6px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}
-                                  >
-                                    Block
-                                  </button>
-                                )
-                              )}
+                                )}
+                              </div>
                             </td>
                           </tr>
                         ))}
