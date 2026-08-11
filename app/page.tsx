@@ -185,6 +185,57 @@ export default function DashboardPage() {
     setAdminModalOpen(true);
   };
 
+  const handleExportToExcel = () => {
+    const users = adminTelemetry?.users || [];
+    if (users.length === 0) {
+      alert("No telemetry data available to export.");
+      return;
+    }
+
+    const headers = [
+      "Email",
+      "Role",
+      "Session Start",
+      "Last Active",
+      "Time Spent",
+      "Total Time (Seconds)",
+      "Login Count",
+      "Activity Count",
+      "Status",
+      "Companies Visited Count",
+      "Companies Visited List"
+    ];
+
+    const csvContent = [
+      headers.join(","),
+      ...users.map((u: any) => {
+        const companies = Array.isArray(u.companies_visited) ? u.companies_visited.join("; ") : "";
+        return [
+          `"${u.email || ""}"`,
+          `"${u.role || "user"}"`,
+          `"${u.session_start || ""}"`,
+          `"${u.last_active || ""}"`,
+          `"${u.duration_display || ""}"`,
+          u.total_time_seconds || 0,
+          u.login_count || 0,
+          u.activity_count || 0,
+          `"${u.is_blocked ? "Blocked" : u.status || "Active"}"`,
+          u.companies_visited_count || 0,
+          `"${companies.replace(/"/g, '""')}"`
+        ].join(",");
+      })
+    ].join("\n");
+
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `PrepChat_UserActivity_Report_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleDeleteUserLog = async (targetEmail: string) => {
     if (!targetEmail || !confirm(`Are you sure you want to delete all telemetry logs for ${targetEmail}?`)) return;
     try {
@@ -1238,52 +1289,55 @@ export default function DashboardPage() {
                 </p>
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
-                  {/* GRAPHICAL CHART 1: Avg Time (Bars) + Active Users (Secondary Line) */}
-                  <div style={{ background: "#f8fafc", padding: "1.25rem", borderRadius: "12px", border: "1px solid #e2e8f0", height: "310px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                  {/* GRAPHICAL CHART 1: Avg Time (Bars) + Active Users (Top Track Line) */}
+                  <div style={{ background: "#f8fafc", padding: "1.25rem", borderRadius: "12px", border: "1px solid #e2e8f0", height: "340px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                     <div>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
                         <strong style={{ fontSize: "0.88rem", color: "#1e293b" }}>📈 Avg User Time per Day (Minutes)</strong>
                         <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#ea580c", background: "#ffedd5", padding: "2px 8px", borderRadius: "8px" }}>👥 Line: Active Users</span>
                       </div>
                       <p style={{ fontSize: "0.75rem", color: "#64748b", margin: 0 }}>
-                        Bars = Avg Minutes / User | Line = Active Users per Day
+                        Top Track = Active Users per Day | Bottom Bars = Avg Minutes / User
                       </p>
                     </div>
 
-                    <div style={{ position: "relative", height: "180px", paddingTop: "20px" }}>
-                      {/* Secondary Axis Line Overlay SVG */}
-                      <svg style={{ position: "absolute", top: "20px", left: 0, width: "100%", height: "130px", pointerEvents: "none", zIndex: 10 }}>
-                        <polyline
-                          fill="none"
-                          stroke="#ea580c"
-                          strokeWidth="3"
-                          strokeDasharray="0"
-                          points={(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
+                    <div style={{ position: "relative", height: "230px" }}>
+                      {/* Top Dedicated Track: Active Users Trend Line */}
+                      <div style={{ position: "relative", height: "65px", background: "#fff", borderRadius: "8px", border: "1px solid #f1f5f9", marginBottom: "8px", overflow: "hidden" }}>
+                        <div style={{ position: "absolute", top: "4px", left: "8px", fontSize: "0.68rem", fontWeight: 700, color: "#94a3b8" }}>ACTIVE USERS / DAY</div>
+                        <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "65px", pointerEvents: "none" }}>
+                          <polyline
+                            fill="none"
+                            stroke="#ea580c"
+                            strokeWidth="2.5"
+                            strokeDasharray="0"
+                            points={(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
+                              const total = (adminTelemetry?.dailyAnalytics || []).length || 1;
+                              const x = (idx + 0.5) * (100 / total);
+                              const y = 52 - Math.min(36, Math.max(4, ((d.active_users || 0) / maxActiveUsers) * 36));
+                              return `${x}%,${y}`;
+                            }).join(" ")}
+                          />
+                          {(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
                             const total = (adminTelemetry?.dailyAnalytics || []).length || 1;
                             const x = (idx + 0.5) * (100 / total);
-                            const y = 130 - Math.min(120, Math.max(10, ((d.active_users || 0) / maxActiveUsers) * 110));
-                            return `${x}%,${y}`;
-                          }).join(" ")}
-                        />
-                        {(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
-                          const total = (adminTelemetry?.dailyAnalytics || []).length || 1;
-                          const x = (idx + 0.5) * (100 / total);
-                          const y = 130 - Math.min(120, Math.max(10, ((d.active_users || 0) / maxActiveUsers) * 110));
-                          return (
-                            <g key={idx}>
-                              <circle cx={`${x}%`} cy={y} r="5" fill="#ea580c" stroke="#ffffff" strokeWidth="2" />
-                              <text x={`${x}%`} y={y - 8} fill="#c2410c" fontSize="10" fontWeight="800" textAnchor="middle">
-                                👥 {d.active_users}
-                              </text>
-                            </g>
-                          );
-                        })}
-                      </svg>
+                            const y = 52 - Math.min(36, Math.max(4, ((d.active_users || 0) / maxActiveUsers) * 36));
+                            return (
+                              <g key={idx}>
+                                <circle cx={`${x}%`} cy={y} r="4.5" fill="#ea580c" stroke="#ffffff" strokeWidth="2" />
+                                <text x={`${x}%`} y={y > 22 ? y - 7 : y + 14} fill="#c2410c" fontSize="9.5" fontWeight="800" textAnchor="middle">
+                                  👥 {d.active_users}
+                                </text>
+                              </g>
+                            );
+                          })}
+                        </svg>
+                      </div>
 
-                      {/* Primary Axis Bar Plot */}
-                      <div style={{ display: "flex", alignItems: "flex-end", height: "150px", gap: "0.75rem", borderBottom: "2px solid #cbd5e1" }}>
+                      {/* Lower Dedicated Track: Primary Axis Bar Plot */}
+                      <div style={{ display: "flex", alignItems: "flex-end", height: "155px", gap: "0.75rem", borderBottom: "2px solid #cbd5e1" }}>
                         {(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
-                          const heightPct = Math.min(100, Math.max(10, ((d.avg_user_time_mins || 0) / maxAvgTime) * 100));
+                          const heightPct = Math.min(80, Math.max(12, ((d.avg_user_time_mins || 0) / maxAvgTime) * 80));
                           return (
                             <div key={idx} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", height: "100%", justifyContent: "flex-end" }}>
                               <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "#2563eb", marginBottom: "2px" }}>{d.avg_user_time_mins}m</span>
@@ -1294,7 +1348,7 @@ export default function DashboardPage() {
                                   height: `${heightPct}%`,
                                   background: "linear-gradient(180deg, #2563eb 0%, #3b82f6 100%)",
                                   borderRadius: "6px 6px 0 0",
-                                  opacity: 0.85,
+                                  opacity: 0.9,
                                   transition: "height 0.3s ease"
                                 }}
                               />
@@ -1306,52 +1360,55 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  {/* GRAPHICAL CHART 2: Avg Companies (Bars) + Active Users (Secondary Line) */}
-                  <div style={{ background: "#f8fafc", padding: "1.25rem", borderRadius: "12px", border: "1px solid #e2e8f0", height: "310px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                  {/* GRAPHICAL CHART 2: Avg Companies (Bars) + Active Users (Top Track Line) */}
+                  <div style={{ background: "#f8fafc", padding: "1.25rem", borderRadius: "12px", border: "1px solid #e2e8f0", height: "340px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                     <div>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
                         <strong style={{ fontSize: "0.88rem", color: "#1e293b" }}>📊 Avg Companies Visited per User per Day</strong>
                         <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#ea580c", background: "#ffedd5", padding: "2px 8px", borderRadius: "8px" }}>👥 Line: Active Users</span>
                       </div>
                       <p style={{ fontSize: "0.75rem", color: "#64748b", margin: 0 }}>
-                        Bars = Avg Companies / User | Line = Active Users per Day
+                        Top Track = Active Users per Day | Bottom Bars = Avg Companies / User
                       </p>
                     </div>
 
-                    <div style={{ position: "relative", height: "180px", paddingTop: "20px" }}>
-                      {/* Secondary Axis Line Overlay SVG */}
-                      <svg style={{ position: "absolute", top: "20px", left: 0, width: "100%", height: "130px", pointerEvents: "none", zIndex: 10 }}>
-                        <polyline
-                          fill="none"
-                          stroke="#ea580c"
-                          strokeWidth="3"
-                          strokeDasharray="0"
-                          points={(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
+                    <div style={{ position: "relative", height: "230px" }}>
+                      {/* Top Dedicated Track: Active Users Trend Line */}
+                      <div style={{ position: "relative", height: "65px", background: "#fff", borderRadius: "8px", border: "1px solid #f1f5f9", marginBottom: "8px", overflow: "hidden" }}>
+                        <div style={{ position: "absolute", top: "4px", left: "8px", fontSize: "0.68rem", fontWeight: 700, color: "#94a3b8" }}>ACTIVE USERS / DAY</div>
+                        <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "65px", pointerEvents: "none" }}>
+                          <polyline
+                            fill="none"
+                            stroke="#ea580c"
+                            strokeWidth="2.5"
+                            strokeDasharray="0"
+                            points={(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
+                              const total = (adminTelemetry?.dailyAnalytics || []).length || 1;
+                              const x = (idx + 0.5) * (100 / total);
+                              const y = 52 - Math.min(36, Math.max(4, ((d.active_users || 0) / maxActiveUsers) * 36));
+                              return `${x}%,${y}`;
+                            }).join(" ")}
+                          />
+                          {(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
                             const total = (adminTelemetry?.dailyAnalytics || []).length || 1;
                             const x = (idx + 0.5) * (100 / total);
-                            const y = 130 - Math.min(120, Math.max(10, ((d.active_users || 0) / maxActiveUsers) * 110));
-                            return `${x}%,${y}`;
-                          }).join(" ")}
-                        />
-                        {(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
-                          const total = (adminTelemetry?.dailyAnalytics || []).length || 1;
-                          const x = (idx + 0.5) * (100 / total);
-                          const y = 130 - Math.min(120, Math.max(10, ((d.active_users || 0) / maxActiveUsers) * 110));
-                          return (
-                            <g key={idx}>
-                              <circle cx={`${x}%`} cy={y} r="5" fill="#ea580c" stroke="#ffffff" strokeWidth="2" />
-                              <text x={`${x}%`} y={y - 8} fill="#c2410c" fontSize="10" fontWeight="800" textAnchor="middle">
-                                👥 {d.active_users}
-                              </text>
-                            </g>
-                          );
-                        })}
-                      </svg>
+                            const y = 52 - Math.min(36, Math.max(4, ((d.active_users || 0) / maxActiveUsers) * 36));
+                            return (
+                              <g key={idx}>
+                                <circle cx={`${x}%`} cy={y} r="4.5" fill="#ea580c" stroke="#ffffff" strokeWidth="2" />
+                                <text x={`${x}%`} y={y > 22 ? y - 7 : y + 14} fill="#c2410c" fontSize="9.5" fontWeight="800" textAnchor="middle">
+                                  👥 {d.active_users}
+                                </text>
+                              </g>
+                            );
+                          })}
+                        </svg>
+                      </div>
 
-                      {/* Primary Axis Bar Plot */}
-                      <div style={{ display: "flex", alignItems: "flex-end", height: "150px", gap: "0.75rem", borderBottom: "2px solid #cbd5e1" }}>
+                      {/* Lower Dedicated Track: Primary Axis Bar Plot */}
+                      <div style={{ display: "flex", alignItems: "flex-end", height: "155px", gap: "0.75rem", borderBottom: "2px solid #cbd5e1" }}>
                         {(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
-                          const heightPct = Math.min(100, Math.max(10, ((d.avg_companies_visited || 0) / maxAvgCompanies) * 100));
+                          const heightPct = Math.min(80, Math.max(12, ((d.avg_companies_visited || 0) / maxAvgCompanies) * 80));
                           return (
                             <div key={idx} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", height: "100%", justifyContent: "flex-end" }}>
                               <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "#059669", marginBottom: "2px" }}>{d.avg_companies_visited}</span>
@@ -1362,7 +1419,7 @@ export default function DashboardPage() {
                                   height: `${heightPct}%`,
                                   background: "linear-gradient(180deg, #059669 0%, #10b981 100%)",
                                   borderRadius: "6px 6px 0 0",
-                                  opacity: 0.85,
+                                  opacity: 0.9,
                                   transition: "height 0.3s ease"
                                 }}
                               />
@@ -1491,22 +1548,45 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* LIVE SESSION & COMPANY TRACKER AUDIT TABLE */}
+               {/* LIVE SESSION & COMPANY TRACKER AUDIT TABLE */}
               <div className="admin-table-container">
-                <div className="admin-table-header">
+                <div className="admin-table-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
                   <div>
                     <h4>Live Session Audit Log & Companies Explored per User</h4>
                     <p style={{ fontSize: "0.78rem", color: "#64748b", margin: "2px 0 0 0" }}>
                       Detailed audit log tracking session start/end timestamps, duration, and specific companies explored per student.
                     </p>
                   </div>
-                  <input
-                    type="text"
-                    className="admin-search-input"
-                    placeholder="Search email..."
-                    value={adminSearch}
-                    onChange={(e) => setAdminSearch(e.target.value)}
-                  />
+                  <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+                    <button
+                      onClick={handleExportToExcel}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.4rem",
+                        padding: "0.5rem 1rem",
+                        background: "linear-gradient(135deg, #16a34a, #15803d)",
+                        color: "#ffffff",
+                        border: "none",
+                        borderRadius: "8px",
+                        fontWeight: 600,
+                        fontSize: "0.85rem",
+                        cursor: "pointer",
+                        whiteSpace: "nowrap"
+                      }}
+                      title="Download complete user activity report as Excel/CSV from inception"
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: "1.1rem" }}>download</span> Download Full Report (Excel)
+                    </button>
+                    <input
+                      type="text"
+                      className="admin-search-input"
+                      placeholder="Search email..."
+                      value={adminSearch}
+                      onChange={(e) => setAdminSearch(e.target.value)}
+                      style={{ margin: 0 }}
+                    />
+                  </div>
                 </div>
                 <div className="table-scroll-wrap">
                   <table className="telemetry-table">
@@ -1553,9 +1633,26 @@ export default function DashboardPage() {
                               )}
                             </td>
                             <td>
-                              <span className={`status-badge ${u.is_blocked ? "status-flagged" : "status-active"}`}>
-                                {u.is_blocked ? "BLOCKED" : "Active Session"}
-                              </span>
+                               <span
+                                 className={`status-badge ${
+                                   u.is_blocked
+                                     ? "status-flagged"
+                                     : u.session_start === "Pending Sign-In"
+                                     ? ""
+                                     : "status-active"
+                                 }`}
+                                 style={
+                                   u.session_start === "Pending Sign-In"
+                                     ? { background: "#d1fae5", color: "#047857", fontWeight: 700 }
+                                     : {}
+                                 }
+                               >
+                                 {u.is_blocked
+                                   ? "BLOCKED"
+                                   : u.session_start === "Pending Sign-In"
+                                   ? "Allowed (Pending Sign-In)"
+                                   : "Active Session"}
+                               </span>
                             </td>
                             <td>
                               <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>

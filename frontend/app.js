@@ -131,6 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const adminStatAbuse = document.getElementById('admin-stat-abuse');
     const adminUserSearch = document.getElementById('admin-user-search');
     const adminTelemetryTbody = document.getElementById('admin-telemetry-tbody');
+    const btnExportExcel = document.getElementById('btn-export-excel');
 
     let currentUser = null;
     let adminTelemetryData = null;
@@ -436,6 +437,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
         renderAdminTelemetryTable();
         if (adminDashboardModal) adminDashboardModal.classList.remove('hidden');
+
+        // Wire the export button every time the dashboard opens
+        if (btnExportExcel) {
+            btnExportExcel.onclick = async () => {
+                btnExportExcel.disabled = true;
+                btnExportExcel.textContent = '⏳ Preparing…';
+                try {
+                    // Try server-side Excel export first
+                    const res = await fetch('/api/admin/export');
+                    if (res.ok) {
+                        const blob = await res.blob();
+                        const disposition = res.headers.get('Content-Disposition') || '';
+                        const nameMatch = disposition.match(/filename="([^"]+)"/);
+                        const filename = nameMatch ? nameMatch[1] : `PrepChat_UserActivity_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.xlsx`;
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a'); a.href = url; a.download = filename;
+                        document.body.appendChild(a); a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    } else {
+                        throw new Error('Server export failed');
+                    }
+                } catch (err) {
+                    // Client-side CSV fallback using already-loaded telemetry data
+                    const users = (adminTelemetryData && adminTelemetryData.users) ? adminTelemetryData.users : [];
+                    const headers = ['Email','Role','Status','First Login','Last Login','Last Active','Login Count','Activity Count','Companies Visited','Company Visit Count'];
+                    const csvRows = [headers.join(',')];
+                    users.forEach(u => {
+                        const companies = Array.isArray(u.companies_visited) ? u.companies_visited.join('; ') : '';
+                        csvRows.push([
+                            u.email || '', u.role || 'user', u.status || 'Active',
+                            u.first_login || 'N/A', u.last_login || 'N/A', u.last_active || 'N/A',
+                            u.login_count || 0, u.activity_count || 0,
+                            `"${companies}"`, u.company_visit_count || 0
+                        ].join(','));
+                    });
+                    const blob = new Blob(['\uFEFF' + csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a'); a.href = url;
+                    a.download = `PrepChat_UserActivity_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.csv`;
+                    document.body.appendChild(a); a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                } finally {
+                    btnExportExcel.disabled = false;
+                    btnExportExcel.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.1rem;">download</span> Download Full Report (Excel)';
+                }
+            };
+        }
     }
 
     function renderAdminTelemetryTable() {

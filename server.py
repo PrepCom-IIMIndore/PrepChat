@@ -1,6 +1,9 @@
 import os
+import io
+import csv
 import json
 import urllib.parse
+import datetime
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
 from company_mapping import get_canonical_name
@@ -298,9 +301,12 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         elif path == '/api/admin/usage':
             # Returns full audit log of all @iimidr.ac.in user activity & usage telemetry
             user_list = list(USER_ACTIVITY.values())
-            user_list.sort(key=lambda u: u.get('last_login', ''), reverse=True)
-            
-            total_logins = sum(u.get('login_count', 0) for u in user_list)
+            user_list.sort(key=lambda u: u.get('last_login', u.get('last_active', '')), reverse=True)
+
+            total_logins  = sum(u.get('login_count', 0) for u in user_list)
+            total_actions = sum(u.get('activity_count', 0) for u in user_list)
+            flagged_users = [u for u in user_list if u.get('login_count', 0) > 15 or u.get('activity_count', 0) > 100]
+
             self._send_json({
                 "summary": {
                     "total_registered_users": len(user_list),
@@ -310,6 +316,86 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
                 },
                 "users": user_list
             })
+            return
+
+        elif path == '/api/admin/export':
+            # -------------------------------------------------------
+            # Download ALL user activity as Excel (.xlsx) from day 1
+            # Falls back to CSV if openpyxl is not installed.
+            # -------------------------------------------------------
+            user_list = list(USER_ACTIVITY.values())
+            user_list.sort(key=lambda u: u.get('first_login', ''), reverse=False)  # chronological
+
+            HEADERS = [
+                'Email', 'Role', 'Status',
+                'First Login', 'Last Login', 'Last Active',
+                'Login Count', 'Activity / Query Count',
+                'Companies Visited', 'Company Visit Count'
+            ]
+
+            rows = []
+            for u in user_list:
+                companies = u.get('companies_visited', [])
+                rows.append([
+                    u.get('email', ''),
+                    u.get('role', 'user'),
+                    u.get('status', 'Active'),
+                    u.get('first_login', 'N/A'),
+                    u.get('last_login', 'N/A'),
+                    u.get('last_active', 'N/A'),
+                    u.get('login_count', 0),
+                    u.get('activity_count', 0),
+                    ', '.join(companies) if isinstance(companies, list) else str(companies),
+                    u.get('company_visit_count', 0)
+                ])
+
+            try:
+                import openpyxl
+                wb = openpyxl.Workbook()
+                ws = wb.active
+                ws.title = 'User Activity Report'
+
+                # Header row - bold
+                ws.append(HEADERS)
+                from openpyxl.styles import Font, PatternFill, Alignment
+                header_font = Font(bold=True, color='FFFFFF')
+                header_fill = PatternFill('solid', fgColor='1D4ED8')
+                for cell in ws[1]:
+                    cell.font = header_font
+                    cell.fill = header_fill
+                    cell.alignment = Alignment(horizontal='center')
+
+                for row in rows:
+                    ws.append(row)
+
+                # Auto-fit column widths (approximate)
+                for col in ws.columns:
+                    max_len = max(len(str(cell.value or '')) for cell in col)
+                    ws.column_dimensions[col[0].column_letter].width = min(max_len + 4, 60)
+
+                buf = io.BytesIO()
+                wb.save(buf)
+                buf.seek(0)
+                content = buf.read()
+                fname = f'PrepChat_UserActivity_{datetime.datetime.now().strftime("%Y%m%d")}.xlsx'
+                content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            except ImportError:
+                # Fallback: plain CSV
+                buf = io.StringIO()
+                writer = csv.writer(buf)
+                writer.writerow(HEADERS)
+                writer.writerows(rows)
+                content = buf.getvalue().encode('utf-8-sig')  # BOM for Excel compatibility
+                fname = f'PrepChat_UserActivity_{datetime.datetime.now().strftime("%Y%m%d")}.csv'
+                content_type = 'text/csv; charset=utf-8'
+
+            self.send_response(200)
+            self.send_header('Content-Type', content_type)
+            self.send_header('Content-Length', str(len(content)))
+            self.send_header('Content-Disposition', f'attachment; filename="{fname}"')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(content)
             return
 
         # -------------------------------------------------------------

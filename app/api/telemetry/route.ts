@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import fs from "fs";
 import path from "path";
+import os from "os";
 import {
   getAccessControlStateAsync,
   blockEmail,
@@ -14,7 +15,7 @@ import {
 } from "@/lib/accessControl";
 
 const LOCAL_USER_FILE = path.join(process.cwd(), "user_activity.json");
-const TMP_USER_FILE = path.join("/tmp", "user_activity.json");
+const TMP_USER_FILE = path.join(os.tmpdir(), "prepchat_user_activity.json");
 
 export interface TelemetryUser {
   email: string;
@@ -52,7 +53,11 @@ async function fetchTelemetryFromCloudKV(): Promise<{ [email: string]: Telemetry
     if (res.ok) {
       const json = await res.json();
       if (json.result) {
-        const parsed = typeof json.result === "string" ? JSON.parse(json.result) : json.result;
+        let parsed = json.result;
+        // Upstash values can be double-serialized strings, so parse recursively until we get an object
+        while (typeof parsed === "string") {
+          parsed = JSON.parse(parsed);
+        }
         return parsed;
       }
     }
@@ -89,7 +94,7 @@ function loadTelemetryDbFromFile(): { [email: string]: TelemetryUser } {
     if (fs.existsSync(LOCAL_USER_FILE)) {
       const data = fs.readFileSync(LOCAL_USER_FILE, "utf-8");
       const parsed = JSON.parse(data);
-      if (parsed && typeof parsed === "object") {
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
         Object.assign(merged, parsed);
       }
     }
@@ -99,7 +104,7 @@ function loadTelemetryDbFromFile(): { [email: string]: TelemetryUser } {
     if (fs.existsSync(TMP_USER_FILE)) {
       const data = fs.readFileSync(TMP_USER_FILE, "utf-8");
       const parsed = JSON.parse(data);
-      if (parsed && typeof parsed === "object") {
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
         Object.keys(parsed).forEach(email => {
           if (!merged[email]) {
             merged[email] = parsed[email];
@@ -141,7 +146,7 @@ async function getTelemetryDbAsync(): Promise<{ [email: string]: TelemetryUser }
   const cloudData = await fetchTelemetryFromCloudKV();
   const fileData = loadTelemetryDbFromFile();
 
-  if (cloudData) {
+  if (cloudData && typeof cloudData === "object" && !Array.isArray(cloudData)) {
     const merged = { ...fileData, ...cloudData };
     telemetryCache = merged;
     return merged;
@@ -173,6 +178,27 @@ export async function GET() {
   const blockedSet = new Set((accessControlState.blockedEmails || []).map(e => e.toLowerCase()));
 
   const userList = Object.values(telemetryDb);
+
+  const allowedSet = new Set((accessControlState.allowedEmails || []).map(e => e.toLowerCase()));
+  const existingEmails = new Set(userList.map(u => u.email.toLowerCase()));
+
+  allowedSet.forEach(aEmail => {
+    if (!existingEmails.has(aEmail)) {
+      userList.push({
+        email: aEmail,
+        role: (aEmail === "prepcom@iimidr.ac.in" || aEmail.startsWith("prepcom")) ? "admin" : "user",
+        session_start: "Pending Sign-In",
+        last_active: "Not Logged In Yet",
+        total_time_seconds: 0,
+        login_count: 0,
+        activity_count: 0,
+        status: "Allowed (Pending)",
+        companies_visited: [],
+        company_visit_count: 0
+      });
+    }
+  });
+
   userList.sort((a, b) => (b.last_active || "").localeCompare(a.last_active || ""));
 
   const totalUsers = userList.length;
@@ -220,9 +246,22 @@ export async function GET() {
     if (!hasExplicitDailyStats) {
       const activeStr = u.last_active || u.session_start || "";
       let dateKey = today.toISOString().split("T")[0];
-      if (activeStr.includes("2026-08-01") || activeStr.includes("1/8/2026")) dateKey = "2026-08-01";
-      if (activeStr.includes("2026-08-02") || activeStr.includes("2/8/2026")) dateKey = "2026-08-02";
-      if (activeStr.includes("2026-08-03") || activeStr.includes("3/8/2026")) dateKey = "2026-08-03";
+      
+      if (activeStr && activeStr !== "Pending Sign-In" && activeStr !== "Not Logged In Yet") {
+        try {
+          const cleanPart = activeStr.split(",")[0].trim();
+          const match = cleanPart.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+          if (match) {
+            const [_, d, m, y] = match;
+            dateKey = `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+          } else {
+            const parsedDate = new Date(activeStr);
+            if (!isNaN(parsedDate.getTime())) {
+              dateKey = parsedDate.toISOString().split("T")[0];
+            }
+          }
+        } catch (e) {}
+      }
 
       if (!dailyMap[dateKey]) {
         dailyMap[dateKey] = { users: new Set(), total_time_sec: 0, companies: new Set() };

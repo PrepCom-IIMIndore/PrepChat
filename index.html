@@ -659,7 +659,12 @@
                 <div class="admin-table-container">
                     <div class="admin-table-header">
                         <h4>Audit Trail of Logged-in @iimidr.ac.in Users</h4>
-                        <input type="text" id="admin-user-search" class="admin-search-input" placeholder="Search user email address...">
+                        <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+                            <input type="text" id="admin-user-search" class="admin-search-input" placeholder="Search user email address...">
+                            <button id="btn-export-excel" title="Download complete user activity report as Excel from Day 1" style="display:flex;align-items:center;gap:0.4rem;padding:0.5rem 1rem;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;white-space:nowrap;transition:opacity .2s;">
+                                <span class="material-symbols-outlined" style="font-size:1.1rem;">download</span> Download Full Report (Excel)
+                            </button>
+                        </div>
                     </div>
                     <div class="table-scroll-wrap">
                         <table class="telemetry-table">

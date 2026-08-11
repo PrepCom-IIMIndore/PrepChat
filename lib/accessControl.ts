@@ -1,8 +1,9 @@
 import fs from "fs";
 import path from "path";
+import os from "os";
 
 const LOCAL_FILE = path.join(process.cwd(), "access_control.json");
-const TMP_FILE = path.join("/tmp", "access_control.json");
+const TMP_FILE = path.join(os.tmpdir(), "prepchat_access_control.json");
 
 export interface AccessControlData {
   blockedEmails: string[];
@@ -58,48 +59,51 @@ async function saveToCloudKV(data: AccessControlData): Promise<boolean> {
 function loadAccessControlDataFromFile(): AccessControlData {
   if (memoryCache) return memoryCache;
 
-  const blockedSet = new Set<string>();
-  const allowedSet = new Set<string>(["prepcom@iimidr.ac.in", "p22placecom@iimidr.ac.in", "placecom@iimidr.ac.in", "candidate@iimidr.ac.in"]);
-  let isWhitelistMode = false;
+  let loadedData: AccessControlData | null = null;
 
-  // 1. Read committed project root file
-  try {
-    if (fs.existsSync(LOCAL_FILE)) {
-      const data = fs.readFileSync(LOCAL_FILE, "utf-8");
-      const parsed = JSON.parse(data);
-      if (parsed) {
-        (parsed.blockedEmails || []).forEach((e: string) => blockedSet.add(e.toLowerCase().trim()));
-        (parsed.allowedEmails || []).forEach((e: string) => allowedSet.add(e.toLowerCase().trim()));
-        if (typeof parsed.isWhitelistMode === "boolean") {
-          isWhitelistMode = parsed.isWhitelistMode;
-        }
-      }
-    }
-  } catch (e) {}
-
-  // 2. Merge runtime /tmp file updates
+  // 1. Try reading runtime TMP_FILE first (most recent state)
   try {
     if (fs.existsSync(TMP_FILE)) {
-      const data = fs.readFileSync(TMP_FILE, "utf-8");
-      const parsed = JSON.parse(data);
-      if (parsed) {
-        (parsed.blockedEmails || []).forEach((e: string) => blockedSet.add(e.toLowerCase().trim()));
-        (parsed.allowedEmails || []).forEach((e: string) => allowedSet.add(e.toLowerCase().trim()));
-        if (typeof parsed.isWhitelistMode === "boolean") {
-          isWhitelistMode = parsed.isWhitelistMode;
-        }
+      const raw = fs.readFileSync(TMP_FILE, "utf-8");
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.allowedEmails) && Array.isArray(parsed.blockedEmails)) {
+        loadedData = {
+          blockedEmails: parsed.blockedEmails.map((e: string) => e.toLowerCase().trim()),
+          allowedEmails: parsed.allowedEmails.map((e: string) => e.toLowerCase().trim()),
+          isWhitelistMode: Boolean(parsed.isWhitelistMode)
+        };
       }
     }
   } catch (e) {}
 
-  const result: AccessControlData = {
-    blockedEmails: Array.from(blockedSet),
-    allowedEmails: Array.from(allowedSet),
-    isWhitelistMode
-  };
+  // 2. If TMP_FILE wasn't available or valid, try reading LOCAL_FILE
+  if (!loadedData) {
+    try {
+      if (fs.existsSync(LOCAL_FILE)) {
+        const raw = fs.readFileSync(LOCAL_FILE, "utf-8");
+        const parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.allowedEmails) && Array.isArray(parsed.blockedEmails)) {
+          loadedData = {
+            blockedEmails: parsed.blockedEmails.map((e: string) => e.toLowerCase().trim()),
+            allowedEmails: parsed.allowedEmails.map((e: string) => e.toLowerCase().trim()),
+            isWhitelistMode: Boolean(parsed.isWhitelistMode)
+          };
+        }
+      }
+    } catch (e) {}
+  }
 
-  memoryCache = result;
-  return result;
+  // 3. Fallback to default state if no file was loaded
+  if (!loadedData) {
+    loadedData = {
+      blockedEmails: [],
+      allowedEmails: ["prepcom@iimidr.ac.in", "p22placecom@iimidr.ac.in", "placecom@iimidr.ac.in", "candidate@iimidr.ac.in"],
+      isWhitelistMode: false
+    };
+  }
+
+  memoryCache = loadedData;
+  return loadedData;
 }
 
 function saveAccessControlDataToFile(data: AccessControlData) {
@@ -141,7 +145,7 @@ export function parseEmails(input: string): string[] {
   if (!input) return [];
   return input
     .split(/[\s,;\n\r]+/)
-    .map(e => e.toLowerCase().trim())
+    .map(e => e.toLowerCase().trim().replace(/^[<"']+|[>,"'.]+$/g, ""))
     .filter(e => e.length > 3 && e.includes("@"));
 }
 
