@@ -71,6 +71,28 @@ export default function DashboardPage() {
     return () => clearInterval(interval);
   }, [session, userEmail]);
 
+  // Track Page View
+  const trackPageView = (pageName: string, companyName?: string) => {
+    if (!session) return;
+    fetch("/api/telemetry", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "page_view", page: pageName, company: companyName })
+    }).catch(() => {});
+  };
+
+  // Track initial page view and section changes
+  useEffect(() => {
+    if (!session) return;
+    trackPageView(activeSection === "experiences" ? "Interview Experiences Section" : "Company Catalog Section");
+  }, [session, activeSection]);
+
+  // Track catalog company view
+  useEffect(() => {
+    if (!session || !catalogCompany || activeSection !== "catalog") return;
+    trackPageView(`Company Catalog: ${catalogCompany}`, catalogCompany);
+  }, [session, catalogCompany, activeSection]);
+
   // Track Company Visit
   const trackCompanyVisit = (companyName: string) => {
     if (!companyName || !session) return;
@@ -1233,6 +1255,17 @@ export default function DashboardPage() {
 
               {/* Analytics Summary Stats Grid */}
               <div className="admin-stats-grid mb-4">
+                <div className="admin-stat-card" style={{ background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)", border: "1px solid #bfdbfe" }}>
+                  <div className="stat-icon material-symbols-outlined" style={{ color: "#2563eb" }}>visibility</div>
+                  <div className="stat-info">
+                    <span className="stat-value" style={{ color: "#1d4ed8" }}>{adminTelemetry?.summary?.total_page_views || 0}</span>
+                    <span className="stat-label" style={{ fontWeight: 800, color: "#1e40af" }}>Total Page Views</span>
+                    <span style={{ fontSize: "0.72rem", color: "#3b82f6", marginTop: "2px" }}>
+                      Real-time page views across all student catalog & experience sessions.
+                    </span>
+                  </div>
+                </div>
+
                 <div className="admin-stat-card">
                   <div className="stat-icon material-symbols-outlined">group</div>
                   <div className="stat-info">
@@ -1594,6 +1627,7 @@ export default function DashboardPage() {
                       <tr>
                         <th title="Authenticated Google Workspace account email">User Account (@iimidr.ac.in)</th>
                         <th title="Role level (ADMIN for prepcom@iimidr.ac.in, USER for students)">Role</th>
+                        <th title="Total page and section views recorded for this student">Page Views</th>
                         <th title="Timestamp when user initiated sign-in">Session Start</th>
                         <th title="Timestamp of latest active background heartbeat ping (every 15s)">Last Active</th>
                         <th title="Total active session duration accumulated during browsing">Time Spent</th>
@@ -1617,6 +1651,11 @@ export default function DashboardPage() {
                                 }}
                               >
                                 {u.role?.toUpperCase()}
+                              </span>
+                            </td>
+                            <td>
+                              <span className="status-badge" style={{ background: "#dbeafe", color: "#1e40af", fontWeight: 800 }}>
+                                👁️ {u.page_views || u.activity_count || 0} views
                               </span>
                             </td>
                             <td>{u.session_start || "Just Now"}</td>

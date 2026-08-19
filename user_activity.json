@@ -7,6 +7,7 @@
     "total_time_seconds": 2450,
     "login_count": 14,
     "activity_count": 112,
+    "page_views": 87,
     "status": "Active",
     "companies_visited": ["Accenture", "McKinsey", "BCG", "HUL", "ICICI Bank"],
     "company_visit_count": 18,
@@ -14,16 +15,19 @@
       "2026-08-01": {
         "time_seconds": 1200,
         "actions": 45,
+        "page_views": 32,
         "companies": ["McKinsey", "BCG", "HUL"]
       },
       "2026-08-02": {
         "time_seconds": 1800,
         "actions": 65,
+        "page_views": 41,
         "companies": ["Accenture", "ICICI Bank", "McKinsey"]
       },
       "2026-08-03": {
         "time_seconds": 950,
         "actions": 35,
+        "page_views": 14,
         "companies": ["BCG", "Accenture"]
       }
     }
@@ -36,6 +40,7 @@
     "total_time_seconds": 1680,
     "login_count": 8,
     "activity_count": 54,
+    "page_views": 46,
     "status": "Active",
     "companies_visited": ["Goldman Sachs", "JPMorgan", "Consulting", "Bain"],
     "company_visit_count": 12,
@@ -43,16 +48,19 @@
       "2026-08-01": {
         "time_seconds": 900,
         "actions": 25,
+        "page_views": 18,
         "companies": ["Goldman Sachs", "JPMorgan"]
       },
       "2026-08-02": {
         "time_seconds": 1100,
         "actions": 38,
+        "page_views": 21,
         "companies": ["Bain", "Goldman Sachs"]
       },
       "2026-08-03": {
         "time_seconds": 600,
         "actions": 18,
+        "page_views": 7,
         "companies": ["Consulting"]
       }
     }
@@ -65,6 +73,7 @@
     "total_time_seconds": 1120,
     "login_count": 5,
     "activity_count": 32,
+    "page_views": 29,
     "status": "Active",
     "companies_visited": ["Tata Administrative Services", "Flipkart", "Amazon"],
     "company_visit_count": 9,
@@ -72,16 +81,19 @@
       "2026-08-01": {
         "time_seconds": 600,
         "actions": 15,
+        "page_views": 11,
         "companies": ["Amazon"]
       },
       "2026-08-02": {
         "time_seconds": 850,
         "actions": 28,
+        "page_views": 13,
         "companies": ["Tata Administrative Services", "Flipkart"]
       },
       "2026-08-03": {
         "time_seconds": 450,
         "actions": 12,
+        "page_views": 5,
         "companies": ["Amazon"]
       }
     }

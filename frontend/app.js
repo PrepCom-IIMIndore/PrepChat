@@ -125,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const adminDashboardModal = document.getElementById('admin-dashboard-modal');
     const adminModalClose = document.getElementById('admin-modal-close');
+    const adminStatViews = document.getElementById('admin-stat-views');
     const adminStatUsers = document.getElementById('admin-stat-users');
     const adminStatLogins = document.getElementById('admin-stat-logins');
     const adminStatActions = document.getElementById('admin-stat-actions');
@@ -405,12 +406,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function trackUserActivity(action) {
+    function trackUserActivity(action = 'page_view', details = {}) {
         if (!currentUser || !currentUser.email) return;
         fetch('/api/auth/track', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: currentUser.email, action })
+            body: JSON.stringify({ email: currentUser.email, action, ...details })
         }).catch(() => {});
     }
 
@@ -423,12 +424,13 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
             // Local fallback simulation
             adminTelemetryData = {
-                summary: { total_registered_users: 1, total_logins: 1, total_actions: 1, flagged_abuse_count: 0 },
+                summary: { total_registered_users: 1, total_logins: 1, total_actions: 1, total_page_views: 1, flagged_abuse_count: 0 },
                 users: [currentUser]
             };
         }
 
         if (adminTelemetryData && adminTelemetryData.summary) {
+            if (adminStatViews) adminStatViews.textContent = adminTelemetryData.summary.total_page_views || adminTelemetryData.summary.total_actions || 0;
             if (adminStatUsers) adminStatUsers.textContent = adminTelemetryData.summary.total_registered_users || 0;
             if (adminStatLogins) adminStatLogins.textContent = adminTelemetryData.summary.total_logins || 0;
             if (adminStatActions) adminStatActions.textContent = adminTelemetryData.summary.total_actions || 0;
@@ -462,14 +464,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (err) {
                     // Client-side CSV fallback using already-loaded telemetry data
                     const users = (adminTelemetryData && adminTelemetryData.users) ? adminTelemetryData.users : [];
-                    const headers = ['Email','Role','Status','First Login','Last Login','Last Active','Login Count','Activity Count','Companies Visited','Company Visit Count'];
+                    const headers = ['Email','Role','Status','First Login','Last Login','Last Active','Login Count','Activity Count','Page Views','Companies Visited','Company Visit Count'];
                     const csvRows = [headers.join(',')];
                     users.forEach(u => {
                         const companies = Array.isArray(u.companies_visited) ? u.companies_visited.join('; ') : '';
                         csvRows.push([
                             u.email || '', u.role || 'user', u.status || 'Active',
                             u.first_login || 'N/A', u.last_login || 'N/A', u.last_active || 'N/A',
-                            u.login_count || 0, u.activity_count || 0,
+                            u.login_count || 0, u.activity_count || 0, u.page_views || u.activity_count || 0,
                             `"${companies}"`, u.company_visit_count || 0
                         ].join(','));
                     });
@@ -497,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         adminTelemetryTbody.innerHTML = '';
         if (filtered.length === 0) {
-            adminTelemetryTbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No user telemetry audit logs found.</td></tr>';
+            adminTelemetryTbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">No user telemetry audit logs found.</td></tr>';
             return;
         }
 
@@ -510,6 +512,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tr.innerHTML = `
                 <td><strong>${escapeHtml(u.email)}</strong></td>
                 <td><span class="status-badge ${statusClass}">${u.role.toUpperCase()}</span></td>
+                <td><span class="status-badge" style="background:#dbeafe;color:#1e40af;font-weight:800;">👁️ ${u.page_views || u.activity_count || 0} views</span></td>
                 <td><strong>${u.login_count || 1}</strong> logins</td>
                 <td>${u.activity_count || 0} queries</td>
                 <td>${u.first_login || 'N/A'}</td>

@@ -25,6 +25,7 @@ export interface TelemetryUser {
   total_time_seconds: number;
   login_count: number;
   activity_count: number;
+  page_views?: number;
   status: string;
   companies_visited?: string[];
   company_visit_count?: number;
@@ -32,6 +33,7 @@ export interface TelemetryUser {
     [dateStr: string]: {
       time_seconds: number;
       actions: number;
+      page_views?: number;
       companies: string[];
     };
   };
@@ -204,10 +206,12 @@ export async function GET() {
   const totalUsers = userList.length;
   const totalLogins = userList.reduce((acc, u) => acc + (u.login_count || 0), 0);
   const totalActions = userList.reduce((acc, u) => acc + (u.activity_count || 0), 0);
+  const totalPageViews = userList.reduce((acc, u) => acc + (u.page_views || u.activity_count || 0), 0);
   const totalTimeSeconds = userList.reduce((acc, u) => acc + (u.total_time_seconds || 0), 0);
 
   const avgTimeSecondsPerUser = totalUsers > 0 ? Math.round(totalTimeSeconds / totalUsers) : 0;
   const avgTimeMinutesPerUser = (avgTimeSecondsPerUser / 60).toFixed(1);
+  const avgPageViewsPerUser = totalUsers > 0 ? (totalPageViews / totalUsers).toFixed(1) : "0.0";
 
   const allCompaniesVisitedSet = new Set<string>();
   userList.forEach(u => {
@@ -307,6 +311,8 @@ export async function GET() {
       total_registered_users: totalUsers,
       total_logins: totalLogins,
       total_actions: totalActions,
+      total_page_views: totalPageViews,
+      avg_page_views_per_user: avgPageViewsPerUser,
       total_time_hours: (totalTimeSeconds / 3600).toFixed(2),
       avg_time_seconds_per_user: avgTimeSecondsPerUser,
       avg_time_minutes_per_user: avgTimeMinutesPerUser,
@@ -417,12 +423,19 @@ export async function POST(request: Request) {
     u.last_active = nowStr;
     u.activity_count = (u.activity_count || 0) + 1;
 
+    if (action === "page_view" || action === "company_visit" || action === "login") {
+      u.page_views = (u.page_views || 0) + 1;
+    }
+
     if (!u.daily_stats) u.daily_stats = {};
     if (!u.daily_stats[todayKey]) {
-      u.daily_stats[todayKey] = { time_seconds: 0, actions: 0, companies: [] };
+      u.daily_stats[todayKey] = { time_seconds: 0, actions: 0, page_views: 0, companies: [] };
     }
     const dayStat = u.daily_stats[todayKey];
     dayStat.actions += 1;
+    if (action === "page_view" || action === "company_visit" || action === "login") {
+      dayStat.page_views = (dayStat.page_views || 0) + 1;
+    }
 
     if (action === "heartbeat") {
       u.total_time_seconds = (u.total_time_seconds || 0) + 15;
@@ -430,7 +443,7 @@ export async function POST(request: Request) {
     } else if (action === "login") {
       u.login_count = (u.login_count || 0) + 1;
       u.session_start = nowStr;
-    } else if (action === "company_visit" && body.company) {
+    } else if ((action === "company_visit" || action === "page_view") && body.company) {
       const compName = body.company.trim();
       if (!u.companies_visited) u.companies_visited = [];
       if (!u.companies_visited.includes(compName)) {

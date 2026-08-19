@@ -305,6 +305,8 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
 
             total_logins  = sum(u.get('login_count', 0) for u in user_list)
             total_actions = sum(u.get('activity_count', 0) for u in user_list)
+            total_views   = sum(u.get('page_views', u.get('activity_count', 0)) for u in user_list)
+            avg_views     = round(total_views / max(len(user_list), 1), 1)
             flagged_users = [u for u in user_list if u.get('login_count', 0) > 15 or u.get('activity_count', 0) > 100]
 
             self._send_json({
@@ -312,6 +314,8 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
                     "total_registered_users": len(user_list),
                     "total_logins": total_logins,
                     "total_actions": total_actions,
+                    "total_page_views": total_views,
+                    "avg_page_views_per_user": avg_views,
                     "flagged_abuse_count": len(flagged_users)
                 },
                 "users": user_list
@@ -329,7 +333,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
             HEADERS = [
                 'Email', 'Role', 'Status',
                 'First Login', 'Last Login', 'Last Active',
-                'Login Count', 'Activity / Query Count',
+                'Login Count', 'Activity / Query Count', 'Page Views',
                 'Companies Visited', 'Company Visit Count'
             ]
 
@@ -345,6 +349,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
                     u.get('last_active', 'N/A'),
                     u.get('login_count', 0),
                     u.get('activity_count', 0),
+                    u.get('page_views', u.get('activity_count', 0)),
                     ', '.join(companies) if isinstance(companies, list) else str(companies),
                     u.get('company_visit_count', 0)
                 ])
@@ -493,13 +498,25 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
 
         elif path == '/api/auth/track':
             email = str(body.get('email', '')).strip().lower()
+            action = str(body.get('action', 'page_view')).strip().lower()
+            company = str(body.get('company', '')).strip()
+
             if email in USER_ACTIVITY:
                 import datetime
                 rec = USER_ACTIVITY[email]
                 rec["activity_count"] = rec.get("activity_count", 0) + 1
+                rec["page_views"] = rec.get("page_views", 0) + 1
                 rec["last_active"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+                if company:
+                    if "companies_visited" not in rec or not isinstance(rec["companies_visited"], list):
+                        rec["companies_visited"] = []
+                    if company not in rec["companies_visited"]:
+                        rec["companies_visited"].append(company)
+                    rec["company_visit_count"] = rec.get("company_visit_count", 0) + 1
+
                 save_user_activity()
-            self._send_json({"status": "tracked"})
+            self._send_json({"status": "tracked", "user": USER_ACTIVITY.get(email)})
             return
 
         self._send_json({"error": "Endpoint not found"}, status=404)
