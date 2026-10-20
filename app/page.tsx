@@ -66,6 +66,30 @@ export default function DashboardPage() {
   const [blockInputEmail, setBlockInputEmail] = useState("");
   const [allowInputEmail, setAllowInputEmail] = useState("");
 
+  // Dark mode theme state
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("prepchat-theme") as "light" | "dark" | null;
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const initialTheme = saved || (prefersDark ? "dark" : "light");
+      setTheme(initialTheme);
+      document.documentElement.setAttribute("data-theme", initialTheme);
+      document.body.classList.toggle("dark-mode", initialTheme === "dark");
+    } catch (e) {}
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+    try {
+      localStorage.setItem("prepchat-theme", nextTheme);
+    } catch (e) {}
+    document.documentElement.setAttribute("data-theme", nextTheme);
+    document.body.classList.toggle("dark-mode", nextTheme === "dark");
+  };
+
   // Reset pagination to page 1 on filter or search changes
   useEffect(() => {
     setCurrentPage(1);
@@ -334,6 +358,20 @@ export default function DashboardPage() {
 
           {/* User Profile & Logout Flow */}
           <div className="header-user-area">
+            {/* Theme Toggle Button */}
+            <button
+              type="button"
+              className="btn-theme-toggle"
+              onClick={toggleTheme}
+              title={`Switch to ${theme === "dark" ? "Light" : "Dark"} Mode`}
+              aria-label="Toggle dark mode"
+            >
+              <span className="material-symbols-outlined theme-toggle-icon">
+                {theme === "dark" ? "light_mode" : "dark_mode"}
+              </span>
+              <span className="theme-toggle-label">{theme === "dark" ? "Light" : "Dark"}</span>
+            </button>
+
             <span className="user-pill" title="Currently authenticated Google Workspace account">
               <span className="material-symbols-outlined">person</span> {userEmail}
             </span>
@@ -464,22 +502,21 @@ export default function DashboardPage() {
                   {/* Autocomplete Dropdown Panel */}
                   {isCompanyDropdownOpen && (
                     <div
+                      className="company-dropdown-menu"
                       style={{
                         position: "absolute",
                         top: "100%",
                         left: 0,
                         right: 0,
                         zIndex: 50,
-                        background: "#ffffff",
-                        border: "1px solid #cbd5e1",
                         borderRadius: "0 0 10px 10px",
-                        boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)",
                         maxHeight: "220px",
                         overflowY: "auto",
                         marginTop: "4px"
                       }}
                     >
                       <div
+                        className="company-dropdown-header"
                         onClick={() => {
                           setSelectedCompany("");
                           setCompanySearchInput("");
@@ -489,10 +526,7 @@ export default function DashboardPage() {
                           padding: "0.55rem 0.85rem",
                           cursor: "pointer",
                           fontSize: "0.85rem",
-                          fontWeight: 700,
-                          color: "#4f46e5",
-                          background: "#f8fafc",
-                          borderBottom: "1px solid #e2e8f0"
+                          fontWeight: 700
                         }}
                       >
                         All Companies (180+ firms)
@@ -500,6 +534,7 @@ export default function DashboardPage() {
                       {companyAutocompleteOptions.map(c => (
                         <div
                           key={c}
+                          className="company-dropdown-item"
                           onClick={() => {
                             setSelectedCompany(c);
                             setCompanySearchInput(c);
@@ -508,13 +543,8 @@ export default function DashboardPage() {
                           style={{
                             padding: "0.55rem 0.85rem",
                             cursor: "pointer",
-                            fontSize: "0.85rem",
-                            color: "#1e293b",
-                            transition: "background 0.15s ease",
-                            borderBottom: "1px solid #f1f5f9"
+                            fontSize: "0.85rem"
                           }}
-                          onMouseEnter={(e) => (e.currentTarget.style.background = "#eff6ff")}
-                          onMouseLeave={(e) => (e.currentTarget.style.background = "#ffffff")}
                         >
                           {c}
                         </div>
@@ -1262,20 +1292,20 @@ export default function DashboardPage() {
               </div>
 
               {/* SECURITY CONTROL PANEL: BLOCKLIST & ALLOWED LIST */}
-              <div className="search-card mb-4" style={{ background: "#f8fafc", border: "1px solid #cbd5e1" }}>
-                <h4 style={{ fontSize: "1.05rem", fontWeight: 800, marginBottom: "0.25rem", color: "#0f172a", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+              <div className="search-card mb-4 admin-control-card">
+                <h4 style={{ fontSize: "1.05rem", fontWeight: 800, marginBottom: "0.25rem", color: "var(--text-primary)", display: "flex", alignItems: "center", gap: "0.4rem" }}>
                   <span className="material-symbols-outlined" style={{ color: "#dc2626" }}>lock</span>
                   Email Access Control Settings (Block & Restrict Email IDs)
                 </h4>
-                <p style={{ fontSize: "0.82rem", color: "#64748b", marginBottom: "1rem" }}>
+                <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", marginBottom: "1rem" }}>
                   Enforced server-side in NextAuth.js callback before a session is ever created.
                 </p>
 
                 {/* Whitelist Toggle */}
-                <div className="mb-3" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#ffffff", padding: "0.85rem 1.1rem", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                <div className="mb-3 admin-control-subcard" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.85rem 1.1rem", borderRadius: "10px" }}>
                   <div>
-                    <strong style={{ fontSize: "0.9rem", color: "#1e293b" }}>Whitelist Mode (Restrict to Specific Allowed Emails Only):</strong>
-                    <p style={{ margin: 0, fontSize: "0.8rem", color: "#64748b" }}>
+                    <strong style={{ fontSize: "0.9rem", color: "var(--text-primary)" }}>Whitelist Mode (Restrict to Specific Allowed Emails Only):</strong>
+                    <p style={{ margin: 0, fontSize: "0.8rem", color: "var(--text-muted)" }}>
                       When enabled, ONLY emails in the Allowed List can sign in. All other @iimidr.ac.in accounts will be rejected server-side.
                     </p>
                   </div>
@@ -1298,9 +1328,9 @@ export default function DashboardPage() {
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
                   {/* Blocklist Management Box */}
-                  <div style={{ background: "#fff", padding: "1rem", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                  <div className="admin-control-subcard" style={{ padding: "1rem", borderRadius: "10px" }}>
                     <strong style={{ fontSize: "0.88rem", color: "#dc2626" }}>🚫 Block Email Address(es) (Space/Comma Separated)</strong>
-                    <p style={{ fontSize: "0.75rem", color: "#64748b", margin: "2px 0 6px 0" }}>
+                    <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", margin: "2px 0 6px 0" }}>
                       Enter one or more email IDs separated by spaces to block instantly.
                     </p>
                     <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
@@ -1309,7 +1339,8 @@ export default function DashboardPage() {
                         placeholder="e.g. user1@iimidr.ac.in user2@iimidr.ac.in"
                         value={blockInputEmail}
                         onChange={(e) => setBlockInputEmail(e.target.value)}
-                        style={{ flex: 1, padding: "0.45rem 0.75rem", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "0.85rem" }}
+                        className="admin-input-text"
+                        style={{ flex: 1, padding: "0.45rem 0.75rem", borderRadius: "8px", fontSize: "0.85rem" }}
                       />
                       <button
                         type="button"
@@ -1321,7 +1352,7 @@ export default function DashboardPage() {
                     </div>
 
                     <div style={{ marginTop: "0.75rem" }}>
-                      <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#64748b" }}>Currently Blocked ({adminTelemetry?.accessControl?.blockedEmails?.length || 0}):</span>
+                      <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--text-muted)" }}>Currently Blocked ({adminTelemetry?.accessControl?.blockedEmails?.length || 0}):</span>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginTop: "0.35rem" }}>
                         {(adminTelemetry?.accessControl?.blockedEmails || []).map((bEmail: string) => (
                           <span key={bEmail} style={{ background: "#fee2e2", color: "#b91c1c", border: "1px solid #fca5a5", borderRadius: "12px", padding: "2px 8px", fontSize: "0.75rem", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "4px" }}>
@@ -1330,16 +1361,16 @@ export default function DashboardPage() {
                           </span>
                         ))}
                         {(!adminTelemetry?.accessControl?.blockedEmails || adminTelemetry.accessControl.blockedEmails.length === 0) && (
-                          <span style={{ fontSize: "0.78rem", color: "#94a3b8" }}>No emails currently blocked.</span>
+                          <span style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>No emails currently blocked.</span>
                         )}
                       </div>
                     </div>
                   </div>
 
                   {/* Allowed List Management Box */}
-                  <div style={{ background: "#fff", padding: "1rem", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                  <div className="admin-control-subcard" style={{ padding: "1rem", borderRadius: "10px" }}>
                     <strong style={{ fontSize: "0.88rem", color: "#059669" }}>✅ Allowed Email Whitelist (Space/Comma Separated)</strong>
-                    <p style={{ fontSize: "0.75rem", color: "#64748b", margin: "2px 0 6px 0" }}>
+                    <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", margin: "2px 0 6px 0" }}>
                       List of email IDs permitted to log in when Whitelist Mode is active.
                     </p>
                     <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
@@ -1348,7 +1379,8 @@ export default function DashboardPage() {
                         placeholder="e.g. user1@iimidr.ac.in user2@iimidr.ac.in"
                         value={allowInputEmail}
                         onChange={(e) => setAllowInputEmail(e.target.value)}
-                        style={{ flex: 1, padding: "0.45rem 0.75rem", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "0.85rem" }}
+                        className="admin-input-text"
+                        style={{ flex: 1, padding: "0.45rem 0.75rem", borderRadius: "8px", fontSize: "0.85rem" }}
                       />
                       <button
                         type="button"
@@ -1360,16 +1392,17 @@ export default function DashboardPage() {
                     </div>
 
                     <div style={{ marginTop: "0.75rem" }}>
-                      <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#64748b" }}>Allowed Accounts ({adminTelemetry?.accessControl?.allowedEmails?.length || 0}):</span>
+                      <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--text-muted)" }}>Currently Allowed ({adminTelemetry?.accessControl?.allowedEmails?.length || 0}):</span>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginTop: "0.35rem" }}>
                         {(adminTelemetry?.accessControl?.allowedEmails || []).map((aEmail: string) => (
-                          <span key={aEmail} style={{ background: "#d1fae5", color: "#047857", border: "1px solid #6ee7b7", borderRadius: "12px", padding: "2px 8px", fontSize: "0.75rem", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                          <span key={aEmail} style={{ background: "#d1fae5", color: "#065f46", border: "1px solid #6ee7b7", borderRadius: "12px", padding: "2px 8px", fontSize: "0.75rem", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: "4px" }}>
                             {aEmail}
-                            {aEmail !== "prepcom@iimidr.ac.in" && (
-                              <span style={{ cursor: "pointer", fontWeight: 800 }} onClick={() => handleRemoveAllowedEmail(aEmail)}>&times;</span>
-                            )}
+                            <span style={{ cursor: "pointer", fontWeight: 800 }} onClick={() => handleRemoveAllowedEmail(aEmail)}>&times;</span>
                           </span>
                         ))}
+                        {(!adminTelemetry?.accessControl?.allowedEmails || adminTelemetry.accessControl.allowedEmails.length === 0) && (
+                          <span style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>No whitelist restrictions configured.</span>
+                        )}
                       </div>
                     </div>
                   </div>

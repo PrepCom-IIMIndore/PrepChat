@@ -11,6 +11,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+        (function(){try{var t=localStorage.getItem("prepchat-theme")||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);if(t==="dark")document.documentElement.classList.add("dark-mode");}catch(e){}})();
+    </script>
 </head>
 <body>
 
@@ -41,6 +44,10 @@
 
             <!-- Logged-in User Profile & Admin Telemetry Navigation -->
             <div class="header-user-area" id="header-user-area">
+                <button class="btn-theme-toggle" id="btn-theme-toggle" title="Toggle Dark/Light Mode" aria-label="Toggle dark mode">
+                    <span class="material-symbols-outlined theme-toggle-icon" id="theme-toggle-icon">dark_mode</span>
+                    <span class="theme-toggle-label" id="theme-toggle-label">Dark</span>
+                </button>
                 <span class="user-pill" id="user-profile-pill"><span class="material-symbols-outlined">person</span> <span id="user-email-display">candidate@iimidr.ac.in</span></span>
                 <button class="btn-admin-nav hidden" id="btn-admin-dashboard" title="Admin Usage & Abuse Monitor"><span class="material-symbols-outlined">analytics</span> Telemetry</button>
                 <button class="btn-logout-nav" id="btn-logout" title="Sign out"><span class="material-symbols-outlined">logout</span></button>

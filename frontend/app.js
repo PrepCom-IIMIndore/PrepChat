@@ -1,6 +1,41 @@
 // PrepChat - Dual-Mode JS (Backend API Proxy + GitHub Pages Direct Support)
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Theme Toggle Logic
+    const btnThemeToggle = document.getElementById('btn-theme-toggle');
+    const themeToggleIcon = document.getElementById('theme-toggle-icon');
+    const themeToggleLabel = document.getElementById('theme-toggle-label');
+
+    function updateThemeUI(currentTheme) {
+        if (themeToggleIcon) {
+            themeToggleIcon.textContent = currentTheme === 'dark' ? 'light_mode' : 'dark_mode';
+        }
+        if (themeToggleLabel) {
+            themeToggleLabel.textContent = currentTheme === 'dark' ? 'Light' : 'Dark';
+        }
+        if (btnThemeToggle) {
+            btnThemeToggle.title = `Switch to ${currentTheme === 'dark' ? 'Light' : 'Dark'} Mode`;
+        }
+    }
+
+    const savedTheme = localStorage.getItem('prepchat-theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.body.classList.toggle('dark-mode', savedTheme === 'dark');
+    updateThemeUI(savedTheme);
+
+    if (btnThemeToggle) {
+        btnThemeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            document.body.classList.toggle('dark-mode', next === 'dark');
+            try {
+                localStorage.setItem('prepchat-theme', next);
+            } catch (e) {}
+            updateThemeUI(next);
+        });
+    }
+
     // DOM Elements - Navigation Sections
     const navBtnCatalog = document.getElementById('nav-btn-catalog');
     const navBtnExperiences = document.getElementById('nav-btn-experiences');

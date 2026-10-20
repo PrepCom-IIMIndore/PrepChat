@@ -25,7 +25,7 @@ PrepChat is architected to support both a production serverless Next.js deployme
 | Component | Technology | Description |
 | :--- | :--- | :--- |
 | **Frontend & Framework** | [Next.js 14](https://nextjs.org/) (App Router), React 18, TypeScript | Fast, server-rendered and client-interactive portal |
-| **Styling** | Vanilla CSS3 / CSS Modules | Custom responsive design system with dark mode accents |
+| **Styling & Theme** | Vanilla CSS3 / Glassmorphism | Custom responsive design system with 1-click Dark/Light mode toggle, localStorage persistence, and zero-flash pre-hydration |
 | **Authentication** | [NextAuth.js v4](https://next-auth.js.org/) | OAuth 2.0 via Google with hosted domain enforcement (`iimidr.ac.in`) |
 | **Telemetry & Analytics** | `@vercel/analytics`, Vercel KV / JSON Persistence | Session & activity tracking, daily active users, query logs |
 | **Standalone Backend** | Python 3 (`http.server`, RapidFuzz / Difflib) | Lightweight zero-dependency server alternative (`server.py`) |
@@ -299,6 +299,7 @@ PrepChat is ready for deployment on **Vercel**:
 | **Data Pipelines & ETL** | 🟢 Complete | Python parsing scripts (`parse_experiences_excel.py`, etc.) documented. |
 | **Access Control & Security** | 🟢 Complete | Whitelist, blacklist, domain gatekeeping, and admin role docs outlined. |
 | **Frontend Documentation** | 🟢 Complete | UI layout, component hierarchy, and standalone HTML/JS documented. |
+| **Dark Mode & Theming** | 🟢 Complete | Full glassmorphic obsidian dark theme, 1-click toggle, zero-flash pre-paint script. |
 
 ---
 
