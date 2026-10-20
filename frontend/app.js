@@ -407,12 +407,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function trackUserActivity(action = 'page_view', details = {}) {
-        if (!currentUser || !currentUser.email) return;
-        fetch('/api/auth/track', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: currentUser.email, action, ...details })
-        }).catch(() => {});
+        // Telemetry tracking disabled for performance and privacy
+        return;
     }
 
     async function openAdminDashboard() {

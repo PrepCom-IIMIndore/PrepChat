@@ -31,10 +31,10 @@ export interface TelemetryUser {
   company_visit_count?: number;
   daily_stats?: {
     [dateStr: string]: {
-      time_seconds: number;
-      actions: number;
+      time_seconds?: number;
+      actions?: number;
       page_views?: number;
-      companies: string[];
+      companies?: string[];
     };
   };
 }
@@ -177,156 +177,59 @@ export async function GET() {
 
   const telemetryDb = await getTelemetryDbAsync();
   const accessControlState = await getAccessControlStateAsync();
-  const blockedSet = new Set((accessControlState.blockedEmails || []).map(e => e.toLowerCase()));
 
-  const userList = Object.values(telemetryDb);
+  // Aggregate unique active users per day across all recorded activity
+  const dailyActiveUsersMap: { [dateStr: string]: Set<string> } = {};
 
-  const allowedSet = new Set((accessControlState.allowedEmails || []).map(e => e.toLowerCase()));
-  const existingEmails = new Set(userList.map(u => u.email.toLowerCase()));
-
-  allowedSet.forEach(aEmail => {
-    if (!existingEmails.has(aEmail)) {
-      userList.push({
-        email: aEmail,
-        role: (aEmail === "prepcom@iimidr.ac.in" || aEmail.startsWith("prepcom")) ? "admin" : "user",
-        session_start: "Pending Sign-In",
-        last_active: "Not Logged In Yet",
-        total_time_seconds: 0,
-        login_count: 0,
-        activity_count: 0,
-        status: "Allowed (Pending)",
-        companies_visited: [],
-        company_visit_count: 0
-      });
-    }
-  });
-
-  userList.sort((a, b) => (b.last_active || "").localeCompare(a.last_active || ""));
-
-  const totalUsers = userList.length;
-  const totalLogins = userList.reduce((acc, u) => acc + (u.login_count || 0), 0);
-  const totalActions = userList.reduce((acc, u) => acc + (u.activity_count || 0), 0);
-  const totalPageViews = userList.reduce((acc, u) => acc + (u.page_views || u.activity_count || 0), 0);
-  const totalTimeSeconds = userList.reduce((acc, u) => acc + (u.total_time_seconds || 0), 0);
-
-  const avgTimeSecondsPerUser = totalUsers > 0 ? Math.round(totalTimeSeconds / totalUsers) : 0;
-  const avgTimeMinutesPerUser = (avgTimeSecondsPerUser / 60).toFixed(1);
-  const avgPageViewsPerUser = totalUsers > 0 ? (totalPageViews / totalUsers).toFixed(1) : "0.0";
-
-  const allCompaniesVisitedSet = new Set<string>();
-  userList.forEach(u => {
-    (u.companies_visited || []).forEach(c => allCompaniesVisitedSet.add(c));
-  });
-
-  const avgCompaniesPerUser = totalUsers > 0 ? (Array.from(allCompaniesVisitedSet).length / totalUsers).toFixed(1) : "0.0";
-
-  // Daily Aggregated Trends Calculation (Past 7 Days)
-  const dailyMap: { [date: string]: { users: Set<string>; total_time_sec: number; companies: Set<string> } } = {};
-  
-  const today = new Date();
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    const dateKey = d.toISOString().split("T")[0];
-    dailyMap[dateKey] = { users: new Set(), total_time_sec: 0, companies: new Set() };
-  }
-
-  userList.forEach(u => {
-    let hasExplicitDailyStats = false;
-
-    if (u.daily_stats && Object.keys(u.daily_stats).length > 0) {
-      Object.keys(u.daily_stats).forEach(dateKey => {
-        if (!dailyMap[dateKey]) {
-          dailyMap[dateKey] = { users: new Set(), total_time_sec: 0, companies: new Set() };
+  Object.values(telemetryDb).forEach(u => {
+    if (u.daily_stats && typeof u.daily_stats === "object") {
+      Object.keys(u.daily_stats).forEach(dateStr => {
+        if (!dailyActiveUsersMap[dateStr]) {
+          dailyActiveUsersMap[dateStr] = new Set();
         }
-        const ds = u.daily_stats![dateKey];
-        dailyMap[dateKey].users.add(u.email);
-        dailyMap[dateKey].total_time_sec += ds.time_seconds || 0;
-        (ds.companies || []).forEach(c => dailyMap[dateKey].companies.add(c));
+        dailyActiveUsersMap[dateStr].add(u.email);
       });
-      hasExplicitDailyStats = true;
-    }
-
-    if (!hasExplicitDailyStats) {
-      const activeStr = u.last_active || u.session_start || "";
-      let dateKey = today.toISOString().split("T")[0];
-      
-      if (activeStr && activeStr !== "Pending Sign-In" && activeStr !== "Not Logged In Yet") {
-        try {
-          const cleanPart = activeStr.split(",")[0].trim();
-          const match = cleanPart.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-          if (match) {
-            const [_, d, m, y] = match;
-            dateKey = `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
-          } else {
-            const parsedDate = new Date(activeStr);
-            if (!isNaN(parsedDate.getTime())) {
-              dateKey = parsedDate.toISOString().split("T")[0];
-            }
-          }
-        } catch (e) {}
+    } else if (u.last_active) {
+      // Fallback: extract date from last_active timestamp
+      const match = u.last_active.match(/\d{4}-\d{2}-\d{2}/);
+      if (match) {
+        const d = match[0];
+        if (!dailyActiveUsersMap[d]) dailyActiveUsersMap[d] = new Set();
+        dailyActiveUsersMap[d].add(u.email);
       }
-
-      if (!dailyMap[dateKey]) {
-        dailyMap[dateKey] = { users: new Set(), total_time_sec: 0, companies: new Set() };
-      }
-      dailyMap[dateKey].users.add(u.email);
-      dailyMap[dateKey].total_time_sec += u.total_time_seconds || 300;
-      (u.companies_visited || []).forEach(c => dailyMap[dateKey].companies.add(c));
     }
   });
 
-  const dailyAnalytics = Object.keys(dailyMap).sort().map(dateKey => {
-    const data = dailyMap[dateKey];
-    const userCount = data.users.size;
-    const avgTimeMins = userCount > 0 ? (data.total_time_sec / 60 / userCount).toFixed(1) : "0.0";
-    const avgCompanies = userCount > 0 ? (data.companies.size / userCount).toFixed(1) : "0.0";
-    const label = new Date(dateKey).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const dates = Object.keys(dailyActiveUsersMap).sort();
+  const totalDays = Math.max(dates.length, 1);
+  const totalDailyUsers = dates.reduce((acc, d) => acc + dailyActiveUsersMap[d].size, 0);
+  const avgUsersPerDay = dates.length > 0 ? (totalDailyUsers / totalDays).toFixed(1) : "0.0";
 
+  const recentDailyBreakdown = dates.slice(-7).map(dateStr => {
+    let label = dateStr;
+    try {
+      label = new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    } catch (e) {}
     return {
-      date: dateKey,
+      date: dateStr,
       label,
-      active_users: userCount,
-      avg_user_time_mins: parseFloat(avgTimeMins),
-      avg_companies_visited: parseFloat(avgCompanies),
-      total_companies_visited: data.companies.size
-    };
-  });
-
-  const formattedUserList = userList.map(u => {
-    const mins = Math.max(1, Math.round((u.total_time_seconds || 0) / 60));
-    const compVisited = u.companies_visited || [];
-    return {
-      ...u,
-      is_blocked: blockedSet.has(u.email.toLowerCase()),
-      duration_display: `${mins} min${mins === 1 ? "" : "s"}`,
-      avg_time_display: `${mins} mins`,
-      companies_visited_count: compVisited.length,
-      companies_visited_list: compVisited.slice(0, 5).join(", ") + (compVisited.length > 5 ? ` +${compVisited.length - 5} more` : "")
+      active_users: dailyActiveUsersMap[dateStr].size
     };
   });
 
   return NextResponse.json({
+    averageUsersPerDay: avgUsersPerDay,
+    totalDaysRecorded: dates.length,
+    recentDailyBreakdown,
     summary: {
-      total_registered_users: totalUsers,
-      total_logins: totalLogins,
-      total_actions: totalActions,
-      total_page_views: totalPageViews,
-      avg_page_views_per_user: avgPageViewsPerUser,
-      total_time_hours: (totalTimeSeconds / 3600).toFixed(2),
-      avg_time_seconds_per_user: avgTimeSecondsPerUser,
-      avg_time_minutes_per_user: avgTimeMinutesPerUser,
-      avg_time_display: `${avgTimeMinutesPerUser} mins / day`,
-      avg_companies_per_user: avgCompaniesPerUser,
-      total_unique_companies_explored: Array.from(allCompaniesVisitedSet).length
+      average_users_per_day: avgUsersPerDay,
+      total_days_recorded: dates.length
     },
-    dailyAnalytics,
     accessControl: {
       blockedEmails: accessControlState.blockedEmails || [],
       allowedEmails: accessControlState.allowedEmails || [],
       isWhitelistMode: accessControlState.isWhitelistMode === true
-    },
-    users: formattedUserList
+    }
   });
 }
 
@@ -339,16 +242,13 @@ export async function POST(request: Request) {
 
   const email = session.user.email.toLowerCase().trim();
   const role = (session.user as any)?.role || "user";
-  const nowStr = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
   const todayKey = new Date().toISOString().split("T")[0];
 
   try {
     const body = await request.json().catch(() => ({}));
-    const action = body.action || "heartbeat";
+    const action = body.action || "login";
 
     const telemetryDb = await getTelemetryDbAsync();
-    const accessControlState = await getAccessControlStateAsync();
-    const blockedSet = new Set((accessControlState.blockedEmails || []).map(e => e.toLowerCase()));
 
     // ADMIN MANAGEMENT ACTIONS (RESTRICTED TO prepcom@iimidr.ac.in)
     if (role === "admin" || email.startsWith("prepcom")) {
@@ -400,65 +300,42 @@ export async function POST(request: Request) {
       }
     }
 
-    // REGULAR USER HEARTBEAT / COMPANY VISIT TRACKING
-    if (!telemetryDb[email]) {
-      telemetryDb[email] = {
+    // DISCARD HEAVY TELEMETRY (heartbeats, browsing, company visits, page views)
+    if (action === "heartbeat" || action === "page_view" || action === "company_visit") {
+      return NextResponse.json({ success: true, tracking: "disabled" });
+    }
+
+    // ONLY RECORD MINIMAL DAILY ACTIVE USER FOR "average users per day" METRIC
+    if (action === "login" || action === "visit") {
+      const user: TelemetryUser = telemetryDb[email] || {
         email: email,
         role: role,
-        session_start: nowStr,
-        last_active: nowStr,
-        total_time_seconds: 15,
-        login_count: 1,
-        activity_count: 1,
-        status: blockedSet.has(email) ? "Blocked" : "Active",
+        session_start: todayKey,
+        last_active: todayKey,
+        total_time_seconds: 0,
+        login_count: 0,
+        activity_count: 0,
+        status: "Active",
         companies_visited: [],
         company_visit_count: 0,
-        daily_stats: {
-          [todayKey]: { time_seconds: 15, actions: 1, companies: [] }
-        }
+        daily_stats: {}
       };
-    }
 
-    const u = telemetryDb[email];
-    u.last_active = nowStr;
-    u.activity_count = (u.activity_count || 0) + 1;
+      if (!user.daily_stats) user.daily_stats = {};
 
-    if (action === "page_view" || action === "company_visit" || action === "login") {
-      u.page_views = (u.page_views || 0) + 1;
-    }
-
-    if (!u.daily_stats) u.daily_stats = {};
-    if (!u.daily_stats[todayKey]) {
-      u.daily_stats[todayKey] = { time_seconds: 0, actions: 0, page_views: 0, companies: [] };
-    }
-    const dayStat = u.daily_stats[todayKey];
-    dayStat.actions += 1;
-    if (action === "page_view" || action === "company_visit" || action === "login") {
-      dayStat.page_views = (dayStat.page_views || 0) + 1;
-    }
-
-    if (action === "heartbeat") {
-      u.total_time_seconds = (u.total_time_seconds || 0) + 15;
-      dayStat.time_seconds += 15;
-    } else if (action === "login") {
-      u.login_count = (u.login_count || 0) + 1;
-      u.session_start = nowStr;
-    } else if ((action === "company_visit" || action === "page_view") && body.company) {
-      const compName = body.company.trim();
-      if (!u.companies_visited) u.companies_visited = [];
-      if (!u.companies_visited.includes(compName)) {
-        u.companies_visited.push(compName);
+      // If user was not already logged today, record today's active presence once
+      if (!user.daily_stats[todayKey]) {
+        user.daily_stats[todayKey] = { actions: 1 };
+        user.login_count = (user.login_count || 0) + 1;
+        user.last_active = todayKey;
+        telemetryDb[email] = user;
+        await persistTelemetryDb(telemetryDb);
       }
-      u.company_visit_count = (u.company_visit_count || 0) + 1;
 
-      if (!dayStat.companies) dayStat.companies = [];
-      if (!dayStat.companies.includes(compName)) {
-        dayStat.companies.push(compName);
-      }
+      return NextResponse.json({ success: true, tracking: "minimal_daily" });
     }
 
-    await persistTelemetryDb(telemetryDb);
-    return NextResponse.json({ success: true, user: telemetryDb[email] });
+    return NextResponse.json({ success: true });
   } catch (e) {
     return NextResponse.json({ error: "Failed to record telemetry action" }, { status: 500 });
   }

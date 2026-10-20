@@ -10,6 +10,19 @@ import formatsData from "@/interview_formats_data.json";
 import slidesData from "@/slides_data.json";
 import { ALL_NORMALIZED_DOMAINS, normalizeDomain } from "@/lib/domainUtils";
 
+function generatePageNumbers(current: number, total: number): (number | string)[] {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  if (current <= 4) {
+    return [1, 2, 3, 4, 5, "...", total];
+  }
+  if (current >= total - 3) {
+    return [1, "...", total - 4, total - 3, total - 2, total - 1, total];
+  }
+  return [1, "...", current - 1, current, current + 1, "...", total];
+}
+
 export default function DashboardPage() {
   const { data: session } = useSession();
   const userEmail = session?.user?.email || "candidate@iimidr.ac.in";
@@ -31,6 +44,10 @@ export default function DashboardPage() {
   const [selectedProcess, setSelectedProcess] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
+  // Pagination State for 60fps snappy rendering (24 cards per page)
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const ITEMS_PER_PAGE = 24;
+
   // Catalog Section State
   const [catalogCompany, setCatalogCompany] = useState<string>("Accenture");
   const [catalogAdvTab, setCatalogAdvTab] = useState<"questions" | "format" | "slides">("questions");
@@ -44,13 +61,17 @@ export default function DashboardPage() {
   const [activeModalTab, setActiveModalTab] = useState<"overview" | "rounds" | "questions" | "tips">("overview");
   const [adminModalOpen, setAdminModalOpen] = useState(false);
   const [adminTelemetry, setAdminTelemetry] = useState<any>(null);
-  const [adminSearch, setAdminSearch] = useState("");
 
   // Access Control State for Blocklist & Whitelist
   const [blockInputEmail, setBlockInputEmail] = useState("");
   const [allowInputEmail, setAllowInputEmail] = useState("");
 
-  // Session Activity Heartbeat Timer
+  // Reset pagination to page 1 on filter or search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCompany, selectedDomains, selectedYears, selectedProcess, searchQuery]);
+
+  // Record a single session visit on sign-in (continuous 15s heartbeats disabled for performance)
   useEffect(() => {
     if (!session || !userEmail) return;
 
@@ -59,56 +80,38 @@ export default function DashboardPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "login" })
     }).catch(() => {});
-
-    const interval = setInterval(() => {
-      fetch("/api/telemetry", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "heartbeat" })
-      }).catch(() => {});
-    }, 15000);
-
-    return () => clearInterval(interval);
   }, [session, userEmail]);
 
-  // Track Page View
-  const trackPageView = (pageName: string, companyName?: string) => {
-    if (!session) return;
-    fetch("/api/telemetry", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "page_view", page: pageName, company: companyName })
-    }).catch(() => {});
-  };
+  // Telemetry tracking disabled for performance and candidate privacy - no-op handlers
+  const trackPageView = (_pageName: string, _companyName?: string) => {};
+  const trackCompanyVisit = (_companyName: string) => {};
 
-  // Track initial page view and section changes
-  useEffect(() => {
-    if (!session) return;
-    trackPageView(activeSection === "experiences" ? "Interview Experiences Section" : "Company Catalog Section");
-  }, [session, activeSection]);
-
-  // Track catalog company view
-  useEffect(() => {
-    if (!session || !catalogCompany || activeSection !== "catalog") return;
-    trackPageView(`Company Catalog: ${catalogCompany}`, catalogCompany);
-  }, [session, catalogCompany, activeSection]);
-
-  // Track Company Visit
-  const trackCompanyVisit = (companyName: string) => {
-    if (!companyName || !session) return;
-    fetch("/api/telemetry", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "company_visit", company: companyName })
-    }).catch(() => {});
-  };
-
-  // Pre-normalize all experiences with clean 7 domain mapping
+  // Pre-normalize all experiences with clean 7 domain mapping & pre-indexed search corpus
   const experiencesWithNormalizedDomain = useMemo(() => {
-    return (experiencesData as any[]).map(exp => ({
-      ...exp,
-      normalizedDomain: normalizeDomain(exp.domain)
-    }));
+    return (experiencesData as any[]).map(exp => {
+      const normDomain = normalizeDomain(exp.domain);
+      const searchCorpus = [
+        exp.company,
+        exp.domain,
+        normDomain,
+        exp.role_offered,
+        exp.pre_process_tips,
+        exp.gd_topics_tips,
+        exp.interview_outline,
+        exp.domain_questions,
+        exp.hr_gk_questions,
+        exp.prep_resources,
+        exp.tips,
+        exp.tech_skills,
+        exp.dos_and_donts
+      ].filter(Boolean).join(" ").toLowerCase();
+
+      return {
+        ...exp,
+        normalizedDomain: normDomain,
+        _searchCorpus: searchCorpus
+      };
+    });
   }, []);
 
   // Extract unique companies
@@ -134,22 +137,25 @@ export default function DashboardPage() {
     return Array.from(set).sort().reverse();
   }, [experiencesWithNormalizedDomain]);
 
-  // Filter experiences using normalized domains
+  // Filter experiences using normalized domains and ultra-fast pre-indexed search
   const filteredExperiences = useMemo(() => {
+    const q = searchQuery ? searchQuery.toLowerCase().trim() : "";
     return experiencesWithNormalizedDomain.filter(exp => {
       if (selectedCompany && exp.company.toLowerCase() !== selectedCompany.toLowerCase()) return false;
       if (selectedDomains.length > 0 && !selectedDomains.includes(exp.normalizedDomain)) return false;
       if (selectedYears.length > 0 && !selectedYears.includes(exp.year)) return false;
       if (selectedProcess && exp.process_type.toLowerCase() !== selectedProcess.toLowerCase()) return false;
-
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        const searchable = `${exp.company} ${exp.domain} ${exp.normalizedDomain} ${exp.role_offered} ${exp.pre_process_tips} ${exp.gd_topics_tips} ${exp.interview_outline} ${exp.domain_questions} ${exp.hr_gk_questions} ${exp.prep_resources} ${exp.tips} ${exp.tech_skills} ${exp.dos_and_donts}`.toLowerCase();
-        if (!searchable.includes(q)) return false;
-      }
+      if (q && !exp._searchCorpus.includes(q)) return false;
       return true;
     }).sort((a, b) => (b.word_count || 0) - (a.word_count || 0));
   }, [experiencesWithNormalizedDomain, selectedCompany, selectedDomains, selectedYears, selectedProcess, searchQuery]);
+
+  // Sliced experiences for current page (24 items per page)
+  const totalPages = Math.ceil(filteredExperiences.length / ITEMS_PER_PAGE) || 1;
+  const paginatedExperiences = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredExperiences.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredExperiences, currentPage]);
 
   // Catalog Company Intelligence Data
   const catalogIntelligence = useMemo(() => {
@@ -205,69 +211,6 @@ export default function DashboardPage() {
       }
     } catch (e) {}
     setAdminModalOpen(true);
-  };
-
-  const handleExportToExcel = () => {
-    const users = adminTelemetry?.users || [];
-    if (users.length === 0) {
-      alert("No telemetry data available to export.");
-      return;
-    }
-
-    const headers = [
-      "Email",
-      "Role",
-      "Session Start",
-      "Last Active",
-      "Time Spent",
-      "Total Time (Seconds)",
-      "Login Count",
-      "Activity Count",
-      "Status",
-      "Companies Visited Count",
-      "Companies Visited List"
-    ];
-
-    const csvContent = [
-      headers.join(","),
-      ...users.map((u: any) => {
-        const companies = Array.isArray(u.companies_visited) ? u.companies_visited.join("; ") : "";
-        return [
-          `"${u.email || ""}"`,
-          `"${u.role || "user"}"`,
-          `"${u.session_start || ""}"`,
-          `"${u.last_active || ""}"`,
-          `"${u.duration_display || ""}"`,
-          u.total_time_seconds || 0,
-          u.login_count || 0,
-          u.activity_count || 0,
-          `"${u.is_blocked ? "Blocked" : u.status || "Active"}"`,
-          u.companies_visited_count || 0,
-          `"${companies.replace(/"/g, '""')}"`
-        ].join(",");
-      })
-    ].join("\n");
-
-    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `PrepChat_UserActivity_Report_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleDeleteUserLog = async (targetEmail: string) => {
-    if (!targetEmail || !confirm(`Are you sure you want to delete all telemetry logs for ${targetEmail}?`)) return;
-    try {
-      await fetch("/api/telemetry", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "delete_user", targetEmail })
-      });
-      handleFetchAdminTelemetry();
-    } catch (e) {}
   };
 
   const handleBlockEmail = async (emailToBlock: string) => {
@@ -358,26 +301,6 @@ export default function DashboardPage() {
   const toggleAccordion = (year: string) => {
     setExpandedYearAccordion(prev => ({ ...prev, [year]: !prev[year] }));
   };
-
-  // Max value calculation for primary bar chart scaling
-  const maxAvgTime = useMemo(() => {
-    const daily = adminTelemetry?.dailyAnalytics || [];
-    const maxVal = Math.max(...daily.map((d: any) => d.avg_user_time_mins || 0), 10);
-    return maxVal;
-  }, [adminTelemetry]);
-
-  const maxAvgCompanies = useMemo(() => {
-    const daily = adminTelemetry?.dailyAnalytics || [];
-    const maxVal = Math.max(...daily.map((d: any) => d.avg_companies_visited || 0), 5);
-    return maxVal;
-  }, [adminTelemetry]);
-
-  // Secondary Axis Max Value Calculation (Active Users per Day)
-  const maxActiveUsers = useMemo(() => {
-    const daily = adminTelemetry?.dailyAnalytics || [];
-    const maxVal = Math.max(...daily.map((d: any) => d.active_users || 0), 5);
-    return maxVal;
-  }, [adminTelemetry]);
 
   return (
     <div className="app-wrapper">
@@ -684,16 +607,15 @@ export default function DashboardPage() {
               </span>
             </div>
 
-            {/* Experiences Cards Grid */}
+            {/* Experiences Cards Grid (Paginated 24 per page for instant 60fps rendering) */}
             <div className="exp-cards-grid">
-              {filteredExperiences.map((exp: any, idx: number) => (
+              {paginatedExperiences.map((exp: any, idx: number) => (
                 <div
                   key={exp.id || idx}
                   className="experience-card"
                   onClick={() => {
                     setActiveModalExp(exp);
                     setActiveModalTab("overview");
-                    trackCompanyVisit(exp.company);
                   }}
                 >
                   <div>
@@ -728,6 +650,59 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="pagination-bar mt-4 mb-4">
+                <div className="pagination-info">
+                  Showing <strong>{((currentPage - 1) * ITEMS_PER_PAGE) + 1}</strong> – <strong>{Math.min(currentPage * ITEMS_PER_PAGE, filteredExperiences.length)}</strong> of <strong>{filteredExperiences.length}</strong> experiences
+                </div>
+                <div className="pagination-buttons">
+                  <button
+                    className="btn-page"
+                    disabled={currentPage === 1}
+                    onClick={() => {
+                      setCurrentPage(prev => Math.max(1, prev - 1));
+                      window.scrollTo({ top: 320, behavior: "smooth" });
+                    }}
+                    title="Previous Page"
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: "1.1rem" }}>chevron_left</span>
+                    <span>Previous</span>
+                  </button>
+
+                  {generatePageNumbers(currentPage, totalPages).map((pageNum, idx) => (
+                    pageNum === "..." ? (
+                      <span key={`dots-${idx}`} className="pagination-ellipsis">…</span>
+                    ) : (
+                      <button
+                        key={pageNum}
+                        className={`btn-page-number ${currentPage === pageNum ? "active" : ""}`}
+                        onClick={() => {
+                          setCurrentPage(Number(pageNum));
+                          window.scrollTo({ top: 320, behavior: "smooth" });
+                        }}
+                      >
+                        {pageNum}
+                      </button>
+                    )
+                  ))}
+
+                  <button
+                    className="btn-page"
+                    disabled={currentPage === totalPages}
+                    onClick={() => {
+                      setCurrentPage(prev => Math.min(totalPages, prev + 1));
+                      window.scrollTo({ top: 320, behavior: "smooth" });
+                    }}
+                    title="Next Page"
+                  >
+                    <span>Next</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: "1.1rem" }}>chevron_right</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -1243,227 +1218,47 @@ export default function DashboardPage() {
                   <span className="meta-pill pill-domain" style={{ background: "#4f46e5", color: "#fff" }}>Exclusive Admin Control</span>
                   <span className="meta-pill pill-process">prepcom@iimidr.ac.in</span>
                 </div>
-                <h3>📊 PrepCom Graphical Analytics & Security Control Center</h3>
+                <h3>📊 PrepCom Institutional Access & Engagement Metric Center</h3>
               </div>
               <button className="modal-close-btn" onClick={() => setAdminModalOpen(false)}>&times;</button>
             </div>
 
             <div className="modal-body">
               <p style={{ fontSize: "0.85rem", color: "#64748b", marginBottom: "1.25rem" }}>
-                Real-time usage metrics, dual-axis trend graphs, company visit statistics, and server-side email access control for PrepCom admins.
+                Institutional engagement metrics and server-side email access control for PrepCom administrators. Continuous telemetry tracking (session duration, heartbeats, and browsing logs) is disabled for candidate privacy and maximum platform responsiveness.
               </p>
 
-              {/* Analytics Summary Stats Grid */}
-              <div className="admin-stats-grid mb-4">
-                <div className="admin-stat-card" style={{ background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)", border: "1px solid #bfdbfe" }}>
-                  <div className="stat-icon material-symbols-outlined" style={{ color: "#2563eb" }}>visibility</div>
-                  <div className="stat-info">
-                    <span className="stat-value" style={{ color: "#1d4ed8" }}>{adminTelemetry?.summary?.total_page_views || 0}</span>
-                    <span className="stat-label" style={{ fontWeight: 800, color: "#1e40af" }}>Total Page Views</span>
-                    <span style={{ fontSize: "0.72rem", color: "#3b82f6", marginTop: "2px" }}>
-                      Real-time page views across all student catalog & experience sessions.
-                    </span>
-                  </div>
-                </div>
-
-                <div className="admin-stat-card">
-                  <div className="stat-icon material-symbols-outlined">group</div>
-                  <div className="stat-info">
-                    <span className="stat-value">{adminTelemetry?.summary?.total_registered_users || 0}</span>
-                    <span className="stat-label">Active Users</span>
-                    <span style={{ fontSize: "0.72rem", color: "#64748b", marginTop: "2px" }}>
-                      Unique student accounts logged in telemetry database.
-                    </span>
-                  </div>
-                </div>
-
-                <div className="admin-stat-card">
-                  <div className="stat-icon material-symbols-outlined">timer</div>
-                  <div className="stat-info">
-                    <span className="stat-value" style={{ color: "#4f46e5" }}>{adminTelemetry?.summary?.avg_time_display || "0 mins"}</span>
-                    <span className="stat-label">Avg Time / Day</span>
-                    <span style={{ fontSize: "0.72rem", color: "#64748b", marginTop: "2px" }}>
-                      Calculated from active 15s session heartbeats per student per day.
-                    </span>
-                  </div>
-                </div>
-
-                <div className="admin-stat-card">
-                  <div className="stat-icon material-symbols-outlined">travel_explore</div>
-                  <div className="stat-info">
-                    <span className="stat-value" style={{ color: "#059669" }}>{adminTelemetry?.summary?.avg_companies_per_user || "0.0"}</span>
-                    <span className="stat-label">Avg Companies / User</span>
-                    <span style={{ fontSize: "0.72rem", color: "#64748b", marginTop: "2px" }}>
-                      Average unique company catalog pages visited per student.
-                    </span>
-                  </div>
-                </div>
-
-                <div className="admin-stat-card">
-                  <div className="stat-icon material-symbols-outlined">domain</div>
-                  <div className="stat-info">
-                    <span className="stat-value" style={{ color: "#7c3aed" }}>{adminTelemetry?.summary?.total_unique_companies_explored || 0}</span>
-                    <span className="stat-label">Companies Explored</span>
-                    <span style={{ fontSize: "0.72rem", color: "#64748b", marginTop: "2px" }}>
-                      Total unique recruiting firms researched across all sessions.
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* GRAPHICAL DUAL-AXIS CHARTS SECTION (Re-aligned Equal Heights) */}
-              <div className="search-card mb-4" style={{ background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: "14px", padding: "1.5rem" }}>
-                <h4 style={{ fontSize: "1.1rem", fontWeight: 800, marginBottom: "0.25rem", color: "#0f172a", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                  <span className="material-symbols-outlined" style={{ color: "#2563eb" }}>bar_chart</span>
-                  Dual-Axis Graphical Trends: Primary Metrics (Bars) & Secondary Axis (Line: Active Users / Day)
-                </h4>
-                <p style={{ fontSize: "0.82rem", color: "#64748b", marginBottom: "1.25rem" }}>
-                  Equal height aligned visual graphs. Bars represent primary metrics; orange line overlay represents secondary axis (Active Users per Day).
-                </p>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
-                  {/* GRAPHICAL CHART 1: Avg Time (Bars) + Active Users (Top Track Line) */}
-                  <div style={{ background: "#f8fafc", padding: "1.25rem", borderRadius: "12px", border: "1px solid #e2e8f0", height: "340px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                    <div>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
-                        <strong style={{ fontSize: "0.88rem", color: "#1e293b" }}>📈 Avg User Time per Day (Minutes)</strong>
-                        <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#ea580c", background: "#ffedd5", padding: "2px 8px", borderRadius: "8px" }}>👥 Line: Active Users</span>
-                      </div>
-                      <p style={{ fontSize: "0.75rem", color: "#64748b", margin: 0 }}>
-                        Top Track = Active Users per Day | Bottom Bars = Avg Minutes / User
-                      </p>
+              {/* Minimal Telemetry: Average Users Per Day Hero Card */}
+              <div className="admin-avg-users-hero">
+                <div className="admin-avg-users-content">
+                  <span className="material-symbols-outlined admin-avg-users-icon">
+                    query_stats
+                  </span>
+                  <div>
+                    <div className="admin-avg-users-title">Average Daily Engagement</div>
+                    <div className="admin-avg-users-val">
+                      {adminTelemetry?.averageUsersPerDay || adminTelemetry?.summary?.average_users_per_day || "0.0"}{" "}
+                      <span style={{ fontSize: "1.25rem", fontWeight: 700, color: "#2563eb" }}>users / day</span>
                     </div>
-
-                    <div style={{ position: "relative", height: "230px" }}>
-                      {/* Top Dedicated Track: Active Users Trend Line */}
-                      <div style={{ position: "relative", height: "65px", background: "#fff", borderRadius: "8px", border: "1px solid #f1f5f9", marginBottom: "8px", overflow: "hidden" }}>
-                        <div style={{ position: "absolute", top: "4px", left: "8px", fontSize: "0.68rem", fontWeight: 700, color: "#94a3b8" }}>ACTIVE USERS / DAY</div>
-                        <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "65px", pointerEvents: "none" }}>
-                          <polyline
-                            fill="none"
-                            stroke="#ea580c"
-                            strokeWidth="2.5"
-                            strokeDasharray="0"
-                            points={(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
-                              const total = (adminTelemetry?.dailyAnalytics || []).length || 1;
-                              const x = (idx + 0.5) * (100 / total);
-                              const y = 52 - Math.min(36, Math.max(4, ((d.active_users || 0) / maxActiveUsers) * 36));
-                              return `${x}%,${y}`;
-                            }).join(" ")}
-                          />
-                          {(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
-                            const total = (adminTelemetry?.dailyAnalytics || []).length || 1;
-                            const x = (idx + 0.5) * (100 / total);
-                            const y = 52 - Math.min(36, Math.max(4, ((d.active_users || 0) / maxActiveUsers) * 36));
-                            return (
-                              <g key={idx}>
-                                <circle cx={`${x}%`} cy={y} r="4.5" fill="#ea580c" stroke="#ffffff" strokeWidth="2" />
-                                <text x={`${x}%`} y={y > 22 ? y - 7 : y + 14} fill="#c2410c" fontSize="9.5" fontWeight="800" textAnchor="middle">
-                                  👥 {d.active_users}
-                                </text>
-                              </g>
-                            );
-                          })}
-                        </svg>
-                      </div>
-
-                      {/* Lower Dedicated Track: Primary Axis Bar Plot */}
-                      <div style={{ display: "flex", alignItems: "flex-end", height: "155px", gap: "0.75rem", borderBottom: "2px solid #cbd5e1" }}>
-                        {(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
-                          const heightPct = Math.min(80, Math.max(12, ((d.avg_user_time_mins || 0) / maxAvgTime) * 80));
-                          return (
-                            <div key={idx} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", height: "100%", justifyContent: "flex-end" }}>
-                              <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "#2563eb", marginBottom: "2px" }}>{d.avg_user_time_mins}m</span>
-                              <div
-                                title={`${d.label}: ${d.avg_user_time_mins} mins avg time (${d.active_users} active users)`}
-                                style={{
-                                  width: "100%",
-                                  height: `${heightPct}%`,
-                                  background: "linear-gradient(180deg, #2563eb 0%, #3b82f6 100%)",
-                                  borderRadius: "6px 6px 0 0",
-                                  opacity: 0.9,
-                                  transition: "height 0.3s ease"
-                                }}
-                              />
-                              <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b", marginTop: "6px" }}>{d.label}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* GRAPHICAL CHART 2: Avg Companies (Bars) + Active Users (Top Track Line) */}
-                  <div style={{ background: "#f8fafc", padding: "1.25rem", borderRadius: "12px", border: "1px solid #e2e8f0", height: "340px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                    <div>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
-                        <strong style={{ fontSize: "0.88rem", color: "#1e293b" }}>📊 Avg Companies Visited per User per Day</strong>
-                        <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#ea580c", background: "#ffedd5", padding: "2px 8px", borderRadius: "8px" }}>👥 Line: Active Users</span>
-                      </div>
-                      <p style={{ fontSize: "0.75rem", color: "#64748b", margin: 0 }}>
-                        Top Track = Active Users per Day | Bottom Bars = Avg Companies / User
-                      </p>
-                    </div>
-
-                    <div style={{ position: "relative", height: "230px" }}>
-                      {/* Top Dedicated Track: Active Users Trend Line */}
-                      <div style={{ position: "relative", height: "65px", background: "#fff", borderRadius: "8px", border: "1px solid #f1f5f9", marginBottom: "8px", overflow: "hidden" }}>
-                        <div style={{ position: "absolute", top: "4px", left: "8px", fontSize: "0.68rem", fontWeight: 700, color: "#94a3b8" }}>ACTIVE USERS / DAY</div>
-                        <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "65px", pointerEvents: "none" }}>
-                          <polyline
-                            fill="none"
-                            stroke="#ea580c"
-                            strokeWidth="2.5"
-                            strokeDasharray="0"
-                            points={(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
-                              const total = (adminTelemetry?.dailyAnalytics || []).length || 1;
-                              const x = (idx + 0.5) * (100 / total);
-                              const y = 52 - Math.min(36, Math.max(4, ((d.active_users || 0) / maxActiveUsers) * 36));
-                              return `${x}%,${y}`;
-                            }).join(" ")}
-                          />
-                          {(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
-                            const total = (adminTelemetry?.dailyAnalytics || []).length || 1;
-                            const x = (idx + 0.5) * (100 / total);
-                            const y = 52 - Math.min(36, Math.max(4, ((d.active_users || 0) / maxActiveUsers) * 36));
-                            return (
-                              <g key={idx}>
-                                <circle cx={`${x}%`} cy={y} r="4.5" fill="#ea580c" stroke="#ffffff" strokeWidth="2" />
-                                <text x={`${x}%`} y={y > 22 ? y - 7 : y + 14} fill="#c2410c" fontSize="9.5" fontWeight="800" textAnchor="middle">
-                                  👥 {d.active_users}
-                                </text>
-                              </g>
-                            );
-                          })}
-                        </svg>
-                      </div>
-
-                      {/* Lower Dedicated Track: Primary Axis Bar Plot */}
-                      <div style={{ display: "flex", alignItems: "flex-end", height: "155px", gap: "0.75rem", borderBottom: "2px solid #cbd5e1" }}>
-                        {(adminTelemetry?.dailyAnalytics || []).map((d: any, idx: number) => {
-                          const heightPct = Math.min(80, Math.max(12, ((d.avg_companies_visited || 0) / maxAvgCompanies) * 80));
-                          return (
-                            <div key={idx} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", height: "100%", justifyContent: "flex-end" }}>
-                              <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "#059669", marginBottom: "2px" }}>{d.avg_companies_visited}</span>
-                              <div
-                                title={`${d.label}: ${d.avg_companies_visited} avg companies visited per user (${d.active_users} active users)`}
-                                style={{
-                                  width: "100%",
-                                  height: `${heightPct}%`,
-                                  background: "linear-gradient(180deg, #059669 0%, #10b981 100%)",
-                                  borderRadius: "6px 6px 0 0",
-                                  opacity: 0.9,
-                                  transition: "height 0.3s ease"
-                                }}
-                              />
-                              <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#64748b", marginTop: "6px" }}>{d.label}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
+                    <p className="admin-avg-users-sub">
+                      Computed across unique active candidate logins per calendar date. Background session tracking, continuous heartbeats, and page view counters are disabled.
+                    </p>
                   </div>
                 </div>
+
+                {adminTelemetry?.recentDailyBreakdown && adminTelemetry.recentDailyBreakdown.length > 0 && (
+                  <div className="admin-daily-pills">
+                    <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "#64748b", alignSelf: "center", marginRight: "4px" }}>
+                      Recorded Daily Breakdown:
+                    </span>
+                    {adminTelemetry.recentDailyBreakdown.map((item: any, idx: number) => (
+                      <div key={idx} className="admin-daily-pill">
+                        <span>📅 {item.label}</span>
+                        <strong>{item.active_users} active {item.active_users === 1 ? "user" : "users"}</strong>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* SECURITY CONTROL PANEL: BLOCKLIST & ALLOWED LIST */}
@@ -1581,161 +1376,6 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-               {/* LIVE SESSION & COMPANY TRACKER AUDIT TABLE */}
-              <div className="admin-table-container">
-                <div className="admin-table-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
-                  <div>
-                    <h4>Live Session Audit Log & Companies Explored per User</h4>
-                    <p style={{ fontSize: "0.78rem", color: "#64748b", margin: "2px 0 0 0" }}>
-                      Detailed audit log tracking session start/end timestamps, duration, and specific companies explored per student.
-                    </p>
-                  </div>
-                  <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-                    <button
-                      onClick={handleExportToExcel}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.4rem",
-                        padding: "0.5rem 1rem",
-                        background: "linear-gradient(135deg, #16a34a, #15803d)",
-                        color: "#ffffff",
-                        border: "none",
-                        borderRadius: "8px",
-                        fontWeight: 600,
-                        fontSize: "0.85rem",
-                        cursor: "pointer",
-                        whiteSpace: "nowrap"
-                      }}
-                      title="Download complete user activity report as Excel/CSV from inception"
-                    >
-                      <span className="material-symbols-outlined" style={{ fontSize: "1.1rem" }}>download</span> Download Full Report (Excel)
-                    </button>
-                    <input
-                      type="text"
-                      className="admin-search-input"
-                      placeholder="Search email..."
-                      value={adminSearch}
-                      onChange={(e) => setAdminSearch(e.target.value)}
-                      style={{ margin: 0 }}
-                    />
-                  </div>
-                </div>
-                <div className="table-scroll-wrap">
-                  <table className="telemetry-table">
-                    <thead>
-                      <tr>
-                        <th title="Authenticated Google Workspace account email">User Account (@iimidr.ac.in)</th>
-                        <th title="Role level (ADMIN for prepcom@iimidr.ac.in, USER for students)">Role</th>
-                        <th title="Total page and section views recorded for this student">Page Views</th>
-                        <th title="Timestamp when user initiated sign-in">Session Start</th>
-                        <th title="Timestamp of latest active background heartbeat ping (every 15s)">Last Active</th>
-                        <th title="Total active session duration accumulated during browsing">Time Spent</th>
-                        <th title="Count and preview of recruiting firm catalog pages visited by this user">Unique Companies Explored</th>
-                        <th title="Current access status (Active Session or BLOCKED)">Status</th>
-                        <th title="1-click admin block, unblock, or remove log controls">Admin Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(adminTelemetry?.users || [])
-                        .filter((u: any) => !adminSearch || u.email.toLowerCase().includes(adminSearch.toLowerCase()))
-                        .map((u: any, idx: number) => (
-                          <tr key={idx}>
-                            <td><strong>{u.email}</strong></td>
-                            <td>
-                              <span
-                                className="status-badge"
-                                style={{
-                                  background: u.role === "admin" ? "#e0e7ff" : "#f1f5f9",
-                                  color: u.role === "admin" ? "#4338ca" : "#475569"
-                                }}
-                              >
-                                {u.role?.toUpperCase()}
-                              </span>
-                            </td>
-                            <td>
-                              <span className="status-badge" style={{ background: "#dbeafe", color: "#1e40af", fontWeight: 800 }}>
-                                👁️ {u.page_views || u.activity_count || 0} views
-                              </span>
-                            </td>
-                            <td>{u.session_start || "Just Now"}</td>
-                            <td>{u.last_active || "Active Now"}</td>
-                            <td><strong>{u.duration_display || "1 min"}</strong></td>
-                            <td>
-                              <span className="status-badge" style={{ background: "#eff6ff", color: "#1d4ed8", fontWeight: 700 }}>
-                                🏢 {u.companies_visited_count || 0} Companies
-                              </span>
-                              {u.companies_visited_list && (
-                                <div style={{ fontSize: "0.72rem", color: "#64748b", marginTop: "2px" }}>
-                                  {u.companies_visited_list}
-                                </div>
-                              )}
-                            </td>
-                            <td>
-                               <span
-                                 className={`status-badge ${
-                                   u.is_blocked
-                                     ? "status-flagged"
-                                     : u.session_start === "Pending Sign-In"
-                                     ? ""
-                                     : "status-active"
-                                 }`}
-                                 style={
-                                   u.session_start === "Pending Sign-In"
-                                     ? { background: "#d1fae5", color: "#047857", fontWeight: 700 }
-                                     : {}
-                                 }
-                               >
-                                 {u.is_blocked
-                                   ? "BLOCKED"
-                                   : u.session_start === "Pending Sign-In"
-                                   ? "Allowed (Pending Sign-In)"
-                                   : "Active Session"}
-                               </span>
-                            </td>
-                            <td>
-                              <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
-                                {u.email !== "prepcom@iimidr.ac.in" && (
-                                  u.is_blocked ? (
-                                    <button
-                                      onClick={() => handleUnblockEmail(u.email)}
-                                      style={{ background: "#d1fae5", color: "#047857", border: "1px solid #6ee7b7", padding: "2px 8px", borderRadius: "6px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}
-                                    >
-                                      Unblock
-                                    </button>
-                                  ) : (
-                                    <button
-                                      onClick={() => handleBlockEmail(u.email)}
-                                      style={{ background: "#fee2e2", color: "#dc2626", border: "1px solid #fca5a5", padding: "2px 8px", borderRadius: "6px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}
-                                    >
-                                      Block
-                                    </button>
-                                  )
-                                )}
-                                {u.email !== "prepcom@iimidr.ac.in" && (
-                                  <button
-                                    onClick={() => handleDeleteUserLog(u.email)}
-                                    style={{ background: "#f1f5f9", color: "#64748b", border: "1px solid #cbd5e1", padding: "2px 8px", borderRadius: "6px", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}
-                                    title={`Permanently remove ${u.email} telemetry log from analytics`}
-                                  >
-                                    🗑️ Remove Log
-                                  </button>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      {(!adminTelemetry?.users || adminTelemetry.users.length === 0) && (
-                        <tr>
-                          <td colSpan={8} style={{ textAlign: "center", padding: "1.5rem", color: "var(--text-muted)" }}>
-                            Clean telemetry logging active. Pings recorded when users sign in and browse companies.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
             </div>
           </div>
         </div>
