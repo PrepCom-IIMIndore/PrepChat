@@ -20142,5 +20142,1845 @@
     "year": "2025-26",
     "question": "Research (Quantitative and Qualitative)",
     "question_type": "Technical"
+  },
+  {
+    "company": "NPCI",
+    "industry": "General Management",
+    "domain": "GenMan",
+    "year": "2026",
+    "question": "About family background",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "IDFC First Bank",
+    "industry": "Finance",
+    "domain": "Prodman",
+    "year": "2026",
+    "question": "Conflict and collaboration incident at work place",
+    "question_type": "Domain"
+  },
+  {
+    "company": "IDFC First Bank",
+    "industry": "Finance",
+    "domain": "Prodman",
+    "year": "2026",
+    "question": "Introducing yourself as such it is not mentioned in resume.",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Groww",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Basic financials statements",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Samsung",
+    "industry": "Marketing",
+    "domain": "Marketing",
+    "year": "2026",
+    "question": "What's there in a name",
+    "question_type": "GD"
+  },
+  {
+    "company": "Goldman Sachs",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Depreciation and other topics for finance. In the buddy call, they'll ask a lot of questions on awm and current affairs related to finance",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Goldman Sachs",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Introduction, general knowledge",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Deloitte",
+    "industry": "General Management",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Finance, depreciation question and why depreciation is not accounted for in case of land",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deloitte",
+    "industry": "General Management",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Introduction",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Cummins",
+    "industry": "Operations",
+    "domain": "Operations",
+    "year": "2026",
+    "question": "Operations and inventory management question",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Cummins",
+    "industry": "Operations",
+    "domain": "Operations",
+    "year": "2026",
+    "question": "Introduction, stakeholder management, past experiences",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "KPMG",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Case based interview",
+    "question_type": "Domain"
+  },
+  {
+    "company": "KPMG",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "General questions on location preference, previous work experience",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "American Express",
+    "industry": "Finance",
+    "domain": "Prodman",
+    "year": "2026",
+    "question": "Mostly logic puzzles and SQL",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Mastercard",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Consulting cases as mentioned",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Mastercard",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Current affairs Qs were about the general state of macroeconomy of the country, demographic dividends and how to improve the GDP",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Morgan Stanley",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "FCFF, Cash conversion cycle implication, impact on three financial statements, company is EBITDA positive but cash negative, accreditive dilutive.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Morgan Stanley",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Why IB ? Why at this stage ? Recent deals,",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Arvind Fashions",
+    "industry": "Marketing",
+    "domain": "Marketing",
+    "year": "2026",
+    "question": "Hobbies",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Mastercard",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "How does a credit card work?",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Mastercard",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Why MBA after consulting? Why IIM Indore over Kozhikode?",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Consulting cases",
+    "question_type": "Domain"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Why JPMC? Why strategy?",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Britannia Industries",
+    "industry": "Marketing",
+    "domain": "Marketing",
+    "year": "2026",
+    "question": "Profitability vs ESG",
+    "question_type": "GD"
+  },
+  {
+    "company": "Britannia Industries",
+    "industry": "Marketing",
+    "domain": "Marketing",
+    "year": "2026",
+    "question": "Who are you beyond your cv?",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Deloitte",
+    "industry": "General Management",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "2 cases : Market entry and revitalization",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deloitte",
+    "industry": "General Management",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Routine HR questions - TMAY, family, home, internships, academics, how is life at IIM Indore etc.",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "PwC",
+    "industry": "General Management",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Profitability case , growth case",
+    "question_type": "Domain"
+  },
+  {
+    "company": "PwC",
+    "industry": "General Management",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "In the 3rd interview asked about my work ex and internships and then created a situation where i needed my industry knowledge and ops knowledge to give the solution.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "PwC",
+    "industry": "General Management",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "In my 2nd Interview I was asked Why you want to join PwC?",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "1. China Plus One Strategy - India as next manufacturing hub for the world\n2. Pizza vs. Biryani",
+    "question_type": "GD"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "I was asked about my understanding of financial statements and whether I had reviewed the financial statements of any company. I was also asked to highlight anything noteworthy I had observed in those statements and answer a hypothetical question involving working capital and debt.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "PepsiCo",
+    "industry": "Marketing",
+    "domain": "Marketing",
+    "year": "2026",
+    "question": "Why PepsiCo",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "A lot throughout the process-",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Read the through the red book and cover the topics that relate to the resume you make-",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Topics like-",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Statements of Accounting, Ratios and their implied meanings, DCF and its calculation, other methods of valuation such as relative valuation, etc can be extensively tested.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "The candidate should know about the happenings surrounding the company and the atmosphere of the the financial world. Movements in stock prices and industry dynamics are frequently asked as well.",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Mastercard",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Concepts of NPV and revenue guesstimate",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Mastercard",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "HR - 3 values you uphold, what do you like about your home city, what you like and dislike about iim indore",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Kotak Mahindra Bank",
+    "industry": "Marketing",
+    "domain": "Marketing",
+    "year": "2026",
+    "question": "Credit card business working",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Kotak Mahindra Bank",
+    "industry": "Marketing",
+    "domain": "Marketing",
+    "year": "2026",
+    "question": "Why credit card business and why kotak bank",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Vodafone",
+    "industry": "Operations",
+    "domain": "Marketing",
+    "year": "2026",
+    "question": "All the questions were mostly HR",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "PwC",
+    "industry": "General Management",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Case-Based( profitability, growth and market-entry) and Guesstimates",
+    "question_type": "Domain"
+  },
+  {
+    "company": "PwC",
+    "industry": "General Management",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "AI implementation",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "PwC",
+    "industry": "General Management",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Financial statements and ratios questions, tech used in finance solutions",
+    "question_type": "Domain"
+  },
+  {
+    "company": "PwC",
+    "industry": "General Management",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Asked about conflict resolution and leadership questions from POR",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Mondelez",
+    "industry": "Marketing",
+    "domain": "Marketing",
+    "year": "2026",
+    "question": "Dark stores or  traditional retail stores which is more profitable",
+    "question_type": "GD"
+  },
+  {
+    "company": "Samsung",
+    "industry": "Marketing",
+    "domain": "Marketing",
+    "year": "2026",
+    "question": "work life balance is a myth",
+    "question_type": "GD"
+  },
+  {
+    "company": "Boehringer Ingelheim",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "forgot the topic",
+    "question_type": "GD"
+  },
+  {
+    "company": "Biobrain Insight",
+    "industry": "Marketing",
+    "domain": "Marketing",
+    "year": "2026",
+    "question": "Where should we draw line to right to protest and maintaining law and order",
+    "question_type": "GD"
+  },
+  {
+    "company": "Biobrain Insight",
+    "industry": "Marketing",
+    "domain": "Marketing",
+    "year": "2026",
+    "question": "What does NPCI does , tell NPCIs product and how it works",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "What is WACC and how will you calculate it for automobile industry",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Which valuation method will give you the highest result",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Which sector you follow",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Macroeconomic trends on that sector",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Outlook in future",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Which companies you suggest to bet on",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "About m and a deal",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Then went on to further cross question on the M and A deal.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Also took an example and told to consolidate the balance sheet of both the firms post acquisation and questioned on various terms involved in it.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Tell me about yourself",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Why IB",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Why db",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "What is special in db",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "What has iim indore taught you which is different from iit patna",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Why finance",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Which roles other than ib are you interested in",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Why not consulting",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "AB InBev",
+    "industry": "Marketing",
+    "domain": "GenMan",
+    "year": "2026",
+    "question": "Case based GD- You are a beer company. The revenue has declined by 10% in recent times. It has been noticed that GenZ isn’t buying your beer. What could be the causes?",
+    "question_type": "GD"
+  },
+  {
+    "company": "AB InBev",
+    "industry": "Marketing",
+    "domain": "GenMan",
+    "year": "2026",
+    "question": "How to increase Brand Awareness",
+    "question_type": "Domain"
+  },
+  {
+    "company": "AB InBev",
+    "industry": "Marketing",
+    "domain": "GenMan",
+    "year": "2026",
+    "question": "Where have you shown resilience before",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Capgemini",
+    "industry": "Marketing",
+    "domain": "GenMan",
+    "year": "2026",
+    "question": "Case based GD where the case was around suggesting a 12 month strategy for an automotive company to adopt EV",
+    "question_type": "GD"
+  },
+  {
+    "company": "Capgemini",
+    "industry": "Marketing",
+    "domain": "GenMan",
+    "year": "2026",
+    "question": "AI relevant questions",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Capgemini",
+    "industry": "Marketing",
+    "domain": "GenMan",
+    "year": "2026",
+    "question": "Questions around effect of AI in workspace",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "AI4M",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Case-based GD: How to improve hiring processes",
+    "question_type": "GD"
+  },
+  {
+    "company": "AI4M",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Where do you see yourself in 7- 8 years.",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "AB InBev",
+    "industry": "Marketing",
+    "domain": "Marketing",
+    "year": "2026",
+    "question": "How to make beers more marketable to women",
+    "question_type": "GD"
+  },
+  {
+    "company": "AB InBev",
+    "industry": "Marketing",
+    "domain": "Marketing",
+    "year": "2026",
+    "question": "Why AbInBev, long term goals, would you relocate for internship",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "2 GDs during the Networking dinner \nTopic 1 - Can India aim for China +1 and become a manufacturing hub?\nTopic 2 - Biryani vs Pizza",
+    "question_type": "GD"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "During the Networking dinner after the GDs, we were asked why Corporate Banking, and we were required to ask some domain specific questions to the panelists as well, informally.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Why Finance, why MBA, CV specific questions about projects and interests",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Groww",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Compare 2 companies on the basis of the gross margin and explain reasons for differences, effects of rate hike, basic guesstimate",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Groww",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Why do you want to join equity research? Why",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Goldman Sachs",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Mentioned abovr",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Goldman Sachs",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "mentioned above",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Goldman Sachs",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Mostly around financial accounting, M&A, valuation and analysis and LBO",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Goldman Sachs",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Around CV (primarily internships), why GS, why IB, long and short term plans",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "IDFC First Bank",
+    "industry": "Finance",
+    "domain": "Operations",
+    "year": "2026",
+    "question": "Based on workex (same domain)",
+    "question_type": "Domain"
+  },
+  {
+    "company": "IDFC First Bank",
+    "industry": "Finance",
+    "domain": "Operations",
+    "year": "2026",
+    "question": "1. Why IDFC 2. What is the impact you will make after joining",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Case based GD, on cement industry",
+    "question_type": "GD"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Financial accounting and valuation, industry specific",
+    "question_type": "Domain"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Why JPMC?",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "What are the values of JPMC?",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Current market situations",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Oil prices",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "PwC",
+    "industry": "General Management",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "1. Introduction 2. What are your expectations from the role 3. What would you contribute and what impact would you make",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Lubrizol",
+    "industry": "Marketing",
+    "domain": "Marketing",
+    "year": "2026",
+    "question": "Marketing case study of speciality chemicals demand",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Lubrizol",
+    "industry": "Marketing",
+    "domain": "Marketing",
+    "year": "2026",
+    "question": "Why this company and role",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Cipla",
+    "industry": "General Management",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "How to manage stakeholder relationships, any recent strategy by any companies that you liked, Why Cipla, Why Strategy roles",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Accenture",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "I was given domain specific cases and my entire interview was around it. I have previous workex in insurance. I was asked to solve the entire supply chain case for buddy call. In final interview I was asked about a hypothetical situation about the various issues companies face in different channels in insurance. In the 2nd case I was asked market entry for the same company",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Accenture",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Just about my PORs once",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Samsung",
+    "industry": "Marketing",
+    "domain": "Marketing",
+    "year": "2026",
+    "question": "Ethanol blending",
+    "question_type": "GD"
+  },
+  {
+    "company": "Samsung",
+    "industry": "Marketing",
+    "domain": "Marketing",
+    "year": "2026",
+    "question": "To talk about any topic related to s&m",
+    "question_type": "Domain"
+  },
+  {
+    "company": "RPSG",
+    "industry": "General Management",
+    "domain": "GenMan",
+    "year": "2026",
+    "question": "Why do you want to join Genman??",
+    "question_type": "Domain"
+  },
+  {
+    "company": "RPSG",
+    "industry": "General Management",
+    "domain": "GenMan",
+    "year": "2026",
+    "question": "What is your strengths and weaknesses??",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Accordion",
+    "industry": "Consulting",
+    "domain": "Prodman",
+    "year": "2026",
+    "question": "- What metrics would you use to evaluate the effectiveness of different marketing campaigns?",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Accordion",
+    "industry": "Consulting",
+    "domain": "Prodman",
+    "year": "2026",
+    "question": "- How would you calculate revenue and margins across different campaign scenarios?",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Accordion",
+    "industry": "Consulting",
+    "domain": "Prodman",
+    "year": "2026",
+    "question": "- How would you estimate the market size and future growth of home glucose-monitoring devices?",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Accordion",
+    "industry": "Consulting",
+    "domain": "Prodman",
+    "year": "2026",
+    "question": "- How would you evaluate the financial feasibility and break-even point of entering a new market?",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Accordion",
+    "industry": "Consulting",
+    "domain": "Prodman",
+    "year": "2026",
+    "question": "- What recommendations would you make based on the market and financial analysis?",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Accordion",
+    "industry": "Consulting",
+    "domain": "Prodman",
+    "year": "2026",
+    "question": "- Questions about technical tools and skills, including AI and Power BI.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Accordion",
+    "industry": "Consulting",
+    "domain": "Prodman",
+    "year": "2026",
+    "question": "- Questions about my previous internships and experiences.",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Accordion",
+    "industry": "Consulting",
+    "domain": "Prodman",
+    "year": "2026",
+    "question": "- Details about my responsibilities, work undertaken and key learnings from previous internships.",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Accordion",
+    "industry": "Consulting",
+    "domain": "Prodman",
+    "year": "2026",
+    "question": "- Questions about my technical background and familiarity with AI and Power BI.",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Accordion",
+    "industry": "Consulting",
+    "domain": "Prodman",
+    "year": "2026",
+    "question": "No specific current-affairs questions were recalled.",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "AI in a financial organization: Productivity boost or risk",
+    "question_type": "GD"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Types of risks in asset wealth management, How does correlation helps in diversification, Hedging and Derivatives",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Synergy Consulting",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Difference between depreciation and amortisation and examples of some intangible assets",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Hinduja Group",
+    "industry": "General Management",
+    "domain": "GenMan",
+    "year": "2026",
+    "question": "GD - case based - was give an FMCG product launch case",
+    "question_type": "GD"
+  },
+  {
+    "company": "Hinduja Group",
+    "industry": "General Management",
+    "domain": "GenMan",
+    "year": "2026",
+    "question": "Best ad you ever saw, a situation you regretted the most in your life, situation based questions, leadership dilemma questions",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "1. India as the next manufacturing hub, China+1 strategy.       2. Biriyani vs Pizza",
+    "question_type": "GD"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "No domain specific questions were asked during the interviews. Only during the 2nd buddy call, I was asked about corporate banking - my understanding about the role.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "One of the GD topic was current affairs based though it seems common topic in general. Basically adding points from current affairs is a brownie point. HR question was very simple, asking how I would adjust, etc.",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Airtel",
+    "industry": "General Management",
+    "domain": "GenMan",
+    "year": "2026",
+    "question": "Case study on telecom network outage",
+    "question_type": "GD"
+  },
+  {
+    "company": "Airtel",
+    "industry": "General Management",
+    "domain": "GenMan",
+    "year": "2026",
+    "question": "Geopolitics",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Cummins",
+    "industry": "Operations",
+    "domain": "Marketing",
+    "year": "2026",
+    "question": "Questions were related to sales and marketing, such as the difference between sales and marketing, approaching a new B2B customer, handling customer rejection, convincing a customer who prefers a cheaper competitor, and translating technical product features into customer benefits. They also asked about Cummins India, its products, business segments, distribution network, and after-sales service.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "IndiaMART",
+    "industry": "General Management",
+    "domain": "Prodman",
+    "year": "2026",
+    "question": "AI, Technology, emerging trends",
+    "question_type": "Domain"
+  },
+  {
+    "company": "IndiaMART",
+    "industry": "General Management",
+    "domain": "Prodman",
+    "year": "2026",
+    "question": "AI current affairs",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "ABFRL",
+    "industry": "Marketing",
+    "domain": "Marketing",
+    "year": "2026",
+    "question": "Not really",
+    "question_type": "Domain"
+  },
+  {
+    "company": "ABFRL",
+    "industry": "Marketing",
+    "domain": "Marketing",
+    "year": "2026",
+    "question": "HR questions were based on resume and situational like how will you to a particular task",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "1. Explain DCF valuation, WACC and terminal value.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "2. Difference between enterprise value and equity value.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "3. Comparable company analysis and precedent transaction analysis.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "4. How do the three financial statements link?",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "5. What happens if depreciation increases by ₹10, assuming a 30% tax rate?",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "6. Explain the relationship between interest rates and company valuations.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "7. Discuss a recent M&A transaction and its strategic rationale.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "8. Questions related to my internships, financial analysis experience and academic research.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "9. Sector preference and understanding of the role and responsibilities of an IB analyst.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "10. Industry specific questions related to the p/e  ratios and comparables",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "11. Current market developments, macroeconomic factors affecting Indian markets, interest rates and recent M&A activity.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "why not take work ex and then come here",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "A case study on cement industry.",
+    "question_type": "GD"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "What is FCFF",
+    "question_type": "Domain"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "What is FCFE",
+    "question_type": "Domain"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Equity value and enterprise value.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Industry Analysis",
+    "question_type": "Domain"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "How is market today",
+    "question_type": "Domain"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "What are your views on where it would go",
+    "question_type": "Domain"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "What is derivatives",
+    "question_type": "Domain"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "What are futures and options",
+    "question_type": "Domain"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "How are they valued.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Why JPMC",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Why finance",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Values of jpmc",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "guesstimate: no. of airplanes taking off in india per day",
+    "question_type": "Domain"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "case interview: european coffee chain planning to enter in india. should they enter or not and how?",
+    "question_type": "Domain"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "jpmc values",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "are you fine with relocating to mumbai",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "talked about my internship and what i could have done better if stayed for longer",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Goldman Sachs",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "What are method of valuations",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Goldman Sachs",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Explain each",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Goldman Sachs",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Stock pitch",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Goldman Sachs",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Industry Analysis",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Goldman Sachs",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Cross questions on each of the topic.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Goldman Sachs",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Why GS",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Goldman Sachs",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Values of GS",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "D.E. Shaw",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Case study based discussion",
+    "question_type": "GD"
+  },
+  {
+    "company": "D.E. Shaw",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "What is derivatives",
+    "question_type": "Domain"
+  },
+  {
+    "company": "D.E. Shaw",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "What is futures",
+    "question_type": "Domain"
+  },
+  {
+    "company": "D.E. Shaw",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "What are options",
+    "question_type": "Domain"
+  },
+  {
+    "company": "D.E. Shaw",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "What is call and put",
+    "question_type": "Domain"
+  },
+  {
+    "company": "D.E. Shaw",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "What is hedge funds",
+    "question_type": "Domain"
+  },
+  {
+    "company": "D.E. Shaw",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "What are hedging strategies",
+    "question_type": "Domain"
+  },
+  {
+    "company": "D.E. Shaw",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Explain a simple hedging strategy",
+    "question_type": "Domain"
+  },
+  {
+    "company": "D.E. Shaw",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "What is D E shaw",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "D.E. Shaw",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "What are its Values",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "D.E. Shaw",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "How it earns",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Mastercard",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Case and guesstimates- based on bank transactions and payments",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Mastercard",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "HR - why consulting",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Mastercard",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Why Fintech consulting",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Mastercard",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Why Mastercard",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Mastercard",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "What is IPM",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Mastercard",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Why IPM",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Morgan Stanley",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Any sector you are following? Said real estate",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Morgan Stanley",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Biggest listed players",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Morgan Stanley",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Cost and revenue drivers",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Morgan Stanley",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Calculate WACC",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Morgan Stanley",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Questioned assumptions in WACC, asked to compare with defence sector",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Morgan Stanley",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Debt service coverage ratio?",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Morgan Stanley",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "If capex inc by 100, opex dec by 100, revenue inc by 100, what will have biggest impact on share price use dcf",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Morgan Stanley",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Following any sector",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "American Express",
+    "industry": "Finance",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "1) How to determine delinquent cardholders",
+    "question_type": "Domain"
+  },
+  {
+    "company": "American Express",
+    "industry": "Finance",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "2) How to determine which customers to upgrade",
+    "question_type": "Domain"
+  },
+  {
+    "company": "American Express",
+    "industry": "Finance",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "3) How to determine which merchants might be leaving the network",
+    "question_type": "Domain"
+  },
+  {
+    "company": "American Express",
+    "industry": "Finance",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "4) An e-commerce company is facing a drop in profitability. (Reason was cart abandonment)",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Capgemini",
+    "industry": "Marketing",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "This section was heavily role-based. The interviewer wanted to rigorously test my technical understanding of the job description and evaluate if I had the right conceptual depth to actually execute the project.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Capgemini",
+    "industry": "Marketing",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "There were no explicit HR or current affairs questions. Instead, the behavioral evaluation was completely woven into the technical discussion. They were primarily testing my communication style, my confidence when breaking down complex technical answers, and my genuine passion for the Industry 4.0 and Digital Twin space. Since this is a client-facing consulting role, how clearly you communicate a technical concept is just as important as the answer itself, and that is exactly what they were assessing.",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Mastercard",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Normal HR",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Red Book questions: definitions of the terms in WACC and cost of debt, cost of equity, which is riskier, and how to value a company. Industry-based questions related to various kinds of M&A in the respective sector.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deutsche Bank",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "They asked why Finance, why Deutsche Bank, and how many hours you are willing to give to the company.",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Godrej Properties",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "It was a case based GD to discuss the pricing strategy for a newly constructed property. It was a GD with 15 people and 12 minutes total so it was too crowded and no one could speak properly.",
+    "question_type": "GD"
+  },
+  {
+    "company": "Morgan Stanley",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Was asked basic Red Book questions like change in depreciation affects on Income statement, Balance sheet, and Cash flow statement.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Morgan Stanley",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Why Finance, Why Morgan Stanley, why IB",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Mastercard",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Basic consulting questions like guesstimates.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Mastercard",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Just prepare NPAD properly",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Accenture",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "AI Implementation in daily life. What Accenture does differently",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Accenture",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "NPAD questions",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "Deloitte",
+    "industry": "General Management",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Case Interview",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Deloitte",
+    "industry": "General Management",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "NPAD questions",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "PwC",
+    "industry": "General Management",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Analytics questions in Excel and situation-based questions",
+    "question_type": "Domain"
+  },
+  {
+    "company": "PwC",
+    "industry": "General Management",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Work experience related questions",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "JioStar",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Nothing about Strategy or Marketing",
+    "question_type": "Domain"
+  },
+  {
+    "company": "JioStar",
+    "industry": "Consulting",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "NPAD and personality questions",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "PwC",
+    "industry": "General Management",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Case study",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Yes Bank",
+    "industry": "Marketing",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "About Balance sheet and it's components",
+    "question_type": "Domain"
+  },
+  {
+    "company": "Yes Bank",
+    "industry": "Marketing",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Introduction",
+    "question_type": "HR/Current Affairs"
+  },
+  {
+    "company": "American Express",
+    "industry": "Finance",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Round-1:-",
+    "question_type": "Domain"
+  },
+  {
+    "company": "American Express",
+    "industry": "Finance",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Normal Introductory questions (TMAY, etc;)",
+    "question_type": "Domain"
+  },
+  {
+    "company": "American Express",
+    "industry": "Finance",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "A couple of basic question on sql. Different types of commands.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "American Express",
+    "industry": "Finance",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Puzzles (There are two ropes, each will burn out in an hour, how can we measure 45 mins) of this kind.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "American Express",
+    "industry": "Finance",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Case (Profitability, Amazon’s revenue is decreasing).",
+    "question_type": "Domain"
+  },
+  {
+    "company": "American Express",
+    "industry": "Finance",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Round-2:-",
+    "question_type": "Domain"
+  },
+  {
+    "company": "American Express",
+    "industry": "Finance",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Explain business model of Amex. How does Amex makes money?",
+    "question_type": "Domain"
+  },
+  {
+    "company": "American Express",
+    "industry": "Finance",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Couple of small cases around Amex and credit cards, knowledge on Amex and credit cards is a must.",
+    "question_type": "Domain"
+  },
+  {
+    "company": "American Express",
+    "industry": "Finance",
+    "domain": "Consulting",
+    "year": "2026",
+    "question": "Guesstimate (how many litres is petrol diesel a petrol bunk near iim Indore pump in a day).",
+    "question_type": "Domain"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "M and A and entry strategy for a cement player (Industry and key competitor analysis)",
+    "question_type": "GD"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "CFA L2 valuation and FSA Concepts, Finance questions from Redbook and multiple layers of questioning on answering specific questions",
+    "question_type": "Domain"
+  },
+  {
+    "company": "J.P. Morgan",
+    "industry": "Finance",
+    "domain": "Finance",
+    "year": "2026",
+    "question": "Any recent m and a deal with numbers",
+    "question_type": "HR/Current Affairs"
   }
 ]

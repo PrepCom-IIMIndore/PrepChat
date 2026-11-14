@@ -2,33 +2,33 @@
   "overall_bucket_frequency": [
     {
       "bucket": "Technical/Domain",
-      "count": 981,
-      "pct": 81.6
+      "count": 1059,
+      "pct": 82.3
     },
     {
       "bucket": "Resume-based",
-      "count": 658,
-      "pct": 54.7
+      "count": 719,
+      "pct": 55.9
     },
     {
       "bucket": "HR/Behavioral",
-      "count": 498,
-      "pct": 41.4
+      "count": 563,
+      "pct": 43.7
     },
     {
       "bucket": "Case/Guesstimate",
-      "count": 334,
-      "pct": 27.8
+      "count": 372,
+      "pct": 28.9
     },
     {
       "bucket": "Current Affairs/GK",
-      "count": 215,
-      "pct": 17.9
+      "count": 226,
+      "pct": 17.6
     },
     {
       "bucket": "Situational",
-      "count": 202,
-      "pct": 16.8
+      "count": 215,
+      "pct": 16.7
     }
   ],
   "company_stats": {
@@ -56,19 +56,19 @@
     },
     "PwC": {
       "company": "PwC",
-      "total_experiences": 91,
-      "avg_rounds": 3,
-      "gd_conducted_pct": 1.1,
+      "total_experiences": 100,
+      "avg_rounds": 2,
+      "gd_conducted_pct": 1.0,
       "gd_conducted_count": 1,
-      "buddy_round_pct": 7.7,
-      "buddy_round_count": 7,
+      "buddy_round_pct": 9.0,
+      "buddy_round_count": 9,
       "bucket_counts": {
-        "Technical/Domain": 81,
-        "Resume-based": 62,
-        "HR/Behavioral": 43,
-        "Case/Guesstimate": 55,
+        "Technical/Domain": 90,
+        "Resume-based": 69,
+        "HR/Behavioral": 51,
+        "Case/Guesstimate": 62,
         "Current Affairs/GK": 13,
-        "Situational": 29
+        "Situational": 32
       },
       "top_buckets": [
         "Technical/Domain",
@@ -78,39 +78,39 @@
     },
     "Deutsche Bank": {
       "company": "Deutsche Bank",
-      "total_experiences": 18,
-      "avg_rounds": 2,
-      "gd_conducted_pct": 0.0,
-      "gd_conducted_count": 0,
-      "buddy_round_pct": 88.9,
-      "buddy_round_count": 16,
+      "total_experiences": 25,
+      "avg_rounds": 3,
+      "gd_conducted_pct": 12.0,
+      "gd_conducted_count": 3,
+      "buddy_round_pct": 92.0,
+      "buddy_round_count": 23,
       "bucket_counts": {
-        "Technical/Domain": 18,
-        "Resume-based": 11,
-        "HR/Behavioral": 9,
+        "Technical/Domain": 25,
+        "Resume-based": 15,
+        "HR/Behavioral": 16,
         "Case/Guesstimate": 0,
-        "Current Affairs/GK": 4,
-        "Situational": 3
+        "Current Affairs/GK": 8,
+        "Situational": 5
       },
       "top_buckets": [
         "Technical/Domain",
-        "Resume-based",
-        "HR/Behavioral"
+        "HR/Behavioral",
+        "Resume-based"
       ]
     },
     "KPMG": {
       "company": "KPMG",
-      "total_experiences": 6,
-      "avg_rounds": 1,
+      "total_experiences": 7,
+      "avg_rounds": 2,
       "gd_conducted_pct": 0.0,
       "gd_conducted_count": 0,
       "buddy_round_pct": 0.0,
       "buddy_round_count": 0,
       "bucket_counts": {
-        "Technical/Domain": 5,
-        "Resume-based": 6,
-        "HR/Behavioral": 4,
-        "Case/Guesstimate": 4,
+        "Technical/Domain": 6,
+        "Resume-based": 7,
+        "HR/Behavioral": 5,
+        "Case/Guesstimate": 5,
         "Current Affairs/GK": 1,
         "Situational": 1
       },
@@ -122,18 +122,18 @@
     },
     "Goldman Sachs": {
       "company": "Goldman Sachs",
-      "total_experiences": 25,
+      "total_experiences": 29,
       "avg_rounds": 2,
       "gd_conducted_pct": 0.0,
       "gd_conducted_count": 0,
-      "buddy_round_pct": 36.0,
-      "buddy_round_count": 9,
+      "buddy_round_pct": 41.4,
+      "buddy_round_count": 12,
       "bucket_counts": {
-        "Technical/Domain": 25,
-        "Resume-based": 13,
-        "HR/Behavioral": 13,
+        "Technical/Domain": 29,
+        "Resume-based": 17,
+        "HR/Behavioral": 17,
         "Case/Guesstimate": 2,
-        "Current Affairs/GK": 12,
+        "Current Affairs/GK": 14,
         "Situational": 5
       },
       "top_buckets": [
@@ -144,18 +144,18 @@
     },
     "Capgemini": {
       "company": "Capgemini",
-      "total_experiences": 18,
+      "total_experiences": 20,
       "avg_rounds": 1,
-      "gd_conducted_pct": 55.6,
-      "gd_conducted_count": 10,
+      "gd_conducted_pct": 55.0,
+      "gd_conducted_count": 11,
       "buddy_round_pct": 0.0,
       "buddy_round_count": 0,
       "bucket_counts": {
-        "Technical/Domain": 15,
-        "Resume-based": 8,
-        "HR/Behavioral": 9,
-        "Case/Guesstimate": 7,
-        "Current Affairs/GK": 2,
+        "Technical/Domain": 17,
+        "Resume-based": 10,
+        "HR/Behavioral": 11,
+        "Case/Guesstimate": 8,
+        "Current Affairs/GK": 3,
         "Situational": 6
       },
       "top_buckets": [
@@ -166,19 +166,19 @@
     },
     "Deloitte": {
       "company": "Deloitte",
-      "total_experiences": 49,
+      "total_experiences": 52,
       "avg_rounds": 3,
-      "gd_conducted_pct": 4.1,
+      "gd_conducted_pct": 3.8,
       "gd_conducted_count": 2,
-      "buddy_round_pct": 28.6,
-      "buddy_round_count": 14,
+      "buddy_round_pct": 28.8,
+      "buddy_round_count": 15,
       "bucket_counts": {
-        "Technical/Domain": 41,
-        "Resume-based": 28,
-        "HR/Behavioral": 19,
-        "Case/Guesstimate": 29,
+        "Technical/Domain": 44,
+        "Resume-based": 30,
+        "HR/Behavioral": 22,
+        "Case/Guesstimate": 32,
         "Current Affairs/GK": 6,
-        "Situational": 4
+        "Situational": 5
       },
       "top_buckets": [
         "Technical/Domain",
@@ -298,30 +298,30 @@
     },
     "J.P. Morgan": {
       "company": "J.P. Morgan",
-      "total_experiences": 45,
-      "avg_rounds": 3,
-      "gd_conducted_pct": 77.8,
-      "gd_conducted_count": 35,
-      "buddy_round_pct": 2.2,
+      "total_experiences": 51,
+      "avg_rounds": 2,
+      "gd_conducted_pct": 76.5,
+      "gd_conducted_count": 39,
+      "buddy_round_pct": 2.0,
       "buddy_round_count": 1,
       "bucket_counts": {
-        "Technical/Domain": 42,
-        "Resume-based": 23,
-        "HR/Behavioral": 16,
-        "Case/Guesstimate": 10,
-        "Current Affairs/GK": 19,
+        "Technical/Domain": 48,
+        "Resume-based": 26,
+        "HR/Behavioral": 21,
+        "Case/Guesstimate": 12,
+        "Current Affairs/GK": 20,
         "Situational": 2
       },
       "top_buckets": [
         "Technical/Domain",
         "Resume-based",
-        "Current Affairs/GK"
+        "HR/Behavioral"
       ]
     },
     "Kearney": {
       "company": "Kearney",
       "total_experiences": 7,
-      "avg_rounds": 3,
+      "avg_rounds": 2,
       "gd_conducted_pct": 0.0,
       "gd_conducted_count": 0,
       "buddy_round_pct": 100.0,
@@ -364,16 +364,16 @@
     },
     "D.E. Shaw": {
       "company": "D.E. Shaw",
-      "total_experiences": 14,
+      "total_experiences": 15,
       "avg_rounds": 2,
-      "gd_conducted_pct": 57.1,
-      "gd_conducted_count": 8,
-      "buddy_round_pct": 7.1,
+      "gd_conducted_pct": 60.0,
+      "gd_conducted_count": 9,
+      "buddy_round_pct": 6.7,
       "buddy_round_count": 1,
       "bucket_counts": {
-        "Technical/Domain": 14,
+        "Technical/Domain": 15,
         "Resume-based": 9,
-        "HR/Behavioral": 6,
+        "HR/Behavioral": 7,
         "Case/Guesstimate": 1,
         "Current Affairs/GK": 7,
         "Situational": 4
@@ -381,13 +381,13 @@
       "top_buckets": [
         "Technical/Domain",
         "Resume-based",
-        "Current Affairs/GK"
+        "HR/Behavioral"
       ]
     },
     "Credit Suisse": {
       "company": "Credit Suisse",
       "total_experiences": 11,
-      "avg_rounds": 1,
+      "avg_rounds": 2,
       "gd_conducted_pct": 90.9,
       "gd_conducted_count": 10,
       "buddy_round_pct": 0.0,
@@ -518,24 +518,24 @@
     },
     "PepsiCo": {
       "company": "PepsiCo",
-      "total_experiences": 8,
+      "total_experiences": 9,
       "avg_rounds": 1,
-      "gd_conducted_pct": 25.0,
+      "gd_conducted_pct": 22.2,
       "gd_conducted_count": 2,
       "buddy_round_pct": 0.0,
       "buddy_round_count": 0,
       "bucket_counts": {
-        "Technical/Domain": 6,
-        "Resume-based": 5,
-        "HR/Behavioral": 2,
-        "Case/Guesstimate": 1,
+        "Technical/Domain": 7,
+        "Resume-based": 6,
+        "HR/Behavioral": 3,
+        "Case/Guesstimate": 2,
         "Current Affairs/GK": 3,
         "Situational": 0
       },
       "top_buckets": [
         "Technical/Domain",
         "Resume-based",
-        "Current Affairs/GK"
+        "HR/Behavioral"
       ]
     },
     "P&G": {
@@ -563,7 +563,7 @@
     "McKinsey & Company": {
       "company": "McKinsey & Company",
       "total_experiences": 6,
-      "avg_rounds": 4,
+      "avg_rounds": 3,
       "gd_conducted_pct": 0.0,
       "gd_conducted_count": 0,
       "buddy_round_pct": 33.3,
@@ -584,7 +584,7 @@
     },
     "Cipla": {
       "company": "Cipla",
-      "total_experiences": 9,
+      "total_experiences": 10,
       "avg_rounds": 1,
       "gd_conducted_pct": 0.0,
       "gd_conducted_count": 0,
@@ -593,8 +593,8 @@
       "bucket_counts": {
         "Technical/Domain": 8,
         "Resume-based": 3,
-        "HR/Behavioral": 4,
-        "Case/Guesstimate": 0,
+        "HR/Behavioral": 5,
+        "Case/Guesstimate": 1,
         "Current Affairs/GK": 2,
         "Situational": 2
       },
@@ -606,17 +606,17 @@
     },
     "Accenture": {
       "company": "Accenture",
-      "total_experiences": 45,
+      "total_experiences": 48,
       "avg_rounds": 2,
-      "gd_conducted_pct": 2.2,
+      "gd_conducted_pct": 2.1,
       "gd_conducted_count": 1,
-      "buddy_round_pct": 22.2,
-      "buddy_round_count": 10,
+      "buddy_round_pct": 27.1,
+      "buddy_round_count": 13,
       "bucket_counts": {
-        "Technical/Domain": 39,
-        "Resume-based": 34,
-        "HR/Behavioral": 21,
-        "Case/Guesstimate": 17,
+        "Technical/Domain": 42,
+        "Resume-based": 35,
+        "HR/Behavioral": 23,
+        "Case/Guesstimate": 19,
         "Current Affairs/GK": 11,
         "Situational": 9
       },
@@ -738,16 +738,16 @@
     },
     "Kotak Mahindra Bank": {
       "company": "Kotak Mahindra Bank",
-      "total_experiences": 11,
+      "total_experiences": 12,
       "avg_rounds": 1,
-      "gd_conducted_pct": 18.2,
+      "gd_conducted_pct": 16.7,
       "gd_conducted_count": 2,
       "buddy_round_pct": 0.0,
       "buddy_round_count": 0,
       "bucket_counts": {
-        "Technical/Domain": 10,
-        "Resume-based": 7,
-        "HR/Behavioral": 4,
+        "Technical/Domain": 11,
+        "Resume-based": 8,
+        "HR/Behavioral": 5,
         "Case/Guesstimate": 1,
         "Current Affairs/GK": 1,
         "Situational": 2
@@ -760,30 +760,30 @@
     },
     "American Express": {
       "company": "American Express",
-      "total_experiences": 33,
+      "total_experiences": 37,
       "avg_rounds": 2,
-      "gd_conducted_pct": 9.1,
+      "gd_conducted_pct": 8.1,
       "gd_conducted_count": 3,
       "buddy_round_pct": 0.0,
       "buddy_round_count": 0,
       "bucket_counts": {
-        "Technical/Domain": 32,
-        "Resume-based": 19,
+        "Technical/Domain": 36,
+        "Resume-based": 23,
         "HR/Behavioral": 16,
-        "Case/Guesstimate": 14,
+        "Case/Guesstimate": 17,
         "Current Affairs/GK": 7,
         "Situational": 10
       },
       "top_buckets": [
         "Technical/Domain",
         "Resume-based",
-        "HR/Behavioral"
+        "Case/Guesstimate"
       ]
     },
     "Everest Group": {
       "company": "Everest Group",
       "total_experiences": 9,
-      "avg_rounds": 1,
+      "avg_rounds": 2,
       "gd_conducted_pct": 0.0,
       "gd_conducted_count": 0,
       "buddy_round_pct": 0.0,
@@ -805,7 +805,7 @@
     "ICICI Bank": {
       "company": "ICICI Bank",
       "total_experiences": 20,
-      "avg_rounds": 2,
+      "avg_rounds": 1,
       "gd_conducted_pct": 55.0,
       "gd_conducted_count": 11,
       "buddy_round_pct": 0.0,
@@ -978,6 +978,28 @@
         "Situational"
       ]
     },
+    "Accordion": {
+      "company": "Accordion",
+      "total_experiences": 2,
+      "avg_rounds": 2,
+      "gd_conducted_pct": 0.0,
+      "gd_conducted_count": 0,
+      "buddy_round_pct": 0.0,
+      "buddy_round_count": 0,
+      "bucket_counts": {
+        "Technical/Domain": 1,
+        "Resume-based": 1,
+        "HR/Behavioral": 1,
+        "Case/Guesstimate": 1,
+        "Current Affairs/GK": 0,
+        "Situational": 0
+      },
+      "top_buckets": [
+        "Technical/Domain",
+        "Resume-based",
+        "HR/Behavioral"
+      ]
+    },
     "Power Finance Corporation Pfc": {
       "company": "Power Finance Corporation Pfc",
       "total_experiences": 1,
@@ -1003,7 +1025,7 @@
     "Cognizant": {
       "company": "Cognizant",
       "total_experiences": 21,
-      "avg_rounds": 1,
+      "avg_rounds": 2,
       "gd_conducted_pct": 33.3,
       "gd_conducted_count": 7,
       "buddy_round_pct": 0.0,
@@ -1068,19 +1090,19 @@
     },
     "AB InBev": {
       "company": "AB InBev",
-      "total_experiences": 12,
+      "total_experiences": 14,
       "avg_rounds": 1,
-      "gd_conducted_pct": 91.7,
-      "gd_conducted_count": 11,
+      "gd_conducted_pct": 92.9,
+      "gd_conducted_count": 13,
       "buddy_round_pct": 0.0,
       "buddy_round_count": 0,
       "bucket_counts": {
-        "Technical/Domain": 5,
-        "Resume-based": 4,
-        "HR/Behavioral": 6,
-        "Case/Guesstimate": 1,
+        "Technical/Domain": 7,
+        "Resume-based": 6,
+        "HR/Behavioral": 8,
+        "Case/Guesstimate": 3,
         "Current Affairs/GK": 1,
-        "Situational": 4
+        "Situational": 5
       },
       "top_buckets": [
         "HR/Behavioral",
@@ -1134,16 +1156,16 @@
     },
     "Vodafone": {
       "company": "Vodafone",
-      "total_experiences": 1,
+      "total_experiences": 2,
       "avg_rounds": 2,
-      "gd_conducted_pct": 100.0,
+      "gd_conducted_pct": 50.0,
       "gd_conducted_count": 1,
       "buddy_round_pct": 0.0,
       "buddy_round_count": 0,
       "bucket_counts": {
-        "Technical/Domain": 1,
-        "Resume-based": 1,
-        "HR/Behavioral": 1,
+        "Technical/Domain": 2,
+        "Resume-based": 2,
+        "HR/Behavioral": 2,
         "Case/Guesstimate": 0,
         "Current Affairs/GK": 1,
         "Situational": 0
@@ -1222,24 +1244,24 @@
     },
     "Samsung": {
       "company": "Samsung",
-      "total_experiences": 5,
+      "total_experiences": 8,
       "avg_rounds": 1,
       "gd_conducted_pct": 100.0,
-      "gd_conducted_count": 5,
+      "gd_conducted_count": 8,
       "buddy_round_pct": 0.0,
       "buddy_round_count": 0,
       "bucket_counts": {
-        "Technical/Domain": 5,
-        "Resume-based": 2,
+        "Technical/Domain": 6,
+        "Resume-based": 5,
         "HR/Behavioral": 3,
-        "Case/Guesstimate": 2,
+        "Case/Guesstimate": 3,
         "Current Affairs/GK": 0,
         "Situational": 3
       },
       "top_buckets": [
         "Technical/Domain",
-        "HR/Behavioral",
-        "Situational"
+        "Resume-based",
+        "HR/Behavioral"
       ]
     },
     "BCG": {
@@ -1355,7 +1377,7 @@
     "Optum": {
       "company": "Optum",
       "total_experiences": 3,
-      "avg_rounds": 2,
+      "avg_rounds": 3,
       "gd_conducted_pct": 0.0,
       "gd_conducted_count": 0,
       "buddy_round_pct": 0.0,
@@ -1465,7 +1487,7 @@
     "Infosys": {
       "company": "Infosys",
       "total_experiences": 8,
-      "avg_rounds": 3,
+      "avg_rounds": 2,
       "gd_conducted_pct": 0.0,
       "gd_conducted_count": 0,
       "buddy_round_pct": 0.0,
@@ -1550,15 +1572,15 @@
     },
     "Mondelez": {
       "company": "Mondelez",
-      "total_experiences": 1,
+      "total_experiences": 2,
       "avg_rounds": 1,
       "gd_conducted_pct": 100.0,
-      "gd_conducted_count": 1,
+      "gd_conducted_count": 2,
       "buddy_round_pct": 0.0,
       "buddy_round_count": 0,
       "bucket_counts": {
         "Technical/Domain": 1,
-        "Resume-based": 0,
+        "Resume-based": 1,
         "HR/Behavioral": 1,
         "Case/Guesstimate": 0,
         "Current Affairs/GK": 0,
@@ -1566,6 +1588,7 @@
       },
       "top_buckets": [
         "Technical/Domain",
+        "Resume-based",
         "HR/Behavioral"
       ]
     },
@@ -1615,15 +1638,15 @@
     },
     "Synergy Consulting": {
       "company": "Synergy Consulting",
-      "total_experiences": 6,
+      "total_experiences": 7,
       "avg_rounds": 1,
       "gd_conducted_pct": 0.0,
       "gd_conducted_count": 0,
-      "buddy_round_pct": 83.3,
-      "buddy_round_count": 5,
+      "buddy_round_pct": 85.7,
+      "buddy_round_count": 6,
       "bucket_counts": {
-        "Technical/Domain": 6,
-        "Resume-based": 0,
+        "Technical/Domain": 7,
+        "Resume-based": 1,
         "HR/Behavioral": 1,
         "Case/Guesstimate": 1,
         "Current Affairs/GK": 2,
@@ -1632,7 +1655,7 @@
       "top_buckets": [
         "Technical/Domain",
         "Current Affairs/GK",
-        "HR/Behavioral"
+        "Resume-based"
       ]
     },
     "Reliance Industries": {
@@ -1877,23 +1900,23 @@
     },
     "Morgan Stanley": {
       "company": "Morgan Stanley",
-      "total_experiences": 5,
-      "avg_rounds": 4,
+      "total_experiences": 8,
+      "avg_rounds": 3,
       "gd_conducted_pct": 0.0,
       "gd_conducted_count": 0,
-      "buddy_round_pct": 0.0,
-      "buddy_round_count": 0,
+      "buddy_round_pct": 25.0,
+      "buddy_round_count": 2,
       "bucket_counts": {
-        "Technical/Domain": 5,
-        "Resume-based": 2,
-        "HR/Behavioral": 2,
+        "Technical/Domain": 8,
+        "Resume-based": 3,
+        "HR/Behavioral": 5,
         "Case/Guesstimate": 0,
         "Current Affairs/GK": 3,
         "Situational": 1
       },
       "top_buckets": [
         "Technical/Domain",
-        "Current Affairs/GK",
+        "HR/Behavioral",
         "Resume-based"
       ]
     },
@@ -2116,6 +2139,28 @@
         "Situational"
       ]
     },
+    "Cummins": {
+      "company": "Cummins",
+      "total_experiences": 3,
+      "avg_rounds": 1,
+      "gd_conducted_pct": 0.0,
+      "gd_conducted_count": 0,
+      "buddy_round_pct": 0.0,
+      "buddy_round_count": 0,
+      "bucket_counts": {
+        "Technical/Domain": 3,
+        "Resume-based": 1,
+        "HR/Behavioral": 2,
+        "Case/Guesstimate": 1,
+        "Current Affairs/GK": 0,
+        "Situational": 2
+      },
+      "top_buckets": [
+        "Technical/Domain",
+        "HR/Behavioral",
+        "Situational"
+      ]
+    },
     "Make My Trip": {
       "company": "Make My Trip",
       "total_experiences": 1,
@@ -2333,6 +2378,28 @@
         "HR/Behavioral"
       ]
     },
+    "Mastercard": {
+      "company": "Mastercard",
+      "total_experiences": 8,
+      "avg_rounds": 3,
+      "gd_conducted_pct": 0.0,
+      "gd_conducted_count": 0,
+      "buddy_round_pct": 62.5,
+      "buddy_round_count": 5,
+      "bucket_counts": {
+        "Technical/Domain": 8,
+        "Resume-based": 2,
+        "HR/Behavioral": 7,
+        "Case/Guesstimate": 7,
+        "Current Affairs/GK": 3,
+        "Situational": 0
+      },
+      "top_buckets": [
+        "Technical/Domain",
+        "HR/Behavioral",
+        "Case/Guesstimate"
+      ]
+    },
     "Menon And Menon Company": {
       "company": "Menon And Menon Company",
       "total_experiences": 1,
@@ -2444,7 +2511,7 @@
     "Ck Birla": {
       "company": "Ck Birla",
       "total_experiences": 2,
-      "avg_rounds": 1,
+      "avg_rounds": 2,
       "gd_conducted_pct": 0.0,
       "gd_conducted_count": 0,
       "buddy_round_pct": 0.0,
@@ -2701,28 +2768,6 @@
         "Case/Guesstimate"
       ]
     },
-    "Mastercard": {
-      "company": "Mastercard",
-      "total_experiences": 2,
-      "avg_rounds": 2,
-      "gd_conducted_pct": 0.0,
-      "gd_conducted_count": 0,
-      "buddy_round_pct": 50.0,
-      "buddy_round_count": 1,
-      "bucket_counts": {
-        "Technical/Domain": 2,
-        "Resume-based": 1,
-        "HR/Behavioral": 1,
-        "Case/Guesstimate": 1,
-        "Current Affairs/GK": 2,
-        "Situational": 0
-      },
-      "top_buckets": [
-        "Technical/Domain",
-        "Current Affairs/GK",
-        "Resume-based"
-      ]
-    },
     "Flipkart": {
       "company": "Flipkart",
       "total_experiences": 4,
@@ -2854,15 +2899,15 @@
     },
     "Godrej Properties": {
       "company": "Godrej Properties",
-      "total_experiences": 6,
+      "total_experiences": 7,
       "avg_rounds": 1,
-      "gd_conducted_pct": 83.3,
-      "gd_conducted_count": 5,
+      "gd_conducted_pct": 85.7,
+      "gd_conducted_count": 6,
       "buddy_round_pct": 0.0,
       "buddy_round_count": 0,
       "bucket_counts": {
         "Technical/Domain": 4,
-        "Resume-based": 3,
+        "Resume-based": 4,
         "HR/Behavioral": 2,
         "Case/Guesstimate": 0,
         "Current Affairs/GK": 0,
@@ -2984,28 +3029,6 @@
         "Current Affairs/GK"
       ]
     },
-    "Cummins": {
-      "company": "Cummins",
-      "total_experiences": 1,
-      "avg_rounds": 2,
-      "gd_conducted_pct": 0.0,
-      "gd_conducted_count": 0,
-      "buddy_round_pct": 0.0,
-      "buddy_round_count": 0,
-      "bucket_counts": {
-        "Technical/Domain": 1,
-        "Resume-based": 0,
-        "HR/Behavioral": 1,
-        "Case/Guesstimate": 0,
-        "Current Affairs/GK": 0,
-        "Situational": 1
-      },
-      "top_buckets": [
-        "Technical/Domain",
-        "HR/Behavioral",
-        "Situational"
-      ]
-    },
     "Dr Reddy": {
       "company": "Dr Reddy",
       "total_experiences": 2,
@@ -3096,7 +3119,7 @@
     "Ofbusiness": {
       "company": "Ofbusiness",
       "total_experiences": 8,
-      "avg_rounds": 1,
+      "avg_rounds": 2,
       "gd_conducted_pct": 0.0,
       "gd_conducted_count": 0,
       "buddy_round_pct": 0.0,
@@ -3118,7 +3141,7 @@
     "Gep": {
       "company": "Gep",
       "total_experiences": 2,
-      "avg_rounds": 3,
+      "avg_rounds": 2,
       "gd_conducted_pct": 0.0,
       "gd_conducted_count": 0,
       "buddy_round_pct": 50.0,
@@ -3465,24 +3488,24 @@
     },
     "Arvind Fashions": {
       "company": "Arvind Fashions",
-      "total_experiences": 2,
+      "total_experiences": 3,
       "avg_rounds": 2,
-      "gd_conducted_pct": 100.0,
+      "gd_conducted_pct": 66.7,
       "gd_conducted_count": 2,
       "buddy_round_pct": 0.0,
       "buddy_round_count": 0,
       "bucket_counts": {
-        "Technical/Domain": 2,
-        "Resume-based": 1,
-        "HR/Behavioral": 1,
+        "Technical/Domain": 3,
+        "Resume-based": 2,
+        "HR/Behavioral": 2,
         "Case/Guesstimate": 2,
         "Current Affairs/GK": 0,
         "Situational": 0
       },
       "top_buckets": [
         "Technical/Domain",
-        "Case/Guesstimate",
-        "Resume-based"
+        "Resume-based",
+        "HR/Behavioral"
       ]
     },
     "Jio Creative Labs": {
@@ -3615,7 +3638,7 @@
     "Agro Tech Foods": {
       "company": "Agro Tech Foods",
       "total_experiences": 3,
-      "avg_rounds": 2,
+      "avg_rounds": 1,
       "gd_conducted_pct": 66.7,
       "gd_conducted_count": 2,
       "buddy_round_pct": 0.0,
@@ -4127,10 +4150,10 @@
         "HR/Behavioral"
       ]
     },
-    "Yes Bank": {
-      "company": "Yes Bank",
+    "Groww": {
+      "company": "Groww",
       "total_experiences": 2,
-      "avg_rounds": 1,
+      "avg_rounds": 2,
       "gd_conducted_pct": 0.0,
       "gd_conducted_count": 0,
       "buddy_round_pct": 0.0,
@@ -4138,7 +4161,29 @@
       "bucket_counts": {
         "Technical/Domain": 2,
         "Resume-based": 1,
-        "HR/Behavioral": 2,
+        "HR/Behavioral": 1,
+        "Case/Guesstimate": 1,
+        "Current Affairs/GK": 0,
+        "Situational": 0
+      },
+      "top_buckets": [
+        "Technical/Domain",
+        "Resume-based",
+        "HR/Behavioral"
+      ]
+    },
+    "Yes Bank": {
+      "company": "Yes Bank",
+      "total_experiences": 3,
+      "avg_rounds": 1,
+      "gd_conducted_pct": 0.0,
+      "gd_conducted_count": 0,
+      "buddy_round_pct": 0.0,
+      "buddy_round_count": 0,
+      "bucket_counts": {
+        "Technical/Domain": 3,
+        "Resume-based": 2,
+        "HR/Behavioral": 3,
         "Case/Guesstimate": 0,
         "Current Affairs/GK": 0,
         "Situational": 1
@@ -4355,6 +4400,28 @@
         "HR/Behavioral": 1,
         "Case/Guesstimate": 0,
         "Current Affairs/GK": 0,
+        "Situational": 0
+      },
+      "top_buckets": [
+        "Technical/Domain",
+        "Resume-based",
+        "HR/Behavioral"
+      ]
+    },
+    "IndiaMART": {
+      "company": "IndiaMART",
+      "total_experiences": 1,
+      "avg_rounds": 1,
+      "gd_conducted_pct": 0.0,
+      "gd_conducted_count": 0,
+      "buddy_round_pct": 0.0,
+      "buddy_round_count": 0,
+      "bucket_counts": {
+        "Technical/Domain": 1,
+        "Resume-based": 1,
+        "HR/Behavioral": 1,
+        "Case/Guesstimate": 0,
+        "Current Affairs/GK": 1,
         "Situational": 0
       },
       "top_buckets": [
@@ -4793,24 +4860,24 @@
     },
     "Airtel": {
       "company": "Airtel",
-      "total_experiences": 2,
+      "total_experiences": 3,
       "avg_rounds": 1,
       "gd_conducted_pct": 100.0,
-      "gd_conducted_count": 2,
+      "gd_conducted_count": 3,
       "buddy_round_pct": 0.0,
       "buddy_round_count": 0,
       "bucket_counts": {
         "Technical/Domain": 1,
-        "Resume-based": 1,
-        "HR/Behavioral": 1,
-        "Case/Guesstimate": 0,
-        "Current Affairs/GK": 1,
+        "Resume-based": 2,
+        "HR/Behavioral": 2,
+        "Case/Guesstimate": 1,
+        "Current Affairs/GK": 2,
         "Situational": 0
       },
       "top_buckets": [
-        "Technical/Domain",
         "Resume-based",
-        "HR/Behavioral"
+        "HR/Behavioral",
+        "Current Affairs/GK"
       ]
     },
     "91Squarefeet": {
@@ -4940,6 +5007,28 @@
         "Technical/Domain"
       ]
     },
+    "Hinduja Group": {
+      "company": "Hinduja Group",
+      "total_experiences": 1,
+      "avg_rounds": 1,
+      "gd_conducted_pct": 100.0,
+      "gd_conducted_count": 1,
+      "buddy_round_pct": 0.0,
+      "buddy_round_count": 0,
+      "bucket_counts": {
+        "Technical/Domain": 1,
+        "Resume-based": 1,
+        "HR/Behavioral": 1,
+        "Case/Guesstimate": 0,
+        "Current Affairs/GK": 0,
+        "Situational": 1
+      },
+      "top_buckets": [
+        "Technical/Domain",
+        "Resume-based",
+        "HR/Behavioral"
+      ]
+    },
     "Profx": {
       "company": "Profx",
       "total_experiences": 1,
@@ -4977,6 +5066,28 @@
         "Situational": 0
       },
       "top_buckets": []
+    },
+    "Britannia Industries": {
+      "company": "Britannia Industries",
+      "total_experiences": 1,
+      "avg_rounds": 1,
+      "gd_conducted_pct": 100.0,
+      "gd_conducted_count": 1,
+      "buddy_round_pct": 0.0,
+      "buddy_round_count": 0,
+      "bucket_counts": {
+        "Technical/Domain": 1,
+        "Resume-based": 1,
+        "HR/Behavioral": 1,
+        "Case/Guesstimate": 0,
+        "Current Affairs/GK": 0,
+        "Situational": 0
+      },
+      "top_buckets": [
+        "Technical/Domain",
+        "Resume-based",
+        "HR/Behavioral"
+      ]
     },
     "Xanadu Realty": {
       "company": "Xanadu Realty",
@@ -5021,6 +5132,28 @@
         "HR/Behavioral"
       ]
     },
+    "JioStar": {
+      "company": "JioStar",
+      "total_experiences": 2,
+      "avg_rounds": 1,
+      "gd_conducted_pct": 0.0,
+      "gd_conducted_count": 0,
+      "buddy_round_pct": 0.0,
+      "buddy_round_count": 0,
+      "bucket_counts": {
+        "Technical/Domain": 2,
+        "Resume-based": 1,
+        "HR/Behavioral": 1,
+        "Case/Guesstimate": 0,
+        "Current Affairs/GK": 0,
+        "Situational": 1
+      },
+      "top_buckets": [
+        "Technical/Domain",
+        "Resume-based",
+        "HR/Behavioral"
+      ]
+    },
     "Gs": {
       "company": "Gs",
       "total_experiences": 1,
@@ -5039,6 +5172,27 @@
       },
       "top_buckets": [
         "Technical/Domain"
+      ]
+    },
+    "Biobrain Insight": {
+      "company": "Biobrain Insight",
+      "total_experiences": 1,
+      "avg_rounds": 12,
+      "gd_conducted_pct": 100.0,
+      "gd_conducted_count": 1,
+      "buddy_round_pct": 0.0,
+      "buddy_round_count": 0,
+      "bucket_counts": {
+        "Technical/Domain": 1,
+        "Resume-based": 1,
+        "HR/Behavioral": 0,
+        "Case/Guesstimate": 0,
+        "Current Affairs/GK": 0,
+        "Situational": 0
+      },
+      "top_buckets": [
+        "Technical/Domain",
+        "Resume-based"
       ]
     },
     "Sarafa Furniture": {
@@ -5292,24 +5446,6 @@
         "Resume-based"
       ]
     },
-    "Accordion": {
-      "company": "Accordion",
-      "total_experiences": 1,
-      "avg_rounds": 2,
-      "gd_conducted_pct": 0.0,
-      "gd_conducted_count": 0,
-      "buddy_round_pct": 0.0,
-      "buddy_round_count": 0,
-      "bucket_counts": {
-        "Technical/Domain": 0,
-        "Resume-based": 0,
-        "HR/Behavioral": 0,
-        "Case/Guesstimate": 0,
-        "Current Affairs/GK": 0,
-        "Situational": 0
-      },
-      "top_buckets": []
-    },
     "Hsco": {
       "company": "Hsco",
       "total_experiences": 1,
@@ -5327,6 +5463,28 @@
         "Situational": 0
       },
       "top_buckets": [
+        "HR/Behavioral"
+      ]
+    },
+    "IDFC First Bank": {
+      "company": "IDFC First Bank",
+      "total_experiences": 3,
+      "avg_rounds": 1,
+      "gd_conducted_pct": 0.0,
+      "gd_conducted_count": 0,
+      "buddy_round_pct": 0.0,
+      "buddy_round_count": 0,
+      "bucket_counts": {
+        "Technical/Domain": 3,
+        "Resume-based": 3,
+        "HR/Behavioral": 2,
+        "Case/Guesstimate": 1,
+        "Current Affairs/GK": 0,
+        "Situational": 2
+      },
+      "top_buckets": [
+        "Technical/Domain",
+        "Resume-based",
         "HR/Behavioral"
       ]
     },
@@ -6140,6 +6298,28 @@
         "Resume-based"
       ]
     },
+    "Lubrizol": {
+      "company": "Lubrizol",
+      "total_experiences": 1,
+      "avg_rounds": 1,
+      "gd_conducted_pct": 0.0,
+      "gd_conducted_count": 0,
+      "buddy_round_pct": 0.0,
+      "buddy_round_count": 0,
+      "bucket_counts": {
+        "Technical/Domain": 1,
+        "Resume-based": 0,
+        "HR/Behavioral": 1,
+        "Case/Guesstimate": 1,
+        "Current Affairs/GK": 0,
+        "Situational": 0
+      },
+      "top_buckets": [
+        "Technical/Domain",
+        "HR/Behavioral",
+        "Case/Guesstimate"
+      ]
+    },
     "Jsw Steel": {
       "company": "Jsw Steel",
       "total_experiences": 1,
@@ -6179,6 +6359,50 @@
       },
       "top_buckets": [
         "Technical/Domain"
+      ]
+    },
+    "AI4M": {
+      "company": "AI4M",
+      "total_experiences": 1,
+      "avg_rounds": 1,
+      "gd_conducted_pct": 100.0,
+      "gd_conducted_count": 1,
+      "buddy_round_pct": 0.0,
+      "buddy_round_count": 0,
+      "bucket_counts": {
+        "Technical/Domain": 1,
+        "Resume-based": 1,
+        "HR/Behavioral": 1,
+        "Case/Guesstimate": 0,
+        "Current Affairs/GK": 0,
+        "Situational": 0
+      },
+      "top_buckets": [
+        "Technical/Domain",
+        "Resume-based",
+        "HR/Behavioral"
+      ]
+    },
+    "ABFRL": {
+      "company": "ABFRL",
+      "total_experiences": 2,
+      "avg_rounds": 1,
+      "gd_conducted_pct": 0.0,
+      "gd_conducted_count": 0,
+      "buddy_round_pct": 0.0,
+      "buddy_round_count": 0,
+      "bucket_counts": {
+        "Technical/Domain": 2,
+        "Resume-based": 2,
+        "HR/Behavioral": 1,
+        "Case/Guesstimate": 1,
+        "Current Affairs/GK": 0,
+        "Situational": 1
+      },
+      "top_buckets": [
+        "Technical/Domain",
+        "Resume-based",
+        "HR/Behavioral"
       ]
     },
     "Teleperformance": {
@@ -6241,6 +6465,28 @@
       },
       "top_buckets": [
         "Technical/Domain",
+        "HR/Behavioral"
+      ]
+    },
+    "RPSG": {
+      "company": "RPSG",
+      "total_experiences": 1,
+      "avg_rounds": 1,
+      "gd_conducted_pct": 0.0,
+      "gd_conducted_count": 0,
+      "buddy_round_pct": 0.0,
+      "buddy_round_count": 0,
+      "bucket_counts": {
+        "Technical/Domain": 1,
+        "Resume-based": 1,
+        "HR/Behavioral": 1,
+        "Case/Guesstimate": 1,
+        "Current Affairs/GK": 0,
+        "Situational": 0
+      },
+      "top_buckets": [
+        "Technical/Domain",
+        "Resume-based",
         "HR/Behavioral"
       ]
     },
@@ -6771,6 +7017,28 @@
         "Current Affairs/GK"
       ]
     },
+    "NPCI": {
+      "company": "NPCI",
+      "total_experiences": 1,
+      "avg_rounds": 2,
+      "gd_conducted_pct": 0.0,
+      "gd_conducted_count": 0,
+      "buddy_round_pct": 0.0,
+      "buddy_round_count": 0,
+      "bucket_counts": {
+        "Technical/Domain": 1,
+        "Resume-based": 1,
+        "HR/Behavioral": 1,
+        "Case/Guesstimate": 0,
+        "Current Affairs/GK": 0,
+        "Situational": 0
+      },
+      "top_buckets": [
+        "Technical/Domain",
+        "Resume-based",
+        "HR/Behavioral"
+      ]
+    },
     "Sbi Capitals": {
       "company": "Sbi Capitals",
       "total_experiences": 1,
@@ -7012,6 +7280,26 @@
         "Situational": 0
       },
       "top_buckets": []
+    },
+    "Boehringer Ingelheim": {
+      "company": "Boehringer Ingelheim",
+      "total_experiences": 1,
+      "avg_rounds": 0,
+      "gd_conducted_pct": 100.0,
+      "gd_conducted_count": 1,
+      "buddy_round_pct": 0.0,
+      "buddy_round_count": 0,
+      "bucket_counts": {
+        "Technical/Domain": 0,
+        "Resume-based": 1,
+        "HR/Behavioral": 0,
+        "Case/Guesstimate": 0,
+        "Current Affairs/GK": 0,
+        "Situational": 0
+      },
+      "top_buckets": [
+        "Resume-based"
+      ]
     },
     "Kailash Corporation": {
       "company": "Kailash Corporation",
@@ -7565,6 +7853,6 @@
       "situational": 100
     }
   ],
-  "total_experiences": 1202,
-  "total_companies": 339
+  "total_experiences": 1287,
+  "total_companies": 352
 }
