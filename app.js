@@ -1557,8 +1557,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderExperienceCards();
 
         const isCompanySelected = Boolean(expFilterCompany && expFilterCompany.value);
-        const isYearSelected = Boolean(expFilterYear && expFilterYear.value);
-        updateDownloadExperienceButton(isCompanySelected && isYearSelected, filteredExperiences, expFilterCompany ? expFilterCompany.value : '', expFilterYear ? expFilterYear.value : '');
+        updateDownloadExperienceButton(isCompanySelected, filteredExperiences, expFilterCompany ? expFilterCompany.value : '', expFilterYear ? expFilterYear.value : '');
     }
 
     function getExpWordCount(exp) {
@@ -1601,7 +1600,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!btn) return;
             if (isEligible) {
                 btn.style.display = 'inline-flex';
-                btn.title = `Download ${count} experiences for ${company} (${year}) in an Excel sheet`;
+                btn.title = `Download ${count} experiences for ${company}${year ? ` (${year})` : ' (All Years)'} in an Excel sheet`;
                 btn.onclick = () => downloadExperiencesExcel(matchingList, company, year);
             } else {
                 btn.style.display = 'none';

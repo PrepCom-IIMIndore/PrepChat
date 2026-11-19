@@ -182,14 +182,13 @@ export default function DashboardPage() {
     return filteredExperiences.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   }, [filteredExperiences, currentPage]);
 
-  // Check if both Company and Year filters are selected for Excel download
+  // Check if Company filter is selected for Excel download (active with or without specific year filter)
   const isCompanySelected = Boolean(selectedCompany && selectedCompany.trim());
-  const isYearSelected = selectedYears.length > 0;
-  const isDownloadEligible = isCompanySelected && isYearSelected;
+  const isDownloadEligible = isCompanySelected;
 
   const handleDownloadExperiencesExcel = () => {
-    if (!isCompanySelected || !isYearSelected) {
-      alert("Please select both a Company and at least one Batch Year filter to download experiences.");
+    if (!isCompanySelected) {
+      alert("Please select a Company to download experiences.");
       return;
     }
     exportExperiencesToExcel(filteredExperiences, selectedCompany, selectedYears);
@@ -448,7 +447,7 @@ export default function DashboardPage() {
                       type="button"
                       className="btn-download-experiences"
                       onClick={handleDownloadExperiencesExcel}
-                      title={`Download ${filteredExperiences.length} experiences for ${selectedCompany} (${selectedYears.join(", ")}) in an Excel sheet`}
+                      title={`Download ${filteredExperiences.length} experiences for ${selectedCompany}${selectedYears.length > 0 ? ` (${selectedYears.join(", ")})` : " (All Years)"} in an Excel sheet`}
                     >
                       <span className="material-symbols-outlined" style={{ fontSize: "1.1rem" }}>download</span>
                       <span>Download Experience</span>
@@ -668,7 +667,7 @@ export default function DashboardPage() {
                   type="button"
                   className="btn-download-experiences"
                   onClick={handleDownloadExperiencesExcel}
-                  title={`Download ${filteredExperiences.length} experiences for ${selectedCompany} (${selectedYears.join(", ")}) in an Excel sheet`}
+                  title={`Download ${filteredExperiences.length} experiences for ${selectedCompany}${selectedYears.length > 0 ? ` (${selectedYears.join(", ")})` : " (All Years)"} in an Excel sheet`}
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: "1.15rem" }}>download</span>
                   <span>Download Experience</span>
