@@ -1555,6 +1555,10 @@ document.addEventListener('DOMContentLoaded', () => {
         renderActiveFilterTags(cVal, dVal, yVal, pVal, sVal);
         renderExperiencesHeroAnalytics(filteredExperiences);
         renderExperienceCards();
+
+        const isCompanySelected = Boolean(expFilterCompany && expFilterCompany.value);
+        const isYearSelected = Boolean(expFilterYear && expFilterYear.value);
+        updateDownloadExperienceButton(isCompanySelected && isYearSelected, filteredExperiences, expFilterCompany ? expFilterCompany.value : '', expFilterYear ? expFilterYear.value : '');
     }
 
     function getExpWordCount(exp) {
@@ -1583,6 +1587,102 @@ document.addEventListener('DOMContentLoaded', () => {
             pill.textContent = t;
             activeFilterTagsContainer.appendChild(pill);
         });
+    }
+
+    function updateDownloadExperienceButton(isEligible, matchingList, company, year) {
+        const btnExp = document.getElementById('btn-download-exp');
+        const badgeExp = document.getElementById('download-exp-count-badge');
+        const btnHeader = document.getElementById('btn-download-exp-header');
+        const badgeHeader = document.getElementById('download-exp-header-badge');
+
+        const count = matchingList ? matchingList.length : 0;
+
+        [btnExp, btnHeader].forEach(btn => {
+            if (!btn) return;
+            if (isEligible) {
+                btn.style.display = 'inline-flex';
+                btn.title = `Download ${count} experiences for ${company} (${year}) in an Excel sheet`;
+                btn.onclick = () => downloadExperiencesExcel(matchingList, company, year);
+            } else {
+                btn.style.display = 'none';
+            }
+        });
+
+        [badgeExp, badgeHeader].forEach(badge => {
+            if (badge) badge.textContent = count;
+        });
+    }
+
+    function downloadExperiencesExcel(experiences, company, year) {
+        if (!experiences || experiences.length === 0) {
+            alert(`No interview experiences found for ${company || "selected company"} (${year || ""}) to download.`);
+            return;
+        }
+
+        const exportData = experiences.map((exp, index) => ({
+            "Serial Number": index + 1,
+            "Company Name": exp.company || company || "",
+            "Graduating Batch Year": exp.year || year || "",
+            "Domain Specialization": exp.domain || "",
+            "Role / Profile Offered": exp.role_offered || "",
+            "Process Type": exp.process_type || "Placement Process",
+            "Selection Status (Converted)": exp.converted ? (String(exp.converted).toLowerCase().includes("yes") ? "Converted" : exp.converted) : "Not Specified",
+            "Interview Rounds Count": (exp.interview_rounds !== null && exp.interview_rounds !== undefined) ? exp.interview_rounds : "Not Specified",
+            "Interview Rounds & Duration Breakdown": exp.no_interviews_duration || "",
+            "Buddy Round Conducted": exp.buddy_round || "Not Specified",
+            "GD Conducted": exp.gd_conducted || "Not Specified",
+            "GD Duration (mins)": exp.gd_duration || "",
+            "GD Topics & Tips": exp.gd_topics_tips || "",
+            "Pre-Process & Screening Tests Details": exp.pre_process_tips || "",
+            "Interview Outline & Flow": exp.interview_outline || "",
+            "Domain Specific Questions": exp.domain_questions || "",
+            "Situational & Behavioural Questions": exp.situational_questions || "",
+            "HR & Current Affairs Questions": exp.hr_gk_questions || "",
+            "Technical Skills Assessed": exp.tech_skills || "",
+            "Resources & Preparation Methods": exp.prep_resources || "",
+            "What the Recruiters Were Looking For": exp.looking_for || "",
+            "What Went Right / Wrong": exp.right_wrong || "",
+            "Key Interview Tips That Helped": exp.tips || "",
+            "Do's and Don'ts / Special Preparation": exp.dos_and_donts || "",
+            "UG Degree Background": exp.ug_background || "",
+            "Professional Certifications": exp.certifications || "",
+            "Question Focus Buckets": Array.isArray(exp.buckets) ? exp.buckets.join(", ") : (exp.buckets || ""),
+            "Additional Remarks": exp.additional_remarks || "",
+            "Total Word Count": exp.word_count || 0
+        }));
+
+        const cleanCo = (company || "Company").replace(/[^a-zA-Z0-9]/g, "_").replace(/_+/g, "_").replace(/^_|_$/g, "");
+        const cleanYr = (year || "AllYears").replace(/[^a-zA-Z0-9]/g, "_");
+        const filename = `PrepChat_${cleanCo}_${cleanYr}_Experiences.xlsx`;
+
+        if (window.XLSX) {
+            const worksheet = window.XLSX.utils.json_to_sheet(exportData);
+            const colWidths = Object.keys(exportData[0] || {}).map(key => {
+                const maxContent = Math.max(key.length, ...exportData.map(row => String(row[key] || "").length));
+                return { wch: Math.min(Math.max(maxContent + 2, 14), 60) };
+            });
+            worksheet["!cols"] = colWidths;
+            const workbook = window.XLSX.utils.book_new();
+            const safeSheetName = (company.slice(0, 25) || "Experiences").replace(/[:\\/?*\[\]]/g, "_");
+            window.XLSX.utils.book_append_sheet(workbook, worksheet, safeSheetName);
+            window.XLSX.writeFile(workbook, filename);
+        } else {
+            const headers = Object.keys(exportData[0]);
+            const csvRows = [headers.join(",")];
+            exportData.forEach(row => {
+                const values = headers.map(h => `"${String(row[h] || '').replace(/"/g, '""')}"`);
+                csvRows.push(values.join(","));
+            });
+            const blob = new Blob(["\uFEFF" + csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename.replace(/\.xlsx$/, ".csv");
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
     }
 
     // Render Experience Response Cards Grid

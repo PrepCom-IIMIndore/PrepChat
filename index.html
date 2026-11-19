@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -286,9 +287,16 @@
                 <div class="filter-card-header">
                     <span class="material-symbols-outlined">filter_list</span>
                     <h3>Filter & Search Interview Experiences</h3>
-                    <button class="btn-reset-filters" id="exp-btn-reset" title="Reset all filters">
-                        <span class="material-symbols-outlined">refresh</span> Reset Filters
-                    </button>
+                    <div style="display:flex;align-items:center;gap:0.5rem;margin-left:auto;">
+                        <button id="btn-download-exp-header" class="btn-download-experiences" style="display:none;" title="Download experiences as Excel">
+                            <span class="material-symbols-outlined" style="font-size:1.1rem;">download</span>
+                            <span>Download Experience</span>
+                            <span id="download-exp-header-badge" class="download-count-badge">0</span>
+                        </button>
+                        <button class="btn-reset-filters" id="exp-btn-reset" title="Reset all filters">
+                            <span class="material-symbols-outlined">refresh</span> Reset Filters
+                        </button>
+                    </div>
                 </div>
 
                 <div class="exp-filter-grid">
@@ -380,7 +388,14 @@
                 <div class="results-count-text">
                     Showing <strong id="exp-showing-count">0</strong> matching interview experiences
                 </div>
-                <div id="active-filter-tags" class="active-filter-tags"></div>
+                <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+                    <div id="active-filter-tags" class="active-filter-tags"></div>
+                    <button id="btn-download-exp" class="btn-download-experiences" style="display:none;" title="Download experiences as Excel">
+                        <span class="material-symbols-outlined" style="font-size:1.15rem;">download</span>
+                        <span>Download Experience</span>
+                        <span id="download-exp-count-badge" class="download-count-badge">0</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Experience Card Grid Container -->

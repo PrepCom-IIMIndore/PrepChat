@@ -9,6 +9,7 @@ import questionsData from "@/questions_data.json";
 import formatsData from "@/interview_formats_data.json";
 import slidesData from "@/slides_data.json";
 import { ALL_NORMALIZED_DOMAINS, normalizeDomain } from "@/lib/domainUtils";
+import { exportExperiencesToExcel } from "@/lib/excelExport";
 
 function generatePageNumbers(current: number, total: number): (number | string)[] {
   if (total <= 7) {
@@ -180,6 +181,19 @@ export default function DashboardPage() {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredExperiences.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   }, [filteredExperiences, currentPage]);
+
+  // Check if both Company and Year filters are selected for Excel download
+  const isCompanySelected = Boolean(selectedCompany && selectedCompany.trim());
+  const isYearSelected = selectedYears.length > 0;
+  const isDownloadEligible = isCompanySelected && isYearSelected;
+
+  const handleDownloadExperiencesExcel = () => {
+    if (!isCompanySelected || !isYearSelected) {
+      alert("Please select both a Company and at least one Batch Year filter to download experiences.");
+      return;
+    }
+    exportExperiencesToExcel(filteredExperiences, selectedCompany, selectedYears);
+  };
 
   // Catalog Company Intelligence Data
   const catalogIntelligence = useMemo(() => {
@@ -428,21 +442,35 @@ export default function DashboardPage() {
                   <span className="material-symbols-outlined">filter_list</span>
                   <span>Multi-Domain Placement Filters</span>
                 </div>
-                <button
-                  className="btn-qtype-clear"
-                  onClick={() => {
-                    setSelectedCompany("");
-                    setCompanySearchInput("");
-                    setIsCompanyDropdownOpen(false);
-                    setSelectedDomains([]);
-                    setSelectedYears([]);
-                    setSelectedProcess("");
-                    setSearchQuery("");
-                  }}
-                  title="Reset all active search filters back to default"
-                >
-                  Reset All Filters
-                </button>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+                  {isDownloadEligible && (
+                    <button
+                      type="button"
+                      className="btn-download-experiences"
+                      onClick={handleDownloadExperiencesExcel}
+                      title={`Download ${filteredExperiences.length} experiences for ${selectedCompany} (${selectedYears.join(", ")}) in an Excel sheet`}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: "1.1rem" }}>download</span>
+                      <span>Download Experience</span>
+                      <span className="download-count-badge">{filteredExperiences.length}</span>
+                    </button>
+                  )}
+                  <button
+                    className="btn-qtype-clear"
+                    onClick={() => {
+                      setSelectedCompany("");
+                      setCompanySearchInput("");
+                      setIsCompanyDropdownOpen(false);
+                      setSelectedDomains([]);
+                      setSelectedYears([]);
+                      setSelectedProcess("");
+                      setSearchQuery("");
+                    }}
+                    title="Reset all active search filters back to default"
+                  >
+                    Reset All Filters
+                  </button>
+                </div>
               </div>
 
               <p style={{ fontSize: "0.82rem", color: "#64748b", margin: "-0.5rem 0 1rem 0" }}>
@@ -635,6 +663,18 @@ export default function DashboardPage() {
               <span className="results-count-text">
                 Showing <strong>{filteredExperiences.length}</strong> candidate placement experiences matching selected criteria
               </span>
+              {isDownloadEligible && (
+                <button
+                  type="button"
+                  className="btn-download-experiences"
+                  onClick={handleDownloadExperiencesExcel}
+                  title={`Download ${filteredExperiences.length} experiences for ${selectedCompany} (${selectedYears.join(", ")}) in an Excel sheet`}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: "1.15rem" }}>download</span>
+                  <span>Download Experience</span>
+                  <span className="download-count-badge">{filteredExperiences.length}</span>
+                </button>
+              )}
             </div>
 
             {/* Experiences Cards Grid (Paginated 24 per page for instant 60fps rendering) */}
